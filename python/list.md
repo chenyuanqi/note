@@ -79,14 +79,14 @@ list(set(list_var)) # list_var 不改变，返回 ['1', '3', '2']
 ",".join(list_var) # list_var 不改变，返回 '3,2,1,3,2,1'
 ```
 
-# 遍历列表，同时输出键和值
+### 遍历列表，同时输出键和值
 ```python
 list_var = [1, 2, 3]
 for index, value in enumerate(list_var):
     print(index, value)
 ```
 
-# 列表生成式
+### 列表生成式
 ```python
 dict_var = {'x': 'A', 'y': 'B', 'z': 'C' }
 # 不使用列表生成式时
