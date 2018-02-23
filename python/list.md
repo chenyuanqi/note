@@ -9,7 +9,7 @@ list_var = [] # 或者 list_var = list()
 list_var = "1,2,3".split(",") # 返回 ['1', '2', '3']
 
 # 获取列表元素：list_var[offset]
-print(list_var[1], list_var[-1]) # 返回 2 3
+list_var[1], list_var[-1] # 返回 2 3
 # 需要注意的是，offset 大于列表长度 - 1 时会抛 IndexError 异常
 
 # 修改列表元素

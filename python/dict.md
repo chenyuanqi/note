@@ -8,7 +8,7 @@ dict_var = {} # 或者 dict_var = dict()
 dict_var["name"] = "vikey"
 
 # 查看键是否在字典里
-print("name" in dict_var)
+"name" in dict_var
 
 # 查看字典里的所有键
 dict_var.keys() # 返回 dict_keys(['name'])
