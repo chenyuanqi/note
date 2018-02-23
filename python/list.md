@@ -2,7 +2,7 @@
 
 ### 列表常用方法
 ```python
-# 定义及初始化
+# 列表定义及初始化
 list_var = [] # 或者 list_var = list()
 
 # 切割字符串
@@ -62,7 +62,7 @@ del list_var_split
 another_list_var = list_var[:]
 # 或者 another_list_var = list_var.copy()
 
-# 列表连接，不改变任何列表
+# 列表连接，不改变任何原列表
 list_var + another_list_var # 返回 ['3', '2', '1', '3', '2', '1']
 
 # 合并列表

@@ -14,7 +14,7 @@ print("name" in dict_var)
 dict_var.keys() # 返回 dict_keys(['name'])
 
 # 查看字典里的所有值
-dict_var.values() # 返回 dict_values(['vikey'])
+dict_var.values() # 返回 dict_values(['vikey'])
 
 # 查看字典里的所有项
 dict_var.items() # 返回 dict_items([('name', 'vikey')])
@@ -27,7 +27,7 @@ dict_var.clear()
 # del dict_var["name"] 可以删除字典的某一项
 
 # 从拷贝的字典更新字典所有项，没有键则添加
-dict_var.update(dict_var_copy)
+dict_var.update(dict_var_copy)
 
 # 设置字典键的值，如果键不存在，将添加并设为默认值
 dict_var.setdefault("age", 18) # 返回键的值
@@ -44,6 +44,19 @@ dict_var.fromkeys(["sex", "birthday"], "") # 返回 {'sex': '', 'birthday': ''}
 
 # 获取字典项目总数
 len(dict_var) # 返回 2
+
+# 删除字典的一对键值（从头删起）
+dict_var.popitem() # 返回 ('sex', '')
+```
+
+### 一些迭代器
+```python
+# 字典键的迭代
+dict_var.iterkeys()
+# 字典值的迭代
+dict_var.itervalues()
+# 字典键值对的迭代
+dict_var.iteritems()
 ```
 
 ### 判断键的存在
