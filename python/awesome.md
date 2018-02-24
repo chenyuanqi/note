@@ -61,9 +61,10 @@
 [stackoverflow 中文问题集](https://taizilongxu.gitbooks.io/stackoverflow-about-python/content/index.html)  
 [Python 罕见问题](http://norvig.com/python-iaq.html)  
 
-### 社区生态
+### 其他
 [Python 之禅](https://foofish.net/)  
 [Python 茶馆](https://pythoncaff.com/)  
+[爱湃森 2017 榜单](https://annual2017.pycourses.com/)  
 
 ### python 之禅
 -- The Zen of Python, by Tim Peters  
