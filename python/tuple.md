@@ -43,6 +43,13 @@ min(another_tuple_var) # 返回 1
 # 删除元组，删除后无法访问
 del another_tuple_var
 
+# 打包多个序列到元组
+list_var_1 = ['name', 'age']
+list_var_2 = ['python', '28']
+tuple_var_zip = zip(list_var_1, list_var_2) # [('name', 'python'), ('age', 28)]
+# 解包
+zip(*tuple_var_zip) # [('name', 'age'), ('python', '28')]
+
 # 再来看看元组连接，不改变任何原元组
 another_tuple_var = (1, 3, 5)
 tuple_var + another_tuple_var # 返回 (1, 'tuple', 1, 3, 5)

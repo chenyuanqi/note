@@ -8,7 +8,7 @@
 
 ### 文档
 [官方文档](https://docs.python.org/3/)  
-[中文文档](http://docs.pythontab.com/)  
+[中文文档](http://www.pythondoc.com/)  
 
 ### 代码规范
 [官方风格](https://www.python.org/dev/peps/pep-0008/)  
