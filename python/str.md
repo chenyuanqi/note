@@ -178,3 +178,26 @@ with open('static/json_file.json', 'r') as f:
     # json 数据 => 字典，并赋值给 dict_var
     dict_var = json.load(f) # {"name": "Python"}
 ```
+
+### pickle 模块
+```python
+import pickle
+
+dict_var = {
+    "name": "Python"
+}
+
+# dumps: 字典 => 字节 （序列化）
+pickle_var = pickle.dumps(dict_var) # b'\x80\x03}q\x00X\x04\x00\x00\x00nameq\x01X\x06\x00\x00\x00Pythonq\x02s.'
+# loads: 字节 => 字典 （反序列化）
+pickle.loads(pickle_var) # {'name': 'Python'}
+
+# 处理 pickle 文件
+with open('static/pickle_file.txt', 'wb') as f:
+    # 字典 => 字节，写入 pickle_file.txt 文件 （序列化）
+    pickle.dump(dict_var, f)
+
+with open('static/pickle_file.txt', 'rb') as f:
+    # 字节 => 字典，并赋值给 dict_var （反序列化）
+    dict_var = pickle.load(f) # {'name': 'Python'}
+```
