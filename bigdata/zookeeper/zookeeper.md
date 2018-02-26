@@ -7,6 +7,25 @@ ZooKeeper 能够加强集群稳定性、持续性，保证集群的有序性和�
 ZooKeeper 的目标：封装复杂、易错的关键服务，将简单易用的接口和性能高效、功能稳定的系统提供给用户。  
 （白话版：Zookeeper 可以理解为 Hadoop 的整体监控系统，比如 Hadoop 的 NameNode,Hbase 的 HMaster 宕机后，这时候 Zookeeper 就得重新选出leader）
 
+### ZooKeeper 下载及安装
+在 [ZooKeeper 下载页面](http://zookeeper.apache.org/releases.html#download) 选择一个稳定的版本  
+```bash
+# 解压
+tar -xzvf zookeeper-x.y.z.tar.gz
+
+# 加入环境变量
+export ZOOKEEPER_HOME=
+export PATH=
+
+# 配置 zoo.cfg
+tickTime=2000
+dataDir=
+clientPort=2181
+
+# 启动 ZooKeeper 服务器
+zkServer.sh start
+```
+
 ### ZooKeeper 体系及数据结构
 体系结构  
 ZooKeeper Server 具有 fast fail 特性，非常健壮。  
@@ -209,36 +228,36 @@ import java.util.concurrent.CountDownLatch;
 
 public class Main {
 
-static CountDownLatch countDownLatch = new CountDownLatch(1);
-
-public static void main(String args[]) throws Exception {
-//
-// 与 127.0.0.1:2181 连接，重试策略：仅重试 1 次
-//
-CuratorFramework client = CuratorFrameworkFactory.newClient("127.0.0.1:2181", new RetryOneTime(1000));
-client.start();
-
-//
-// 判断 ZNode /2018-02 是否存在，设置 Watch
-//
-client.checkExists().usingWatcher((CuratorWatcher) (event) -> {
-if (event.getType() == EventType.NodeCreated) {
-System.out.println(Thread.currentThread().getName() + ": " + "node Created.");
-} else if (event.getType() == EventType.NodeDeleted) {
-System.out.println(Thread.currentThread().getName() + ": " + "node Deleted.");
-}
-
-countDownLatch.countDown();
-}).inBackground((c, event) -> {
-//
-// 异步接口
-//
-System.out.println(Thread.currentThread().getName() + ": " + "checkExists == " + event.getResultCode() + ", event == " + event.getType());
-}).forPath("/2018-02");
-
-countDownLatch.await();
-System.out.println("terminate...");
-}
+    static CountDownLatch countDownLatch = new CountDownLatch(1);
+    
+    public static void main(String args[]) throws Exception {
+        //
+        // 与 127.0.0.1:2181 连接，重试策略：仅重试 1 次
+        //
+        CuratorFramework client = CuratorFrameworkFactory.newClient("127.0.0.1:2181", new RetryOneTime(1000));
+        client.start();
+    
+        //
+        // 判断 ZNode /2018-02 是否存在，设置 Watch
+        //
+        client.checkExists().usingWatcher((CuratorWatcher) (event) -> {
+            if (event.getType() == EventType.NodeCreated) {
+                System.out.println(Thread.currentThread().getName() + ": " + "node Created.");
+            } else if (event.getType() == EventType.NodeDeleted) {
+                System.out.println(Thread.currentThread().getName() + ": " + "node Deleted.");
+            }
+        
+            countDownLatch.countDown();
+        }).inBackground((c, event) -> {
+            //
+            // 异步接口
+            //
+            System.out.println(Thread.currentThread().getName() + ": " + "checkExists == " + event.getResultCode() + ", event == " + event.getType());
+        }).forPath("/2018-02");
+    
+        countDownLatch.await();
+        System.out.println("terminate...");
+    }
 }
 ```
 如代码所示：  
