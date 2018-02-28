@@ -53,25 +53,35 @@ cd kafka.x.x.x
 bin/zookeeper-server-start.sh config/zookeeper.properties &
 ```
 
-3、创建 topic
+3、topic 操作
 ```bash
-# 名为 test_topic: 1 个副本，1 个分区
+# 创建 topic 名为 test_topic: 1 个副本，1 个分区
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test_topic
-# 查看已创建的 topic
+# 查看已创建 topic 的详情
+bin/kafka-topics.sh --describe --topic test_topic --zookeeper localhost:2181
+# 查看所有已创建的 topic
 bin/kafka-topics.sh --list --zookeeper localhost:2181
-# 注意，通过配置 broker 可以自动创建 topic
+
+# 修改 topic 分区数
+bin/kafka-topics.sh --zookeeper localhost:2181 --alter --topic test_topic --partitions 4
+# 删除 topic （需要在 server.properties 中添加 delete.topic.enable=true）
+bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic test_topic
+
+# 注意，通过配置 broker 可以自动创建 topic（建议把自动创建配置关掉）
+# 删除多余 topic 报 marked for deletion 错误时，
+# 需要调整 server.properties 的参数 auto.create.topics.enable（是否自动创建topic）、delete.topic.enable（是否删除topic）
 ```
 
-4、发送消息
+4、启动 producer, 发送消息
 ```bash
 bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test_topic
 ```
 
-5、启动 consumer 
+5、启动 consumer, 接受消息 
 ```bash
 bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic test_topic --from-beginning
 ```
 ### Kafka 应用场景
--- 日志收集
--- 行为跟踪
--- 持久性日志
+-- 日志收集  
+-- 行为跟踪  
+-- 持久性日志  
