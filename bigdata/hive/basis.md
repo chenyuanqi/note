@@ -1,6 +1,7 @@
 
 ### 什么是 Hive
-hive 是基于 hadoop 的数据仓库
+Hive 是基于 hadoop 的数据仓库。  
+Hive 的设计目的是使用 SQL 生成 MapReduce 代码对 HDFS 执行查询。   
 
 ### Hive 的系统架构
 ```html
@@ -14,7 +15,7 @@ Hive -|                — — Mysql
 Hive 中的元数据包括表的名字，表的列和分区及其属性，表的属性（是否为外部表等），表的数据所在目录等。  
 Hive 数据存储在 HDFS 中，大部分的查询由 MapReduce 完成（SELECT * 不会生成 MapReduce 任务）。    
 Hive 用户接口包括 CLI, Client, WUI，解释器、编译器、优化器完成 HQL 查询语句从词法分析、语法分析、编译、优化以及查询计划的生成。生成的查询计划存储在 HDFS 中，并在随后有 MapReduce 调用执行。  
-注意：Hive 默认元数据库并不是 Mysql，但是因为默认元数据库存在局限，所以最好使用 Mysql。
+注意：Hive 默认元数据库并不是 Mysql (存储在自带的内存数据库 Derby)，但是因为默认元数据库存在局限，所以最好使用 Mysql。
 
 ### Hive 安装步骤
 1、在 [Hive Dist](http://archive.apache.org/dist/hive/) 中选择下载一个稳定版本的压缩包，然后解压到大数据目录。
@@ -57,12 +58,12 @@ vim hive-site.xml
  
 	<property> 
         <name>javax.jdo.option.ConnectionUserName</name>
-        <value>hive<value>
+        <value>{hive_user}<value>
         <description>username to use against metastore database</description>
 	</property>
 	<property>  
         <name>javax.jdo.option.ConnectionPassword</name>
-        <value>hive</value>
+        <value>{hive_password}</value>
         <description>password to use against metastore database</description>  
 	</property>          
 </configuration>
@@ -72,9 +73,40 @@ vim hive-site.xml
 ```bash
 # 启动 metastore
 hive --service metastore &
+
 # 进入 hive-cli
 hive
+# 进入 hive-cli, 并指定日志目录
+hive -hiveconf hive.log.dir='log_dir'
+# 进入 hive-cli, 并将调试信息输出控制台
+hive -hiveconf hive.root.logger=DEBUG,console
+> Usage: hive [-hiveconf conf_item=conf_value] [-i file_name] [-f file_name] [-e query_string] [-S]
+> -i 从文件中初始化 Sql
+> -f 执行文件中 Sql
+> -S 静默模式
 ```
+
+### Hive 数据结构
+| 分类 | 类型| 描述 | 示例 |  
+| ---- | :-----:  | :----: | ----: |
+| 原始类型 | BOOLEAN | true/false | TRUE |
+| | TINYINT | 1 字节的有符号整数 -128~127 | -121 |
+| | SMALLINT | 2 个字节的有符号整数，-32768~32767 | 129 |
+| | INT | 4 个字节的带符号整数，-2147483648~2147483647 | 1 |
+| | BIGINT | 8 字节带符号整数，-9223372036854775808~9223372036854775807 | 1 |
+| | FLOAT | 4字节单精度浮点数 | 1.0 |	
+| | DOUBLE | 8字节双精度浮点数 | 1.0 |
+| | DEICIMAL | 任意精度的带符号小数 | 1.0 |
+| | STRING | 无上限可变长度字符串 | "a", 'a' |
+| | VARCHAR | 可变长度字符串 | "a", 'a' |
+| | CHAR | 固定长度字符串 | "a", 'a' |
+| | BINARY | 字节数组 | |
+| | TIMESTAMP | 时间戳，纳秒精度 | 1519714435439 |
+| | DATE | 日期 | '2018-02-28' |
+| 复杂类型 | ARRAY | 有序的的同类型的集合 | array(1,2) |
+| | MAP | key-value,key必须为原始类型，value可以任意类型 |map('a', 1, 'b', 2) |
+| | STRUCT | 字段集合,类型可以不同 | struct('1',1,1.0), named_stract('col1','1','col2',1,'clo3',1.0) |
+| | UNION | 在有限取值范围内的一个值| create_union(1,'a',63) |
 
 ### Hive 基本操作
 ```bash
@@ -85,7 +117,7 @@ CREATE (DATABASE|SCHEMA) [IF NOT EXISTS] database_name
     [WITH DBPROPERTIES (property_name=property_value, ...)];
 ep:
 CREATE DATABASE IF NOT EXISTS example_database
-COMMENT '这是一个例子'
+COMMENT '创建栗子数据库'
 LOCATION 'hdfs://user/hive/wherehouse/example/example_database.db/';
 
 # 删除数据库
@@ -95,6 +127,12 @@ LOCATION 'hdfs://user/hive/wherehouse/example/example_database.db/';
 DROP (DATABASE|SCHEMA) [IF EXISTS] database_name [RESTRICT|CASCADE];
 ep:
 DROP DATABASE if exists example_database CASCADE;
+
+# 查看所有数据库
+SHOW databases;
+
+# 选择数据库
+USE database_name;
 
 # 创建表
 # 内部表 DROP 的时候会删除 HDFS 上的数据，而外部表不会（无特殊要求，建议使用外部表）
@@ -115,6 +153,35 @@ DROP TABLE [IF EXISTS] table_name [PURGE];
 ep:
 DROP TABLE IF EXISTS table_name;
 
+# 表重命名
+ALTER TABLE table_name RENAME TO new_talbe_name;
+
+# 添加字段
+ALTER TABLE table_name ADD COLUMNS (column_name column_type COMMENT 'your column comment');
+# 更新字段
+ALTER TABLE table_name CHANGE COLUMNS column_name new_column_name column_type COMMENT 'your column comment' FIRST|AFTER another_column_name;
+# 替换所有字段
+ALTER TABLE table_name REPLACE COLUMNS (column_name INT/others COMMENT 'your column comment');
+
+# 添加分区
+ALTER TABLE table_name ADD PATITION (patition_field='patition_value') LOCATION 'hdfs_path';
+# 删除分区
+ALTER TABLE table_name DROP PATITION (patition_field='patition_value');
+
+# 查看表分区
+SHOW PATITIONS table_name;
+
+# 查看表结构
+DESC table_name; # 或 DESCRIBE table_name;
+
+# 复制表结构
+CREATE TABLE copy_table_name LIKE table_name;
+
+# 查看所有表
+SHOW TABLES;
+# 正则查看部分表
+SHOW TABLES '.*game';
+
 # 加载本地文件
 LOAD DATA LOCAL INPATH '/hive_data_path'
 INTO TABLE example_table PARTITION (day='xxxx-xx-xx');
@@ -123,7 +190,7 @@ LOAD DATA INPATH '/hive_data_path'
 INTO TABLE example_table PARTITION (day='xxxx-xx-xx');
 
 # 从子查询中加载数据
-INSERT overwrite TABLE example_table PARTITION (day='xxxx-xx-xx');
+INSERT [OVERWRITE] TABLE example_table PARTITION (day='xxxx-xx-xx');
 SELECT example_field from temp_table;
 ```
 
