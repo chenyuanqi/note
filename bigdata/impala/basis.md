@@ -23,6 +23,7 @@ export PATH=$HIVE_HOME/bin: $PATH
 ```
 
 ### Impala shell
+1、执行 impala-shell 进入命令行  
 ```bash
 # 启动
 impala-shell
@@ -47,6 +48,26 @@ explain select_sentence;
 
 # 查看最近查询的低级信息(用于查询的诊断和性能的调整)
 profile;
+
+# 执行系统命令
+shell command; 
+# 如 shell date;
+# 又如操作 hdfs：shell hdfs fs -mkdir /tmp/impala
+```
+
+2、使用 impala-shell 执行 sql  
+```bash
+# 执行包含 SQL 语句的文件
+impala-shell -f sql_file
+
+# 直接 sql 查询
+impala-shell -q "select_sentance"
+
+# 查询结果输出到指定文件
+impala-shell -f sql_file \
+    -o output_file \
+    --delimited \
+    --output_delimeter 'symbol'  
 ```
 
 ### Impala 数据结构
@@ -60,6 +81,7 @@ profile;
 | | FLOAT | 4字节单精度浮点数 | 1.0 |	
 | | DOUBLE | 8字节双精度浮点数 | 1.0 |
 | | DEICIMAL | 任意精度的带符号小数，用于存储十进制值 | 1.0 |
+| | COMPLEX | 复数 | 1 + 2j |
 | | STRING | 无上限可变长度字符串 | "a", 'a' |
 | | VARCHAR | 可变长度字符串，最大长度为 65535 | "a", 'a' |
 | | CHAR | 固定长度字符串，用空格填充，可存储最大长度为 255 | "a", 'a' |
@@ -78,5 +100,3 @@ profile;
 这是多行注释_3.
 */
 ```
-
-### 
