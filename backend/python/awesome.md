@@ -14,6 +14,11 @@
 [官方风格](https://www.python.org/dev/peps/pep-0008/)  
 [Google 风格](http://zh-google-styleguide.readthedocs.io/en/latest/google-python-styleguide/) 
 
+### 代码检测工具
+[语法检查 pyflakes](https://pypi.python.org/pypi/pyflakes)  
+[代码规范 pylint](https://www.pylint.org/)  
+> 工具同样聚合在 pycharm  
+
 ### 框架
 [Django](https://www.djangoproject.com/)  
 [Django 最佳实践](https://github.com/yangyubo/zh-django-best-practices/blob/master/readme.rst)   
