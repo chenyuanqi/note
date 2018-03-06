@@ -51,8 +51,8 @@
 
 ### 数据分析
 [科学计算基础包 Numpy](http://www.numpy.org/)  
-[数据分析工具 Pandas](http://pandas.pydata.org/)  
 [2D 绘图库 matplotlib](https://matplotlib.org/)  
+[数据分析工具 Pandas](http://pandas.pydata.org/)  
 
 ### 深入理解  
 [Python 挑战](http://www.pythonchallenge.com/)  
