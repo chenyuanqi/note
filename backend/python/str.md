@@ -1,4 +1,31 @@
 
+### 字符常量
+```python
+# 包 0 到 9 的数字
+string.digits '0123456789'
+
+# 包含 26 字母的小写
+string.ascii_lowercase # 'abcdefghijklmnopqrstuvwxyz'
+# 包含 26 字母的大写
+string.ascii_uppercase # 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+# 包含 26 个字母的大小写
+string.ascii_letters # 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+# 包含八进制的所有数字
+string.octdigits # '01234567'
+# 包含十六进制所有数字和字母
+string.hexdigits # '0123456789abcdefABCDEF'
+
+# 包含所有空白符
+string.whitespace # ' \t\n\r\x0b\x0c'
+
+# 包含所有标点符号
+string.punctuation # '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+
+# 可打印的所有 ascii 字符
+string.printable # '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c'
+```
+
 ### 字符串常用方法
 ```python
 # 定义及初始化字符串
