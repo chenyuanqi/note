@@ -19,6 +19,7 @@ Shadowrocket: 翻墙的小火箭
 
 VVebo: 微博客户端  
 讯飞输入法：有态度的语音输入  
-Picsew: 长截图     
+Picsew: 网页截图+截图合并（收费 1 软妹币）   
+to:day: 计划+提醒    
 
 ```
