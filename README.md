@@ -10,20 +10,19 @@
 ├── bigdata  
 │   ├── hive  
 │   ├── impala  
-│   ├── kafka  
-│   │    
+│   ├── kafka      
 │   ├── pyspark  
 │   └── zookeeper  
 │        
 ├── databases  
 │   ├── mysql  
 │   └── redis  
-|  
+│  
 ├── frontend  
 │   ├── typescript  
 │   ├── vuejs  
 │   └── webpack  
-|  
+│  
 ├── language  
 │   ├── english  
 │   └── japanese  
@@ -34,7 +33,8 @@
 │   ├── fund  
 │   ├── search  
 │   └── stock  
-|  
+│  
 └── test  
 
--- 人生苦短，只言片语~ @vikey | 2018  
+-- 人生苦短，只言片语~  
+-- 2018@vikey  
