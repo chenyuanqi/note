@@ -55,6 +55,7 @@
 [数据分析工具 Pandas](http://pandas.pydata.org/)  
 
 ### 深入理解  
+[Python 格式化](https://pyformat.info/)  
 [Python 挑战](http://www.pythonchallenge.com/)  
 [Python 之旅](http://funhacks.net/explore-python/)  
 [Python 进阶](http://interpy.eastlakeside.com/)  

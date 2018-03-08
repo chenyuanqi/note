@@ -117,8 +117,10 @@ df_var.tail(1)
 """
 # 查看索引
 df_var.index # Int64Index([0, 1, 2, 3], dtype='int64')
+# 修改索引 df_var.index = seq
 # 查看列
 df_var.columns # Index(['A', 'B', 'C', 'D', 'E', 'F'], dtype='object')
+# 修改列 df_var.columns = seq
 # 查看底层 numpy 数据
 df_var.values
 """
