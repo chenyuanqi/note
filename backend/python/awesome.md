@@ -17,7 +17,7 @@
 ### 代码检测工具
 [语法检查 pyflakes](https://pypi.python.org/pypi/pyflakes)  
 [代码规范 pylint](https://www.pylint.org/)  
-> 工具同样聚合在 pycharm  
+> 工具同样可以聚合在 pycharm  
 
 ### 框架
 [Django](https://www.djangoproject.com/)  
