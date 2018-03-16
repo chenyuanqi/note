@@ -93,17 +93,22 @@ composer status
 # 诊断系统的常见错误
 composer diagnose
 
+# 查看配置
+composer config [--global] --list
+# 修改配置
+composer config [--global] <config_name> <config_value>
+
 # 启动向导，创建 composer.json 文件（不建议手动修改）
 composer init
 # 没有 composer.lock 时，下载 composer.json 相关依赖包，并生成 composer.lock；
 # 有 composer.lock 时，下载 composer.lock 中已经注册的依赖及相应版本
 composer install
 # 更新依赖
-composer update <package>
+composer update <package>:<version>
 # 添加依赖包
-composer require <package>
+composer require [--dev] <package>:<version>
 # 全局添加依赖包
-composer global require <package>
+composer global require <package>:<version>
 
 # 列出所有可用的软件包
 composer show
@@ -125,7 +130,8 @@ composer create-project --prefer-dist laravel/laravel project_name
 ### 向 Packagist 提交一个 composer package
 > 1、注册并登陆 [Packagist](https://packagist.org/)（或使用 GitHub 账号）  
 > 2、创建 package 项目，并提交到 GitHub，可参考 [elasticsearch-php](https://github.com/chenyuanqi/elasticsearch)  
-> 3、在 [Packagist Submit](https://packagist.org/packages/submit) 填写 package 项目的 GitHub 地址，点击 check
+> 3、在 [Packagist Submit](https://packagist.org/packages/submit) 填写 package 项目的 GitHub 地址，点击 check  
+> 4、要更新 package 项目，除了提交代码 GitHub 之外，到自己的 Packagist 仓库点击 Update 按钮即可  
 
 ### Composer 问题及解决
 1、[Composer\Downloader\TransportException]  
