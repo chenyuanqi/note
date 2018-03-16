@@ -10,7 +10,6 @@
 ### 依赖管理
 [Composer](https://getcomposer.org/)  
 [Composer 仓库](https://packagist.org/)  
-[Composer 加速](https://packagist.laravel-china.org)  
 [Laravel package](https://packalyst.com/packages)  
 
 ### IDE
