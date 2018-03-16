@@ -123,9 +123,9 @@ composer create-project --prefer-dist laravel/laravel project_name
 ```
 
 ### 向 Packagist 提交一个 composer package
-> 1、注册并登陆 https://packagist.org/（或使用 GitHub 账号）  
-> 2、创建 package 项目，并提交到 GitHub，可参考[elasticsearch-php](https://github.com/chenyuanqi/elasticsearch)  
-> 3、在 https://packagist.org/packages/submit 填写 package 项目的 GitHub 地址，点击 check
+> 1、注册并登陆 [Packagist](https://packagist.org/)（或使用 GitHub 账号）  
+> 2、创建 package 项目，并提交到 GitHub，可参考 [elasticsearch-php](https://github.com/chenyuanqi/elasticsearch)  
+> 3、在 [Packagist Submit](https://packagist.org/packages/submit) 填写 package 项目的 GitHub 地址，点击 check
 
 ### Composer 问题及解决
 1、[Composer\Downloader\TransportException]  
