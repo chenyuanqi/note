@@ -25,6 +25,9 @@ $ cd $home && brew update
 -- 软件卸载  
 appcleaner：https://freemacsoft.net/appcleaner/
 
+-- IOS 文件管理  
+Wondershare TunesGo  
+
 -- 其他工具  
 印象笔记  
 host 管理：https://oldj.github.io/SwitchHosts/  
