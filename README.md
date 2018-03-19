@@ -1,5 +1,5 @@
-# vikey's 开发笔记
-人生苦短，谨慎撸文 -- 2018@vikey  
+# vikey's note
+人生苦短，谨慎撸文~  
 
 .  
 ├── backend  
