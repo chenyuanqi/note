@@ -26,7 +26,7 @@ $ cd $home && brew update
 appcleaner：https://freemacsoft.net/appcleaner/
 
 -- IOS 文件管理  
-Wondershare TunesGo  
+Wondershare TunesGo（需付费）  
 
 -- 其他工具  
 印象笔记  

@@ -6,6 +6,11 @@
 2. 设置 - iTunes&App Stores - 找到更新，关闭  
 3. Safari 打开 https://oldcat.me/web/NOOTA11.mobileconfig - 安装该 provision 文件 - 重启  
 
+# mac、ipad/iphone 文件传输
+使用 AirDrop (隔空传送) 功能，ipad 该功能位于设置 > 通用 > 隔空传送；  
+mac 和 ipad 都设置为允许所有人接收，mac 右键选择文件或文件夹 > 共享 > AirDrop > 点击要传送的机器名开始传送；  
+ipad 接受后会弹出要存储的位置，选择即可。  
+
 # 扫描二维码
 使用相机扫描即可
 
