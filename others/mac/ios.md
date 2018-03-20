@@ -2,8 +2,8 @@
 ### IOS 实用技巧
 ```
 # 去除烦人的系统更新提示  
-1. 设置 - 通用 - 存储空间 - 找到更新包，删除  
-2. 设置 - iTunes&App Stores - 找到更新，关闭  
+1. 设置 > 通用 > 存储空间 > 找到更新包，删除  
+2. 设置 > iTunes&App Stores > 找到更新，关闭  
 3. Safari 打开 https://oldcat.me/web/NOOTA11.mobileconfig - 安装该 provision 文件 - 重启  
 
 # mac、ipad/iphone 文件传输
