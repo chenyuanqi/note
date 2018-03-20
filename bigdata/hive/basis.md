@@ -15,7 +15,7 @@ Hive -|                — — Mysql
 Hive 中的元数据包括表的名字，表的列和分区及其属性，表的属性（是否为外部表等），表的数据所在目录等。  
 Hive 数据存储在 HDFS 中，大部分的查询由 MapReduce 完成（SELECT * 不会生成 MapReduce 任务）。    
 Hive 用户接口包括 CLI, Client, WUI，解释器、编译器、优化器完成 HQL 查询语句从词法分析、语法分析、编译、优化以及查询计划的生成。生成的查询计划存储在 HDFS 中，并在随后有 MapReduce 调用执行。  
-注意：Hive 默认元数据库并不是 Mysql (存储在自带的内存数据库 Derby)，但是因为默认元数据库存在局限，所以最好使用 Mysql。
+注意：Hive 默认元数据库并不是 Mysql (存储在自带的内存数据库 Derby)，但是因为默认元数据库存在局限（Derby 数据存在内存，不稳定），所以最好使用 Mysql。
 
 ### Hive 安装步骤
 1、在 [Hive Dist](http://archive.apache.org/dist/hive/) 中选择下载一个稳定版本的压缩包，然后解压到大数据目录。
@@ -31,7 +31,7 @@ export PATH=$HIVE_HOME/bin: $PATH
 2、在 Mysql 中建立 Hive 元数据库及相关用户
 ```bash
 CREATE DATABASE hive;
-GRANT ALL ON hive.* TO hive@’%’ IDENTIFIED BY 'hive_password';
+GRANT ALL ON hive.* TO hive@'%' IDENTIFIED BY 'hive_password';
 flush privileges;
 ```
 
@@ -85,6 +85,20 @@ hive -hiveconf hive.root.logger=DEBUG,console
 > -f 执行文件中 Sql
 > -S 静默模式
 ```
+
+### Hive 内部表和外部表
+内部表：加载数据到 hive 所在的 hdfs 目录，删除时，元数据和数据文件都删除  
+外部表：不加载数据到 hive 所在的 hdfs 目录，删除时，只删除表结构  
+
+建议使用外部表，因为外部表不会加载数据到 hive 所在的 hdfs 目录，减少数据传输，而且数据可以共享；  
+删除表时，只删除表结构，不删除表数据；  
+hive 不会修改数据，所以无需担心数据的损坏。
+
+### Hive 虚拟列
+Hive 提供了三个虚拟列 INPUT__FILE__NAME、BLOCK__OFFSET__INSIDE__FILE 和 ROW__OFFSET__INSIDE__BLOCK；  
+INPUT__FILE__NAME, 用于 mapper 任务的输出文件名；  
+ROW__OFFSET__INSIDE__BLOCK 用来排查有问题的输入数据，默认情况下，ROW__OFFSET__INSIDE__BLOCK 是不可用的，需要设置 hive.exec.rowoffset 值为 true 才可用；  
+BLOCK__OFFSET__INSIDE__FILE, 当前全局文件的偏移量；对于块压缩文件，就是当前块的文件偏移量，即当前块的第一个字节在文件中的偏移量。
 
 ### Hive 数据结构
 | 分类 | 类型| 描述 | 示例 |  
