@@ -1,9 +1,9 @@
 
-### 权限控制
+### Hive 权限控制
 Hive 的权限需要在 hive-site.xml 文件中设置才会起作用，配置默认的是 false。  
 需要把 hive.security.authorization.enabled 设置为 true，并对不同的用户设置不同的权限，例如 select ,drop 等的操作。  
 
-### 优化数据倾斜
+### Hive 优化数据倾斜
 1、万能方法
 ```
 hive.groupby.skewindata=true
