@@ -58,7 +58,7 @@ LSB, FHS: (FileSystem Heirache Standard)
 帮助文件：/usr/share/man, /usr/share/doc, /usr/local/share/man, /usr/local/share/doc  
 
 ### Linux 文件类型
-- (f)：普通文件；  
+\- (f)：普通文件；  
 d: 目录文件；  
 b: 块设备；  
 c: 字符设备；  
