@@ -1,5 +1,34 @@
 
 ```bash
+# 关机，如下各命令
+halt, poweroff, shutdown, init 0
+# 重启，如下各命令
+reboot, shutdown, init 6
+
+# 显示指定路径下的文件列表
+ls [OPTION]... [DIR]...
+# -a, --all: 显示所有文件，包括隐藏文件；
+# -l: 长格式
+# -h, --human-readable：单位换算
+# -d: 显示目录自身的相关属性；通常要与-l一起使用；
+# -r, --reverse: 逆序显示
+# -R, --recursive: 递归
+ls -l
+# -rw-r--r-- 1 root root 44800 2月 26 14:32 LICENSE
+# -rw-r--r--: 最左侧的第一位表示文件类型 -, d, l, b, c, p, s；后面的 9 位字符(rwx)表示访问权限
+# 数字 1：文件被硬链接的次数；
+# 左 root: 文件的 owner
+# 右 root: 文件的 group
+# 44800：文件的 size，单位 byte
+# 2月 26 14:32 : 文件的最近一次被修改的时间
+# LICENSE： 文件名
+
+# 回当前用户的主目录
+cd 或 cd ~
+# 切换至指定用户的主目录
+cd ~USERNAME
+# 在上一个目录和当前目录之间来回切换
+cd -
 
 # 为文件创建链接
 ln aim_file_path link_file_path
@@ -91,7 +120,7 @@ clear
 # 显示本月的日历
 cal
 # 显示当前的日期和时间
-date
+date +"%Y-%m-%d %H:%M:%S"
 
 # 杀死进程
 kill [-9] process_id
