@@ -39,7 +39,7 @@
 [Linux](./others/linux/command.md)  
 [Elasticsearch](./others/search/elastic.md)  
 
-[金融](./others/financial/basis.md)
+[金融](./others/financial/basis.md)  
 [基金](./others/fund/basic.md)  
 [股票](./others/stock/started.md)  
 [区块链](./others/areachain/basic.md)  
