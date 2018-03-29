@@ -23,6 +23,17 @@ ls -l
 # 2月 26 14:32 : 文件的最近一次被修改的时间
 # LICENSE： 文件名
 
+# 命令的历史
+history
+# 显示命令历史中最近的 10 条命令
+history 10
+# 清空当前命令历史
+history -c
+# 与 history 相关的环境变量有 HISTSIZE、HISTFILE、HISTFILESIZE
+# HISTSIZE：命令历史记录的条数
+# HISTFILE：命令历史记录存储文件，默认 ~/.bash_history
+# HISTFILESIZE：命令历史文件记录历史的条数
+
 # 回当前用户的主目录
 cd 或 cd ~
 # 切换至指定用户的主目录
