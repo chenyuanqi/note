@@ -41,6 +41,16 @@ cd ~USERNAME
 # 在上一个目录和当前目录之间来回切换
 cd -
 
+# 创建目录
+mkdir [options] /path/to/somewhere
+# -p: 存在于不报错，且可自动创建所需的各目录
+# -v: 显示详细信息
+# -m MODE: 创建目录时直接指定权限
+
+# 删除空目录
+rmdir [OPTION]... DIRECTORY...
+# -v: 显示过程
+
 # 为文件创建链接
 ln aim_file_path link_file_path
 # -s 参数表示对源文件建立符号链接，而非硬链接
