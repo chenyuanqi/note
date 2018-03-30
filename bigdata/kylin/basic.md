@@ -8,22 +8,22 @@ Kylin 的使命是让大数据分析像使用数据库一样简单迅速，用�
 ### Kylin 工作原理
 
 ### Kylin 主要特点
-1、标准 SQL 接口
-2、支持超大数据集
-3、得益于预计算，亚秒级响应
-4、可伸缩性和高吞吐率
-5、BI 及可视化工具集成
+1、标准 SQL 接口  
+2、支持超大数据集  
+3、得益于预计算，亚秒级响应  
+4、可伸缩性和高吞吐率  
+5、BI 及可视化工具集成  
 
 ### Kylin 工具 —— Kybot 
 Kybot = Kylin + Robot  
-[Kybot](https://kybot.io/home) 在线诊断，优化及服务 Kylin。
+[Kybot](https://kybot.io/home) 在线诊断，优化及服务 Kylin。  
 Kybot 平台含仪表盘、系统优化、故障排除及知识库。  
 
 > 使用 Kybot 步骤：
-> 1、注册 Kybot 官网账号
-> 2、下载 Kybot client
-> 3、执行 kybot/kybot.sh 生成诊断包
-> 4、上传诊断包
+> 1、注册 Kybot 官网账号  
+> 2、下载 Kybot client  
+> 3、执行 kybot/kybot.sh 生成诊断包  
+> 4、上传诊断包  
 
 ### Kylin 与其他 OLAP 大数据分析框架
 OLAP（On-Line Analytical Processing）线上分析处理，是一套以多维度方式分析数据，而能弹性地提供积存、下钻、和透视分析等操作，呈现集成性决策信息的方法，多用于决策支持系统、商务智能或数据仓库。其主要的功能，在于方便大规模数据分析及统计计算，对决策提供参考和支持。  
