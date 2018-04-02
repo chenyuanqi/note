@@ -51,6 +51,33 @@ mkdir [options] /path/to/somewhere
 rmdir [OPTION]... DIRECTORY...
 # -v: 显示过程
 
+# 复制文件或目录
+cp [OPTION] SRC DEST
+# -i：交互式
+# -r, -R: 递归复制目录及内部的所有内容；
+# -a: 归档，相当于-dR --preserv=all
+# -f: --force
+
+# 移动文件或重命名
+mv [OPTION] SOURCE DEST
+# -i：交互式
+# --backup=<备份模式>：若需覆盖文件，则覆盖前先行备份
+# -u：当源文件比目标文件新或者目标文件不存在时，才执行移动操作
+# -f: --force
+
+# 删除文件或目录
+rm [OPTION] FILE
+# -i: 交互式
+# -f: 强制删除
+# -r: 递归
+
+# 转换或删除字符
+tr [OPTION] SET1 [SET2]
+# -c 或 ——complerment：取代所有不属于第一字符集的字符
+# -d 或 ——delete：删除所有属于第一字符集的字符
+# -s 或 --squeeze-repeats：把连续重复的字符以单独一个字符表示
+# -t 或 --truncate-set1：先删除第一字符集较第二字符集多出的字符
+
 # 为文件创建链接
 ln aim_file_path link_file_path
 # -s 参数表示对源文件建立符号链接，而非硬链接
