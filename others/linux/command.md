@@ -71,13 +71,6 @@ rm [OPTION] FILE
 # -f: 强制删除
 # -r: 递归
 
-# 转换或删除字符
-tr [OPTION] SET1 [SET2]
-# -c 或 ——complerment：取代所有不属于第一字符集的字符
-# -d 或 ——delete：删除所有属于第一字符集的字符
-# -s 或 --squeeze-repeats：把连续重复的字符以单独一个字符表示
-# -t 或 --truncate-set1：先删除第一字符集较第二字符集多出的字符
-
 # 为文件创建链接
 ln aim_file_path link_file_path
 # -s 参数表示对源文件建立符号链接，而非硬链接
@@ -126,26 +119,51 @@ du file_name
 # -exclude 参数用于排除某些目录或文件，如 --exclude=*.iso
 # --max-depth 参数用于设定目录大小统计到第几层，如果 -–max-depth=0，那么等同于 -s 参数
 
-# 查看文件内容 
-cat file_path
+# 读取文件所有内容
+cat [OPTION] [FILE]
+# -n 或 --number：有1开始对所有输出的行数编号
+# -A：显示不可打印字符，行尾显示 $
+
 # 查看文件内容，并显示行号
-nl file_path
+nl [OPTION] [FILE]
 # -s 参数可设定行号的后缀
 
-# 显示文件内容，每次显示一屏，Enter 键向下翻滚一行，空格向下滚动一屏，B 键显示上一屏内容，Q 键退出
-more file_path
-# 分屏上下翻页浏览文件内容，PageUp 键向上翻页，PageDown 键向下翻页,Q 键退出
-less file_path
-# -l 参数表示搜索时忽略大小写的差异
-# -N 参数表示每一行行首显示行号
-# -s 参数表示将连续多个空行压缩成一行显示
+# 少即是多，分屏上下翻页浏览文件内容，PageUp 键向上翻页，PageDown 键向下翻页,Q 键退出 
+less [OPTION] [FILE]
+# -N：每一行行首显示行号
+# -s：将连续多个空行压缩成一行显示
 # -S 参数表示在单行显示较长的内容，而不换行显示
+# -l：搜索时忽略大小写的差异
+# -g：不加亮显示搜索到的所有关键词，仅显示当前显示的关键字，以提高显示速度
+# -f：强制显示文件
 
-# 查看文件类型
-file file_path
+# 显示文件内容，每次显示一屏，Enter 键向下翻滚一行，空格向下滚动一屏，B 键显示上一屏内容，Q 键退出
+more [OPTION] [FILE]
+# -d: 显示翻页及退出提示
+
+# 读取文件的头部
+head [OPTION] [FILE]
+# -c ?: 指定获取前 ? 字节
+# -n ? 或 -?: 指定获取前 ? 行
+
+# 读取文件的尾部
+tail [OPTION] [FILE]
+# -c ?: 指定获取后 ? 字节
+# -n ? 或 -?: 指定获取后 ? 行
+# -f: 跟踪显示文件新追加的内容
+
+# 转换或删除字符
+tr [OPTION] SET1 [SET2]
+# -c 或 ——complerment：取代所有不属于第一字符集的字符
+# -d 或 ——delete：删除所有属于第一字符集的字符
+# -s 或 --squeeze-repeats：把连续重复的字符以单独一个字符表示
+# -t 或 --truncate-set1：先删除第一字符集较第二字符集多出的字符
 
 # 按照给定模式转换文本，如小写转大写
 cat example.txt | tr 'a-z' 'A-Z'
+
+# 查看文件类型
+file file_path
 
 # 显示文本中的行数、字数、字节数等信息
 wc -l file_path
