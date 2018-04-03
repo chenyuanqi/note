@@ -140,6 +140,7 @@ less [OPTION] [FILE]
 # 显示文件内容，每次显示一屏，Enter 键向下翻滚一行，空格向下滚动一屏，B 键显示上一屏内容，Q 键退出
 more [OPTION] [FILE]
 # -d: 显示翻页及退出提示
+# -s：将连续多个空行压缩成一行显示
 
 # 读取文件的头部
 head [OPTION] [FILE]
