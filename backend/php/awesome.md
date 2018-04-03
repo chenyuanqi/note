@@ -15,6 +15,9 @@
 ### IDE
 [Phpstorm](https://www.jetbrains.com/phpstorm/)  
 
+### 代码工具
+[phpcs](https://github.com/squizlabs/PHP_CodeSniffer)  
+
 ### 命令行
 [PsySH](http://psysh.org/)  
 
