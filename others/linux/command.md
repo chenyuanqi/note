@@ -214,6 +214,30 @@ ps
 # e 列出程序时，显示每个程序所使用的环境变量
 # f 用 ASCII 字符显示树状结构，表达程序间的相互关系
 
+# 切换用户或以其他用户身份执行
+# 非登录式切换，即不会读取目标用户的配置文件
+su username
+# 登录式切换，会读取目标用户的配置文件，完全切换
+su - username
+# 注意，root 用户 su 到其他用户无需密码，非 root 用户切换时需要密码
+
+# 换个身份执行命令
+su [- 或 -l] username -c 'COMMAND'
+
+# 修改自己的登录密码
+passwd
+# 修改其他用户的登录密码（仅限 root）
+passwd [OPTIONS] username
+# -l: 锁定指定用户
+# -u: 解锁指定用户
+# -n mindays: 指定最短使用期限
+# -x maxdays：最大使用期限
+# -w warndays：提前多少天开始警告
+# -i inactivedays：非活动期限；
+
+# 从标准输入接收用户密码
+echo "PASSWORD" | passwd --stdin username
+
 # 清屏 ctrl+l
 clear
 
