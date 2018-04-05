@@ -16,7 +16,7 @@ class Woman
 
 ### UML 类图
 UML 类图（类图中的类，与面向对象语言中的类的概念是对应的）是一种结构图，用于描述一个系统的静态结构。类图以反映类结构和类之间关系为目的，用以描述软件系统的结构，是一种静态建模方法。  
-UML 类图是面向对象设计的辅助工具，但并非是必须工具。  
+UML 类图是面向对象设计的辅助工具，但不是必须工具。  
 
 UML 类图推荐使用免费的 [UMLet工具](http://www.umlet.com/umletino/umletino.html)。
 
@@ -24,8 +24,19 @@ UML 类图推荐使用免费的 [UMLet工具](http://www.umlet.com/umletino/umle
 
 ### 设计原则
 设计模式有六大原则（SOLID）。  
-SRP The Single Responsibility Principle: -- a class should have one, and only one, reason to change.
-OCP The Open Closed Principle: -- you should be able to extend a class's behavior, without modifying it.
-LSP The Liskov Substitution Principle: -- derived classes must be substitutable for their base classes.
-ISP The Interface Segregation Principle: -- make fine grained interfaces that are client specific.
-DIP The Dependency Inversion Principle -- depend on abstractions not on concrete implementations.
+
+单一职责原则（ SRP —— Single responsibility principle ），是指一个类只负责一个功能领域中的相应职责，或者可以定义为：就一个类而言，应该只有一个引起它变化的原因。它的目的是类的复杂性降低，可读性提高，可维护性提高。
+
+开闭原则（OCP —— Open Close Principle），即软件模块应该对扩展开放，对修改关闭。比如，在程序需要进行新增功能的时候，不能去修改原有的代码，而是新增代码，实现一个热插拔的效果（热插拔：灵活的去除或添加功能，不影响到原有的功能）。开闭元祖的目的是为了使程序的扩展性好，易于维护和升级。  
+
+里氏代换原则（LSP —— Liskov Substitution Principle）是继承复用的基石，只有当衍生类可以替换掉基类，软件单位的功能不受到影响时，基类才能真正被复用，而衍生类也能够在基类的基础上增加新的行为。比如球类，原本是一种体育用品，它的衍生类有篮球、足球、排球、羽毛球等等，如果衍生类替换了基类的原本方法，如把体育用品改成了食用品（那么软件单位的功能受到影响），就不符合里氏代换原则。那么，里氏替换的目的是对实现抽象化的具体步骤的规范。  
+
+接口隔离原则（ISP —— Interface Segregation Principle），即使用多个隔离的接口，比使用单个接口要好。比如登录和注册是属于用户模块的两个接口，比写成一个接口要好的多。接口隔离的目的是提高程序设计灵活性。  
+
+依赖反转原则（DIP —— Dependence Inversion Principle）即针对接口编程，而不是针对实现编程。以计算机系统为例，无论主板、CPU、内存、硬件都是在针对接口设计的，如果针对实现来设计，内存就要对应到针对某个品牌的主板，那么会出现换内存需要把主板也换掉的尴尬。它的目的是降低模块之间的耦合。  
+
+还有一个原则是迪米特法则（DP —— Demeter Principle），它也称最少知道原则，一个实体应当尽量少的与其他实体之间发生相互作用，使得系统功能模块相对独立。比如，一个类公开的 public 属性或方法越多，修改时涉及的面也就越大，变更引起的风险扩散也就越大。它的目的是降低类之间的耦合，减少对其他类的依赖。  
+
+> 据说好的代码要符合「高内聚，低耦合」，那什么是高内聚低耦合呢？  
+> 内聚是从功能角度来度量模块内的联系，一个好的内聚模块应当恰好做一件事。它描述的是模块内的功能联系；  
+> 耦合是软件结构中各模块之间相互连接的一种度量，耦合强弱取决于模块间接口的复杂程度、进入或访问一个模块的点以及通过接口的数据。  
