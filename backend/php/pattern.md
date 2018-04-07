@@ -86,7 +86,7 @@ class Aircraft implements Vehicle
     }
 }
 
-// 工厂类，根据类名实现类的创建
+// 工厂类，根据类名实现类的创建
 class VehicleFactory
 {
     public static function build($className = null)
