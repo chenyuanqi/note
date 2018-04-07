@@ -38,6 +38,7 @@
 [Git](./others/git/basic.md)  
 [Linux](./others/linux/command.md)  
 [Elasticsearch](./others/search/elastic.md)  
+[SEO](./others/seo.md)  
 
 [金融](./others/financial/basis.md)  
 [基金](./others/fund/basic.md)  

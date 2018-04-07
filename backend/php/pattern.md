@@ -157,3 +157,189 @@ $dbObj = Database::getInstance($config);
 从如上代码可以知道，单例模式的特点是 4 私 1 公，一个私有静态属性，构造方法私有，克隆方法私有，重建方法私有，一个公共静态方法。  
 单例模式在应用请求的整个生命周期中都有效，这有点类似全局变量，会降低程序的可测试性。大部分情况下，也可以用依赖注入来代替单例模式，避免在应用中引入不必要的耦合。所以，对于仅需生成一个对象的类，首先考虑用依赖注入方式，其次考虑用单例模式来实现。  
 
+### 结构型设计模式
+主要的结构型设计模式包括适配器模式、组合模式、外观模式、代理模式。  
+
+适配器模式，就是根据客户端需要，将某个类的接口转换成特定样式的接口，以解决类之间的兼容问题。当我们的代码依赖一些外部的 API，或者依赖一些可能会经常更改的类，那么应该考虑用适配器模式。  
+```php
+/**
+ * 适配器接口，所有的支付适配器都需实现这个接口
+ * 不管第三方支付实现方式如何，对于客户端来说，都用 pay()方法完成支付
+ */
+interface PayAdapter
+{
+    public function pay();
+}
+
+/**
+ * 支付宝适配器
+ */
+class AlipayAdapter implements PayAdapter
+{
+    public function pay()
+    {
+        // 实例化 Alipay 类
+        // 用 Alipay 的方法实现支付，后续如果改变直接修改这里即可
+        $alipay = new Alipay();
+        $alipay->sendPayment();
+    }
+}
+
+/**
+ * 微信支付适配器
+ */
+class WechatPayAdapter implements PayAdapter
+{
+    public function pay()
+    {
+        $wechatPay = new WechatPay();
+        $wechatPay->scan();
+        $wechatPay->doPay();
+    }
+}
+
+// 客户端代码
+$alipay = new AlipayAdapter();
+// 用 pay() 方法实现支付
+$alipay->pay();
+```
+大的应用都会不断地加入新库和新 API。为避免它们的变更引发问题，应该用适配器模式包装起来，提供应用统一的引用方式，这样就会让我们的代码更具结构化，便于管理和扩展。  
+
+组合模式是将对象组合成树形结构，以表示‘部分-整体’的层次结构。  
+在组合模式中，客户端访问独立对象和组合对象（或称对象集合）一样；独立对象是一个有特定功能的对象，它不引用其他任何其他对象，组合对象则是一个提供相似功能对象的集合，主要用来管理独立对象，并为客户端提供和独立对象一样的访问方式。  
+```php
+/**
+ * 规范独立对象和组合对象必须实现的方法，保证它们提供给客户端统一的
+ * 访问方式
+ */
+abstract class Filesystem
+{
+    protected $name;
+
+    public function __construct($name)
+    {
+        $this->name = $name;
+    }
+
+    public abstract function getName();
+    public abstract function getSize();
+}
+
+/**
+ * 目录类
+ */
+class Dir extends Filesystem
+{
+    private $filesystems = [];
+
+    // 组合对象必须实现添加方法
+    // 因为传入参数规定为 Filesystem 类型，所以目录和文件都能添加
+    public function add(Filesystem $filesystem)
+    {
+        $key = array_search($filesystem, $this->filesystems);
+        if ($key === false) {
+            $this->filesystems[] = $filesystem;
+        }
+    }
+
+    // 组合对象必须实现移除方法
+    public function remove(Filesystem $filesystem)
+    {
+        $key = array_search($filesystem, $this->filesystems);
+        if ($key !== false) {
+            unset($this->filesystems[$key]);
+        }
+    }
+
+    public function getName()
+    {
+        return '目录：' . $this->name;
+    }
+
+    public function getSize()
+    {
+        $size = 0;
+        foreach ($this->filesystems as $filesystem) {
+            $size += $filesystem->getSize();
+        }
+
+        return $size;
+    }
+}
+
+/**
+ * 独立对象：文本文件类
+ */
+class TextFile extends Filesystem
+{
+    public function getName()
+    {
+        return '文本文件：' . $this->name;
+    }
+
+    public function getSize()
+    {
+        return 10;
+    }
+}
+
+/**
+ * 独立对象：图片文件类
+ */
+class ImageFile extends Filesystem
+{
+    public function getName()
+    {
+        return '图片：' . $this->name;
+    }
+
+    public function getSize()
+    {
+        return 100;
+    }
+}
+
+/**
+ * 独立对象：视频文件类
+ */
+class VideoFile extends Filesystem
+{
+    public function getName()
+    {
+        return '视频：'. $this->name;
+    }
+
+    public function getSize()
+    {
+        return 200;
+    }
+}
+// 创建 home 目录，并加入三个文件
+$dir = new Dir('home');
+$dir->add(new TextFile('text.txt'));
+$dir->add(new ImageFile('bg.png'));
+$dir->add(new VideoFile('film.mp4'));
+
+// 在 home 下创建子目录 source
+$subDir = new Dir('source');
+$dir->add($subDir);
+
+// 创建一个 text2.txt，并放到子目录 source 中
+$text2 = new TextFile('text2.txt');
+$subDir->add($text2);
+
+// 打印信息
+// 文本文件：text2.txt-->10
+echo $text2->getName(), '-->', $text2->getSize();
+// 目录：source --> 10
+echo $subDir->getName(), ' --> ',$subDir->getSize();
+// 目录：home --> 320
+echo $dir->getName(), ' --> ', $dir->getSize();
+```
+组合模式分为安全模式和透明模式，这是根据接口中是否包含管理对象的方法来区分的。  
+在组合模式中，组合对象和独立对象必须实现一个接口。其中，组合对象必须包含添加和删除节点对象。组合模式通过和装饰模式有着类似的结构图，但是组合模式旨在构造类，而装饰模式重在不生成子类即可给对象添加职责。并且，装饰模式重在修饰，而组合模式重在表示。
+
+### 行为型设计模式
+主要的行为型设计模式包括命令模式、迭代器模式、策略模式、观察者模式。  
+
+
