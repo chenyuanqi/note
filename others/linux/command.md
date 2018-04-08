@@ -47,6 +47,10 @@ mkdir [options] /path/to/somewhere
 # -v: 显示详细信息
 # -m MODE: 创建目录时直接指定权限
 
+# 创建多目录
+mkdir /tmp/x/{y1,y2}/{a,b}
+mkdir {x,y}_{m,n}
+
 # 删除空目录
 rmdir [OPTION]... DIRECTORY...
 # -v: 显示过程
@@ -198,6 +202,23 @@ touch [OPTION] [FILE]
 
 # 查看文件类型
 file file_path
+
+# 修改文件权限
+chmod [OPTION] [FILE]
+# -R: 递归
+
+# 修改文件的属主和属组（: 可替换为 .）
+chown [OPTION] [OWNER][:[GROUP]] [FILE]
+# -R: 递归
+
+# 修改文件的属组
+chgrp [OPTION] [GROUP] [FILE]
+# -R: 递归
+
+# 文件或目录创建时的遮罩码（掩码）
+umask [OPTION] [FILE]
+# -p：输出的权限掩码可直接作为指令来执行
+# -S：以符号方式输出权限掩码
 
 # 显示文本中的行数、字数、字节数等信息
 wc -l file_path

@@ -105,6 +105,7 @@ VehicleFactory::build('Ship')->drive();
 VehicleFactory::build('Aircraft')->drive();
 ```
 
+------  
 单例模式，只创建一个对象的类。常见的有 Database 类、Cache 类、配置类、Session 类、 Cache 类等等。  
 以 Database 类为例，如果不使用单例模式的化，需要每次都创建一个 Database 对象，多增加一个数据库的连接，用户量大的情况下会给数据库和服务器性能带来巨大的影响。  
 ```php
@@ -116,14 +117,14 @@ class Database
     private $db = null;
 
     // 构造方法声明为私有方法，禁止外部程序使用new实例化，只能在内部new
-    private function __construct($config = array())
+    private function __construct($config = [])
     {
         $dsn = sprintf('mysql:host=%s;dbname=%s', $config['db_host'], $config['db_name']);
         $this->db = new PDO($dsn, $config['db_user'], $config['db_pass']);
     }
 
     // 这是获取当前类对象的唯一方式
-    public static function getInstance($config = array())
+    public static function getInstance($config = [])
     {
         // 检查对象是否已经存在，不存在则实例化后保存到$instance属性
         if(self::$instance == null) {
@@ -153,7 +154,6 @@ $config = [
 ];
 $dbObj = Database::getInstance($config);
 ```
-
 从如上代码可以知道，单例模式的特点是 4 私 1 公，一个私有静态属性，构造方法私有，克隆方法私有，重建方法私有，一个公共静态方法。  
 单例模式在应用请求的整个生命周期中都有效，这有点类似全局变量，会降低程序的可测试性。大部分情况下，也可以用依赖注入来代替单例模式，避免在应用中引入不必要的耦合。所以，对于仅需生成一个对象的类，首先考虑用依赖注入方式，其次考虑用单例模式来实现。  
 
@@ -205,6 +205,7 @@ $alipay->pay();
 ```
 大的应用都会不断地加入新库和新 API。为避免它们的变更引发问题，应该用适配器模式包装起来，提供应用统一的引用方式，这样就会让我们的代码更具结构化，便于管理和扩展。  
 
+------  
 组合模式是将对象组合成树形结构，以表示‘部分-整体’的层次结构。  
 在组合模式中，客户端访问独立对象和组合对象（或称对象集合）一样；独立对象是一个有特定功能的对象，它不引用其他任何其他对象，组合对象则是一个提供相似功能对象的集合，主要用来管理独立对象，并为客户端提供和独立对象一样的访问方式。  
 ```php
@@ -342,4 +343,218 @@ echo $dir->getName(), ' --> ', $dir->getSize();
 ### 行为型设计模式
 主要的行为型设计模式包括命令模式、迭代器模式、策略模式、观察者模式。  
 
+策略模式定义了一组相同类型的算法，算法之间独立封装，并且可以互换代替。每一个算法（处理方式）称为一个策略，这些算法是同一类型问题的多种处理方式，但是具体行为有差别。  
+在应用中，就可以根据环境的不同，选择不同的策略来处理问题。  
+比如数组的输出有序列化输出、JSON 字符串输出和数组格式输出等方式，每种输出方式都可以独立封装起来，作为一个策略；如果要把数组保存到数据库则可以选择使用序列化方式转化输出，如果要给 APP 作接口则可以用 JSON 字符串输出。  
+```php
+/**
+ * 策略接口
+ */
+interface OutputStrategy
+{
+    public function render($array);
+}
 
+/**
+ * 策略类 1：返回序列化字符串
+ */
+class SerializeStrategy implements OutputStrategy
+{
+    public function render($array)
+    {
+        return serialize($array);
+    }
+}
+
+/**
+ * 策略类 2：返回 JSON 编码后的字符串
+ */
+class JsonStrategy implements OutputStrategy
+{
+    public function render($array)
+    {
+        return json_encode($array);
+    }
+}
+
+/**
+ * 策略类 3：直接返回数组
+ */
+class ArrayStrategy implements OutputStrategy
+{
+    public function render($array)
+    {
+        return $array;
+    }
+}
+
+/**
+ * 环境角色类
+ */
+class Output
+{
+    private $outputStrategy;
+
+    public function __construct(OutputStrategy $outputStrategy)
+    {
+        $this->outputStrategy = $outputStrategy;
+    }
+
+    public function renderOutput($array)
+    {
+        return $this->outputStrategy->render($array);
+    }
+}
+
+// 需要返回序列化字符串
+$output = new Output(new SerializeStrategy());
+$data = $output->renderOutput($arr);
+
+// 需要返回 JSON
+$output = new Output(new JsonStrategy());
+$data = $output->renderOutput($arr);
+```
+策略模式主要是用来分离算法，根据相同的行为抽象来做不同的具体策略实现。  
+策略模式结构清晰明了、使用简单直观。并且耦合度相对而言较低，扩展方便。同时操作封装也更为彻底，数据更为安全。  
+策略模式的缺点是随着策略的增加，子类也会变得繁多；但是，这样并不会影响系统的运行，所以在复杂业务中应该考虑使用。  
+
+------  
+观察者模式，也称发布-订阅模式，定义了一个被观察者和多个观察者的、一对多的对象关系，当被观察者状态发生变化的时候，它的所有观察者都会收到通知，并自动更新。观察者模式通常用在实时事件处理系统、组件间解耦、数据库驱动的消息队列系统，同时也是 MVC 设计模式中的重要组成部分。  
+比如订单的处理，当订单创建后，系统会发送邮件和短信，并保存日志记录。  
+```php
+/**
+ * 被观察者接口
+ */
+interface Observable
+{
+    // 添加 / 注册观察者
+    public function attach(Observer $observer);
+    // 删除观察者
+    public function detach(Observer $observer);
+    // 触发通知
+    public function notify();
+}
+
+/**
+ * 被观察者
+ * 职责：添加观察者到 $observers 属性中，有变动时通过 notify() 方法执行通知
+ */
+class Order implements Observable
+{
+    // 保存所有观察者
+    private $observers = [];
+    // 订单状态
+    private $state = 0;
+
+    // 添加（注册）观察者
+    public function attach(Observer $observer)
+    {
+        $key = array_search($observer, $this->observers);
+        if ($key === false) {
+            $this->observers[] = $observer;
+        }
+    }
+
+    // 移除观察者
+    public function detach(Observer $observer)
+    {
+        $key = array_search($observer, $this->observers);
+        if ($key !== false) {
+            unset($this->observers[$key]);
+        }
+    }
+
+    // 遍历调用观察者的 update() 方法进行通知，不关心其具体实现方式
+    public function notify()
+    {
+        foreach ($this->observers as $observer) {
+            // 把本类对象传给观察者，以便观察者获取当前类对象的信息
+            $observer->update($this);
+        }
+    }
+
+    // 订单状态有变化时发送通知
+    public function addOrder()
+    {
+        $this->state = 1;
+        $this->notify();
+    }
+
+    // 获取提供给观察者的状态
+    public function getState()
+    {
+        return $this->state;
+    }
+}
+
+/**
+ * 观察者接口
+ */
+interface Observer
+{
+    // 接收到通知的处理方法
+    public function update(Observable $observable);
+}
+
+/**
+ * 观察者1：发送邮件
+ */
+class Email implements Observer
+{
+    public function update(Observable $observable)
+    {
+        $state = $observable->getState();
+        if ($state) {
+            echo '发送邮件：您已经成功下单';
+        } else {
+            echo '发送邮件：下单失败，请重试';
+        }
+    }
+}
+
+/**
+ * 观察者2：短信通知
+ */
+class Message implements Observer
+{
+    public function update(Observable $observable)
+    {
+        $state = $observable->getState();
+        if ($state) {
+            echo '短信通知：您已下单成功';
+        } else {
+            echo '短信通知：下单失败，请重试';
+        }
+    }
+}
+
+/**
+ * 观察者3：记录日志
+ */
+class Log implements Observer
+{
+    public function update(Observable $observable)
+    {
+        echo '记录日志：生成了一个订单记录';
+    }
+}
+
+// 创建观察者对象
+$email = new Email();
+$message = new Message();
+$log = new Log();
+// 创建被观察者对象 —— 订单
+$order = new Order();
+
+// 向订单对象中注册 3 个观察者：发送邮件、短信通知、记录日志
+$order->attach($email);
+$order->attach($message);
+$order->attach($log);
+// 添加订单，添加时会自动发送通知给观察者
+$order->addOrder();
+```
+如上代码，扩展观察者是非常方便的。  
+在观察者模式中，被观察者完全不需要关心观察者，当自身状态有变化时，遍历执行所有观察者的 update() 方法即可完成通知；被观察者通过添加 attach() 方法，提供给观察者注册，使自己变得可见；当被观察者改变时，给注册的观察者发送通知，至于观察者如何处理通知，被观察者不需要关心。  
+
+这是一种良好的设计，对象之间不必相互理解，同样能够相互通信。  
+在面向对象的编程中，任何对象的状态都非常重要，它们是对象间交互的桥梁；当一个对象的改变需要被其他对象关注时，观察者模式就派上用场了。  
