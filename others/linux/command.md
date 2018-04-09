@@ -287,4 +287,20 @@ date +"%Y-%m-%d %H:%M:%S"
 # 杀死进程
 kill [-9] process_id
 killall process_name
+
+# 下载文件 
+wget [OPTIONS] URL
+# -O xxx 指定一个文件名
+# -o 设置下载的日志文件
+# -r 下载远程文件夹
+# --limit-rate=300k 限速 300k
+# -c 断点续传
+# -b 后台下载
+# -i, –-input-file=FILE 下载在 FILE 文件中出现的 URLs
+# --ftp-user=USERNAME --ftp-password=PASSWORD 用户名和密码认证的 ftp 下载
+# -r -A.pdf 下载指定格式（如全站 pdf 文件）
+# --spider 测试下载链接
+# --execute robots=off 避开网站 robots.txt 封禁
+# --tries=40 失败可重试 40 次
+# --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" 伪代理下载
 ```
