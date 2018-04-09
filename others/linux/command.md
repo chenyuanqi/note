@@ -87,6 +87,23 @@ ln aim_file_path link_file_path
 # 软链接也称符号链接，生成一个新文件，没有目录和系统间的限制
 # 软链接相当于一个指针，删除软链接并不影响被指向的文件，删除源文件或目录只删除了数据但不会删除链接（连接变为死链接）；一旦以同样文件名创建了源文件，链接将继续指向该文件的新数据
 
+# 打包与解包
+tar [OPTION] FILE
+# -c或--create：创建新的备份文件（打包）
+# -x或--extract或--get：从备份文件中还原文件（解包）
+# -z或--gzip或--ungzip：通过gzip指令处理备份文件
+# -Z或--compress或--uncompress：通过 compress 指令处理备份文件
+# -f<文件>或--file=<文件>：指定文件或目录
+# -v或--verbose：显示指令执行过程
+
+# 不同的后缀的文件
+# *.tar、*.tar.Z、*.tar.bz2、*.tar.gz、*.tgz 用 tar 加、解压
+# *.gz 用 gzip、gunzip 加、解压
+# *.bz2 用 bzip2、bunzip2 加、解压
+# *.Z 用 compress、uncompress 加、解压
+# *.rar 用 rar、unrar 加、解压
+# *.zip 用 zip、unzip 加、解压
+
 # 别名的设置与删除
 alias ll='ls -alhF'
 unalias ll
