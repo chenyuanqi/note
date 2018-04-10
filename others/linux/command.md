@@ -62,6 +62,10 @@ cp [OPTION] SRC DEST
 # -a: 归档，相当于-dR --preserv=all
 # -f: --force
 
+# 远程复制文件或者文件夹
+# 复制本地到远程： scp [-r] local_path user_name@ip:remote_path
+# 复制远程到本地： scp [-r] user_name@ip:remote_path local_path
+
 # 移动文件或重命名
 mv [OPTION] SOURCE DEST
 # -i：交互式
@@ -121,6 +125,8 @@ who am i
 which command
 # 显示某个命令的所有位置
 whereis command
+# 查找文件位置 whereis 文件名 或 find / -name 文件名
+# 查找文件夹位置 locate 文件夹名
 
 # 显示内核信息
 uname -a
@@ -271,6 +277,12 @@ lsof [OPTION]
 # +d<目录>：列出目录下被打开的文件；
 # +D<目录>：递归列出目录下被打开的文件
 
+# 查看端口
+netstat [OPTION]
+# -a 显示所有，默认不显示 LISTEN
+# -n 不显示数字别名
+# -p 显示关联的程序f
+
 # 切换用户或以其他用户身份执行
 # 非登录式切换，即不会读取目标用户的配置文件
 su username
@@ -280,6 +292,10 @@ su - username
 
 # 换个身份执行命令
 su [- 或 -l] username -c 'COMMAND'
+
+# 
+sudo [OPTION]  
+# 
 
 # 修改自己的登录密码
 passwd
@@ -337,5 +353,6 @@ curl [OPTION] URL
 # -v 显示请求全过程解析
 # -d 添加请求参数
 # -X 以什么方式请求，如 -XPOST
+# -F "key=value" 模拟表单提交数据
 
 ```
