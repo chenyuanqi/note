@@ -311,4 +311,20 @@ wget [OPTIONS] URL
 # --execute robots=off 避开网站 robots.txt 封禁
 # --tries=40 失败可重试 40 次
 # --user-agent="Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.16 (KHTML, like Gecko) Chrome/10.0.648.204 Safari/534.16" 伪代理下载
+
+#
+curl [OPTION] URL
+# --silent 不显示进度信息
+# -C 偏移量 断点续传（-C - 自动判断续传位置）
+# --referer "SITE" 指定参照页字符串
+# --user-agent 或 -A 设置用户代理
+# -H 设置头部信息
+# --limit-rate 50k 限制下载速度 50k
+# --max-filesize 指定可下载的最大文件大小
+# -u user:pwd 完成 HTTP 或 FTP 认证
+# -I 或 -head 只打印出HTTP头部信息
+# -v 显示请求全过程解析
+# -d 添加请求参数
+# -X 以什么方式请求，如 -XPOST
+
 ```
