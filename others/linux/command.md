@@ -174,6 +174,14 @@ tail [OPTION] [FILE]
 # -n ? 或 -?: 指定获取后 ? 行
 # -f: 跟踪显示文件新追加的内容
 
+# 给其他命令传参，默认给命令 echo 传参
+xargs
+# 多行输入单行输出: cat test.txt | xargs
+# 每 3 项一行输出多行：cat test.txt | xargs -n3
+# 自定义定界符：echo "nameXnameXnameXname" | xargs -dX
+# 将\0作为定界符：xargs -0
+# 使用 -I 指定一个替换字符串 {}：cat arg.txt | xargs -I {} ./sk.sh -p {} -l
+
 # 连接文件并打印到标准输出设备上
 cut [OPTION] [FILE]
 # -c ?：仅显示行中指定范围的字符，例如 -c-2 \ -c5- 
