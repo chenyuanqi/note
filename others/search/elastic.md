@@ -130,6 +130,9 @@ Elasticsearch 2.X 版本删除直接存储内存的方式，并在内存中映�
 - bulk 批处理的最佳处理记录是多少
 > 最佳值跟硬件配置、文档复杂度以及当前集群的负载有关，可根据仪表性能的消耗来判断  
 
+- 怎样实现统计去重（distinct）
+> [参考链接](https://github.com/laoyang360/deep_elasticsearch/blob/master/04_distinct)  
+
 - 相关性打分机制是怎样的
 > ElasticSearch 采用的默认相关性打分采用的是 Lucene 的 [TF-IDF 技术](https://lucene.apache.org/core/5_5_0/core/org/apache/lucene/search/similarities/TFIDFSimilarity.html)  
 > 更多参考[权威指南 > 相关性](https://es.xiaoleilu.com/056_Sorting/90_What_is_relevance.html)、[相关性打分机制](https://zhuanlan.zhihu.com/p/27951938)  
