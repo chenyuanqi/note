@@ -319,6 +319,11 @@ cal
 # 显示当前的日期和时间
 date +"%Y-%m-%d %H:%M:%S"
 
+# 显示或管理执行中的程序 [htop](http://hisham.hm/htop/)
+htop [OPTION]
+# -u --user=USER_NAME 只显示一个指定用户的进程
+# -d --delay=DELAY 设置更新之间的延迟，在十秒
+
 # 杀死进程
 kill [-9] process_id
 killall process_name
