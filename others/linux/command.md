@@ -328,6 +328,11 @@ htop [OPTION]
 kill [-9] process_id
 killall process_name
 
+# 建立信任链接
+ssh-copy-id "-p port user_name@ip"
+# 提示 “No identities found”，需要给使用的登录账号创建公钥私钥（ssh-keygen -t rsa）
+# 输入密码成功后，后面就可以免密登录了（ssh user_name@ip -p port ）
+
 # 下载文件 
 wget [OPTIONS] URL
 # -O xxx 指定一个文件名
