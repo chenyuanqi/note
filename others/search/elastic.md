@@ -11,6 +11,38 @@ Elasticsearch 主要解决如下问题：
 > 1、快速检索相关数据  
 > 2、能够统计检索结果  
 
+### Elasticsearch 的安装配置
+> java 版本要求：最低 1.7 
+
+- Elasticsearch 安装
+> [ELK 部署](https://blog.csdn.net/laoyang360/article/details/73368740)  
+> [Windows 部署](https://blog.csdn.net/laoyang360/article/details/51900235)  
+
+- Elasticsearch 配置
+> [Mapping 模板](https://blog.csdn.net/laoyang360/article/details/78396928)  
+> [高性能配置清单](https://blog.csdn.net/laoyang360/article/details/77985822)  
+
+- Elasticsearch 集群
+> [集群部署](https://blog.csdn.net/laoyang360/article/details/72850834)  
+
+- Elasticsearch 插件
+> [Head](https://blog.csdn.net/laoyang360/article/details/51472821)  
+> [Kibana](https://blog.csdn.net/laoyang360/article/details/51472888)  
+> [Logstash](https://blog.csdn.net/laoyang360/article/details/51472914)  
+> [Marvel](https://blog.csdn.net/laoyang360/article/details/51472902)  
+> [Graph](https://blog.csdn.net/laoyang360/article/details/51472931)  
+> [IK](https://blog.csdn.net/laoyang360/article/details/51472953)  
+> 
+> Github  
+> [head](https://github.com/mobz/elasticsearch-head)  
+> [bigdesk](https://github.com/hlstudio/bigdesk)  
+> [kopt](https://github.com/lmenezes/elasticsearch-kopf)  
+> [sql](https://github.com/NLPchina/elasticsearch-sql)  
+> [ik](https://github.com/medcl/elasticsearch-analysis-ik)  
+> [pinyin](https://github.com/gitchennan/elasticsearch-analysis-lc-pinyin)  
+> [同义词](https://github.com/bells/elasticsearch-analysis-dynamic-synonym)  
+> [简繁转换](https://github.com/medcl/elasticsearch-analysis-stconvert)  
+
 ### Elasticsearch 的工作原理
 ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast，使用单播需要修改配置）寻找集群中的其它节点，并与之建立连接；利用倒排索引检索后并把相应结果返回。  
 > 常规索引：文档 -> 关键词的映射过程（正向索引），耗时，需遍历整个文档  
