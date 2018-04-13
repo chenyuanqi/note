@@ -5,6 +5,13 @@ halt, poweroff, shutdown, init 0
 # 重启，如下各命令
 reboot, shutdown, init 6
 
+# 查看命令文档
+man [COMMAND]
+# 查看命令信息
+info [COMMAND]
+# 显示命令帮助信息
+[COMMAND] --help
+
 # 显示指定路径下的文件列表
 ls [OPTION]... [DIR]...
 # -a, --all: 显示所有文件，包括隐藏文件；
@@ -22,6 +29,9 @@ ls -l
 # 44800：文件的 size，单位 byte
 # 2月 26 14:32 : 文件的最近一次被修改的时间
 # LICENSE： 文件名
+
+# 查看当前路径的绝对路径
+pwd
 
 # 命令的历史
 history
@@ -95,6 +105,7 @@ ln aim_file_path link_file_path
 tar [OPTION] FILE
 # -c或--create：创建新的备份文件（打包）
 # -x或--extract或--get：从备份文件中还原文件（解包）
+# -A 将 tar 文件添加到归档文件中
 # -z或--gzip或--ungzip：通过gzip指令处理备份文件
 # -Z或--compress或--uncompress：通过 compress 指令处理备份文件
 # -f<文件>或--file=<文件>：指定文件或目录
@@ -121,6 +132,9 @@ whoami
 # 更详细 who x x，又如 who is she\who are you
 who am i
 
+# 显示主机名称
+hostname
+
 # 显示执行命令所在的路径
 which command
 # 显示某个命令的所有位置
@@ -128,7 +142,7 @@ whereis command
 # 查找文件位置 whereis 文件名 或 find / -name 文件名
 # 查找文件夹位置 locate 文件夹名
 
-# 显示内核信息
+# 显示系统内核信息
 uname -a
 
 # 显示磁盘信息
@@ -285,13 +299,13 @@ netstat [OPTION]
 
 # 切换用户或以其他用户身份执行
 # 非登录式切换，即不会读取目标用户的配置文件
-su username
+su user_name
 # 登录式切换，会读取目标用户的配置文件，完全切换
-su - username
+su - user_name
 # 注意，root 用户 su 到其他用户无需密码，非 root 用户切换时需要密码
 
 # 换个身份执行命令
-su [- 或 -l] username -c 'COMMAND'
+su [- 或 -l] user_name -c 'COMMAND'
 
 # 
 sudo [OPTION]  
@@ -300,7 +314,7 @@ sudo [OPTION]
 # 修改自己的登录密码
 passwd
 # 修改其他用户的登录密码（仅限 root）
-passwd [OPTIONS] username
+passwd [OPTIONS] user_name
 # -l: 锁定指定用户
 # -u: 解锁指定用户
 # -n mindays: 指定最短使用期限
@@ -308,8 +322,42 @@ passwd [OPTIONS] username
 # -w warndays：提前多少天开始警告
 # -i inactivedays：非活动期限；
 
+# 添加用户
+useradd [OPTIONS] user_name
+# -u 指定UID（省略该选项, 系统会自动分配一个UID）
+# -g 初始化群组, （默认创建新的群组, 群组名与帐号名称相同）
+# -G 次要的群组, 可以指定该帐号的所属的其它群组,多个用,分开, 如 -G g1,g2,g3
+# -c 用户的注释信息
+# -d 该用户的home目录
+# -s shell脚本环境, 默认为 /bin/bash
+
+# 修改用户（大部分参数与 useradd 相同）
+usermod [OPTIONS] user_name
+# -l 修改帐号名称
+# -U 解除密码锁定
+
+# 删除用户
+userdel [OPTIONS] user_name
+# -f 强制删除用户，即使用户当前已登录
+# -r 删除用户的同时，删除与用户相关的所有文件
+
+# 添加用户组
+groupadd [OPTIONS] group_name
+# -g gid 指定组群 id
+# -o 允许添加组 ID 号不唯一的工作组
+# -r 创建系统工作组，系统工作组的组 ID 小于 500
+# -K 覆盖配置文件 /ect/login.defs
+
+# 修改用户组
+groupmod [OPTIONS] group_name
+# -g gid 指定组群 id
+# -n group_name 修改用户组名
+
+# 删除用户组
+groupdel group_name
+
 # 从标准输入接收用户密码
-echo "PASSWORD" | passwd --stdin username
+echo "PASSWORD" | passwd --stdin user_name
 
 # 清屏 ctrl+l
 clear
@@ -379,4 +427,15 @@ curl [OPTION] URL
 # -X 以什么方式请求，如 -XPOST
 # -F "key=value" 模拟表单提交数据
 
+# 挂载磁盘设备
+mount [OPTION] origin_dir aim_dir
+# –t  文件系统类型
+# -o ro 用唯读模式挂上
+
+# 卸载已经挂载的文件系统
+umount [OPTION] aim_dir
+# -v 执行时显示详细的信息
+# -a 卸除 /etc/mtab 中记录的所有文件系统
+# -r 若无法成功卸除，则尝试以只读的方式重新挂入文件系统
+# -n 卸除时不要将信息存入 /etc/mtab 文件中
 ```
