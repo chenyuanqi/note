@@ -14,6 +14,15 @@ PHP 发行版可以在[「PHP 博物馆」](http://museum.php.net/) 找到。
 ### PHP 5.5 新特性
 
 ### PHP 5.4 新特性
+1、支持「[性状 Trait](http://php.net/manual/zh/language.oop5.traits.php)」  
+2、支持「短数组语法」，如 $arr = [1, 2, 3];  
+3、支持返回值为数组的函数进行成员访问解析，例如 foo()[0]  
+4、新增「匿名函数」支持 $this  
+5、<?= 将总是可用  
+6、新增实例化时访问类成员，如 (new Foo)->foo();  
+7、支持语法 Class::{expr}()  
+8、内置「[Web Server](http://php.net/manual/zh/features.commandline.webserver.php)」  
+9、SESSION 扩展可追踪[上传进度](http://php.net/manual/zh/session.upload-progress.php)  
 
 ### PHP 5.3 新特性
 1、支持「[命名空间](http://php.net/manual/zh/language.namespaces.php)」  
