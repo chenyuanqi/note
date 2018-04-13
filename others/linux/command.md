@@ -324,6 +324,20 @@ htop [OPTION]
 # -u --user=USER_NAME 只显示一个指定用户的进程
 # -d --delay=DELAY 设置更新之间的延迟，在十秒
 
+# 同步的艺术
+rsync [OPTION] local_file user@ip:/remote_file
+# -t 修改时间也同步
+# -I 踏实做人，逐个文件发起数据同步
+# -l 保持软链接文件类型
+# -P 保持权限
+# -v 查看同步信息
+# -r 递归同步文件夹
+# -a 霸道，尽可能的保证各方面的一致性
+# --delete 如果源端没有该文件，删除它
+# --exclude 排除隐私文件
+# --partial 断点续传
+# --progress 显示传输进度
+
 # 杀死进程
 kill [-9] process_id
 killall process_name
