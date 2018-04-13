@@ -65,7 +65,7 @@ REST，即 Representational State Transfer 的缩写，意思是 " 表现层状�
 > PATCH（UPDATE）：在服务器更新资源（客户端提供改变的属性，如修改手机号）  
 > DELETE（DELETE）：从服务器删除资源  
 > HEAD：获取资源的元数据  
-> OPTIONS：获取信息，关于资源的哪些属性是客户端可以改变的
+> OPTIONS：获取信息，关于资源的哪些属性是客户端可以改变的  
 
 - 过滤信息（Filtering）  
 > 如果记录数量很多，服务器不可能都将它们返回给用户。API 应该提供参数（含默认参数），过滤返回结果。  
@@ -112,6 +112,7 @@ REST，即 Representational State Transfer 的缩写，意思是 " 表现层状�
 > 服务器向用户返回的状态码和提示信息，参考 [「HTTP 状态码」](https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html)  
 
 ### 其他
+0、RESTFUL API 的幂等性是指响应不因多次请求而结果不一样，比如 HTTP GET 方法是幂等的，但是 HTTP POST 方法就是非幂等的。  
 1、RESTful API 最好做到 Hypermedia，即返回结果中提供链接，连接指向其他 API 方法，使得用户不查文档，也知道下一步应该做什么。  
 2、API的身份认证应该使用 [OAuth 2.0](http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html) 框架。  
 3、服务器返回的数据格式，应该尽量使用 JSON，避免使用 XML。  
