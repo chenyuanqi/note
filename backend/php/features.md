@@ -13,7 +13,8 @@ PHP 走过了漫长的道路，成长为处理 web 的最卓越的语言。
 3、新增「[?? 语法糖](http://php.net/manual/zh/functions.arguments.php#functions.variable-arg-list)」，也叫 null 合并运算符  
 ```php
 // 如果变量存在且值不为 NULL， 它就会返回自身的值，否则返回它的第二个操作数
-$username = $_GET['user'] ?? 'nobody'; // 等价于 $username = isset($_GET['user']) ? $_GET['user'] : 'nobody'; 
+// 如下程式等价于 $username = isset($_GET['user']) ? $_GET['user'] : 'nobody'; 
+$username = $_GET['user'] ?? 'nobody'; 
 ```
 4、新增太空船操作符（组合比较符）<=>，比较规则沿用「[常规比较规则](http://php.net/manual/zh/types.comparisons.php)」  
 ```php
@@ -35,12 +36,12 @@ use \namespace\{ClassA, ClassB, ClassC as C};
 15、支持「[生成器](http://php.net/manual/zh/language.generators.php)」委派其他生成器「[yield from](http://php.net/manual/zh/language.generators.syntax.php#control-structures.yield.from)」  
 16、新增整数除法函数「[intdiv()](http://php.net/manual/zh/function.intdiv.php)」  
 ```php
-// 返回 3
+// 如下程式返回 3
 echo intdiv(10, 3); 
 ```
 17、支持「[session_start()](http://php.net/manual/zh/language.generators.php)」接受 array 参数，覆盖配置文件中的会话选项  
 18、新增「[preg_replace_callback_array()](http://php.net/manual/zh/function.preg-replace-callback-array.php)」多正则检索或替换回调  
-19、新增高安全级别的随机字符串生成函数「[preg_replace_callback_array()](http://php.net/manual/zh/function.random-bytes.php」、高安全级别的随机整数生成函数「[random_int() ()](http://php.net/manual/zh/function.random-int.php)」  
+19、新增高安全级别的随机字符串生成函数「[preg_replace_callback_array()](http://php.net/manual/zh/function.random-bytes.php)」、高安全级别的随机整数生成函数「[random_int()](http://php.net/manual/zh/function.random-int.php)」  
 20、支持「[list()](http://php.net/manual/zh/function.list.php)」函数来展开实现了 ArrayAccess 接口的对象  
 21、支持克隆表达式上访问对象成员  
 ```php
