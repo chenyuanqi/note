@@ -291,11 +291,20 @@ lsof [OPTION]
 # +d<目录>：列出目录下被打开的文件；
 # +D<目录>：递归列出目录下被打开的文件
 
-# 查看端口
+# 查看端口（明日黄花）
 netstat [OPTION]
 # -a 显示所有，默认不显示 LISTEN
 # -n 不显示数字别名
 # -p 显示关联的程序f
+
+# 查询 socket 的有关统计信息
+ss [OPTION]
+# -s, --summary   显示套接字（socket）使用概况（网络连接统计）
+# -l, --listening 显示监听状态的套接字（sockets）（所有打开的网络端口）
+# -a, --all 所有 socket 连接
+
+# 所有端口为 22（ssh）的连接
+ss state all sport = :ssh
 
 # 切换用户或以其他用户身份执行
 # 非登录式切换，即不会读取目标用户的配置文件
