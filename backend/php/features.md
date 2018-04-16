@@ -3,17 +3,54 @@
 PHP 走过了漫长的道路，成长为处理 web 的最卓越的语言。  
 > PHP 发行版可以在「[PHP 博物馆](http://museum.php.net/)」 找到。  
 
+### PHP 7.3 新特性
+1、waiting~  
+
 ### PHP 7.2 新特性
+1、新增「[object 对象类型](http://php.net/manual/zh/language.types.object.php)」，引进了可用于逆变参数输入和协变返回任何对象类型  
+```php
+function foo(object $obj) : object
+{
+    return new SplQueue();
+}
+```
+2、支持通过「[dl()](http://php.net/manual/zh/function.dl.php)」函数实现用名称加载扩展  
+3、支持继承抽象类后的抽象类重写抽象方法  
+4、Argon2 算法加入生成密码散列 API  
+5、新增 PDO 字符串扩展类型（国际化的字符集）  
+6、优化「[PDOStatement::debugDumpParams()](http://php.net/manual/zh/pdostatement.debugdumpparams.php)」，增加额外的模拟调试信息  
+7、LDAP 扩展支持 EXOP  
+8、sockets 扩展增加地址信息函数「[socket_addrinfo_lookup()](http://php.net/manual/zh/function.socket-addrinfo-lookup.php)」、「[socket_addrinfo_connect()](http://php.net/manual/zh/function.socket-addrinfo-connect.php)」、「[socket_addrinfo_bind()](http://php.net/manual/zh/function.socket-addrinfo-bind.php)」、「[socket_addrinfo_explain()](http://php.net/manual/zh/function.socket-addrinfo-explain.php)」  
+9、扩展参数类型，重写方法和接口实现的参数类型可以省略  
+```php
+interface A
+{
+    public function Test(array $input);
+}
+
+class B implements A
+{
+    public function Test($input){}
+}
+```
+10、允许分组命名空间的尾部逗号  
+```php
+use Foo\Bar\{
+    Foo,
+    Bar,
+    Baz,
+};
+```
 
 ### PHP 7.1 新特性
-1、新增「[可为空（Nullable）类型](http://museum.php.net/)」，参数、返回值的类型允许为空  
+1、新增「可为空（Nullable）类型」，参数、返回值的类型允许为空  
 ```php
 function language(): ?string
 {
     return 'php';
 }
 ```
-2、新增「[Void 函数](http://museum.php.net/)」，返回值类型要么省去 return 语句，要么使用一个空的 return 语句   
+2、新增「Void 函数」，返回值类型要么省去 return 语句，要么使用一个空的 return 语句   
 ```php
 function swap(&$left, &$right) : void
 {
