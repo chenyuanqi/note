@@ -8,6 +8,44 @@ PHP 走过了漫长的道路，成长为处理 web 的最卓越的语言。
 ### PHP 7.1 新特性
 
 ### PHP 7.0 新特性
+1、支持标量「[类型声明](http://php.net/manual/zh/functions.arguments.php#functions.arguments.type-declaration)」  
+2、支持「[返回值类型声明](http://php.net/manual/zh/functions.returning-values.php#functions.returning-values.type-declaration)」  
+3、新增「[?? 语法糖](http://php.net/manual/zh/functions.arguments.php#functions.variable-arg-list)」，也叫 null 合并运算符  
+```php
+// 如果变量存在且值不为 NULL， 它就会返回自身的值，否则返回它的第二个操作数
+$username = $_GET['user'] ?? 'nobody'; // 等价于 $username = isset($_GET['user']) ? $_GET['user'] : 'nobody'; 
+```
+4、新增太空船操作符（组合比较符）<=>，比较规则沿用「[常规比较规则](http://php.net/manual/zh/types.comparisons.php)」  
+```php
+// 当 $a 小于、等于或大于 $b 时它分别返回 -1、0 或 1
+echo $a <=> $b;
+```
+5、支持通过 define() 定义常量数组  
+6、支持通过new class 来实例化一个「[匿名类](http://php.net/manual/zh/language.oop5.anonymous.php)」  
+7、支持 Unicode codepoint 转译语法  
+8、优化 Closure::call()  
+9、为「[unserialize()](http://php.net/manual/zh/function.unserialize.php)」提供过滤  
+10、新增「[IntlChar 类](http://php.net/manual/zh/class.intlchar.php)」，暴露出更多的 ICU 功能  
+11、优化「[assert 断言](http://php.net/manual/zh/class.intlchar.php)」，提供断言失败时抛出特定异常的预期能力  
+12、支持「[use](http://php.net/manual/zh/language.namespaces.importing.php)」分组  
+```php
+use \namespace\{ClassA, ClassB, ClassC as C};
+```
+14、支持「[生成器](http://php.net/manual/zh/language.generators.php)」返回表达式  
+15、支持「[生成器](http://php.net/manual/zh/language.generators.php)」委派其他生成器「[yield from](http://php.net/manual/zh/language.generators.syntax.php#control-structures.yield.from)」  
+16、新增整数除法函数「[intdiv()](http://php.net/manual/zh/function.intdiv.php)」  
+```php
+// 返回 3
+echo intdiv(10, 3); 
+```
+17、支持「[session_start()](http://php.net/manual/zh/language.generators.php)」接受 array 参数，覆盖配置文件中的会话选项  
+18、新增「[preg_replace_callback_array()](http://php.net/manual/zh/function.preg-replace-callback-array.php)」多正则检索或替换回调  
+19、新增高安全级别的随机字符串生成函数「[preg_replace_callback_array()](http://php.net/manual/zh/function.random-bytes.php」、高安全级别的随机整数生成函数「[random_int() ()](http://php.net/manual/zh/function.random-int.php)」  
+20、支持「[list()](http://php.net/manual/zh/function.list.php)」函数来展开实现了 ArrayAccess 接口的对象  
+21、支持克隆表达式上访问对象成员  
+```php
+(clone $foo)->bar();
+```
 
 ### PHP 5.6 新特性
 1、支持常量使用表达式，如 const THREE = TWO + 1;  
