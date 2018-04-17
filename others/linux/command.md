@@ -131,6 +131,13 @@ who
 whoami
 # 更详细 who x x，又如 who is she\who are you
 who am i
+# 查看系统所有用户
+cut -d: -f1 /etc/passwd
+# 查看系统所有用户组
+cut -d: -f1 /etc/group
+
+# 查看用户登录日志
+last
 
 # 显示主机名称
 hostname
@@ -290,6 +297,13 @@ lsof [OPTION]
 # -d<文件号>：列出占用该文件号的进程
 # +d<目录>：列出目录下被打开的文件；
 # +D<目录>：递归列出目录下被打开的文件
+
+# 查看所有网络接口的属性
+ifconfig 
+# 查看防火墙设置
+iptables -L
+# 查看路由表
+route -n 
 
 # 查看端口（明日黄花）
 netstat [OPTION]
