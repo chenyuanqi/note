@@ -404,6 +404,19 @@ ssh-copy-id "-p port user_name@ip"
 # 提示 “No identities found”，需要给使用的登录账号创建公钥私钥（ssh-keygen -t rsa）
 # 输入密码成功后，后面就可以免密登录了（ssh user_name@ip -p port ）
 
+# 查看已存在的环境变量
+env [OPTION]
+# -i 开始一个新的空的环境
+# -u<变量名> 从当前环境中删除指定的变量
+
+# 任务调度
+crontab [-u username] [-l|-e|-r]
+# * * * * * COMMAND 分 时 日 月 周
+# -u 只有 root 才能进行这个任务，也就是说帮其他使用者创建/移除 crontab 工作排程
+# -e 编辑 crontab 的工作内容
+# -l 查阅 crontab 的工作内容
+# -r 移除所有的 crontab 的工作内容，若仅要移除一项，请用 -e 去编辑
+
 # 下载文件 
 wget [OPTIONS] URL
 # -O xxx 指定一个文件名
