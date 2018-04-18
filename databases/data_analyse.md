@@ -108,6 +108,5 @@
 > 
 > 会可视化工具和技术，会编程，你将跨入中高级数据分析师行列。比如 ECchart、HighChart、numpy、matplotlib 等等，Python、R 编程语言等等。  
 
-### 数据分析与 R 语言
-
 ### 数据分析与 Python
+waiting~  

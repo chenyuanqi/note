@@ -1,7 +1,7 @@
 
 ### PHP 的征程
 PHP 走过了漫长的道路，成长为处理 web 的最卓越的语言。  
-> PHP 发行版可以在「[PHP 博物馆](http://museum.php.net/)」 找到。  
+> PHP 发行版可以在「[PHP 博物馆](http://museum.php.net/)」找到。  
 
 ### PHP 7.3 新特性
 1、waiting~  
