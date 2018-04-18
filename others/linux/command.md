@@ -235,6 +235,11 @@ sort [OPTION] [FILE]
 # -n: 以数值大小进行排序
 # -u: uniq，排序后去重
 
+# 重定向输出到文件并显示
+echo 'aaa' | tee /tmp/aaa.txt
+# -a 向文件中重定向时使用追加模式
+# -i 忽略中断（interrupt）信号
+
 # 转换或删除字符
 tr [OPTION] SET1 [SET2]
 # -c 或 ——complerment：取代所有不属于第一字符集的字符
