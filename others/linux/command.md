@@ -335,9 +335,13 @@ su - user_name
 # 换个身份执行命令
 su [- 或 -l] user_name -c 'COMMAND'
 
-# 
-sudo [OPTION]  
-# 
+# 以其他身份来执行命令
+sudo [OPTION] COMMAND  
+# -u<用户> 以指定的用户作为新的身份。若不加上此参数，则预设以 root 作为新的身份
+
+# 使用 root 超级用户重新登录一次 shell，只不过密码是使用的当前用户的密码
+# 重新加载 /etc/profile 文件以及 /etc/bashrc 文件等系统配置文件，并且还会重新加载 root 用户的 $SHELL 环境变量所对应的配置文件
+sudo su -
 
 # 修改自己的登录密码
 passwd
