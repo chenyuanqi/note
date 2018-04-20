@@ -22,6 +22,8 @@
 > 2011 年 6 月 9 日，Laravel 的创始人 Taylor Otwell 发布第一个测试版本
 
 ### Laravel 5.6 新特性
+要求 PHP 7.1.3+
+
 - 「[日志优化](http://laravelacademy.org/post/8805.html)」  
 > 所有日志配置都存放在新的 config/logging.php 配置文件，轻松构建发送日志消息到多个处理器的日志”堆栈”。
 
@@ -67,12 +69,17 @@
 - 移除 「Artisan Optimize 命令」
 
 ### Laravel 5.5 新特性
+要求 PHP 7.0+
+
 - 「[Laravel Horizon](http://laravelacademy.org/post/8492.html)」  
 > Horizon 为基于 Redis 的 Laravel 队列提供了一个美观的后台和代码驱动的配置。Horizon 允许你轻松监控队列系统的关键指标，例如任务吞吐量、运行时和失败任务。
 > 所有任务进程配置都存放在一个简单独立的配置文件中，从而允许你的配置保存在源码控制系统中以便整个团队的协作。
 
 - 「[包自动发现](http://laravelacademy.org/post/8476.html)」  
 > barryvdh/laravel-debugbar 扩展包可以自动发现并为你注册服务提供者和门面
+
+- 「[Whoops 优雅报错](https://laravel-news.com/whoops-laravel-5-5)」  
+> whoops 扩展包重新回归  
 
 - 「[API 资源](http://laravelacademy.org/post/8223.html)」  
 > 资源类允许你简单、优雅地将模型和模型集合转化成 JSON  
@@ -81,7 +88,7 @@
 > 当创建新的控制台命令时，不再需要手动将其添加到 Console Kernel 的 $commands 属性列表中  
 > 取而代之，在 kernel 的 commands 方法中会调用一个新的 load 方法，该方法会检索给定目录下的所有控制台命令并自动注册它们
 
-- 「新的前端预置功能」  
+- 「[新的前端预置功能](https://laravel-news.com/frontend-presets)」  
 > 可以使用 preset 命令将默认的 Vue 脚手架切换到 React 脚手架：php artisan preset react  
 > 也可以使用 none 预置指令整个移除 JavaScript 和 CSS 框架脚手架：php artisan preset none  
 
@@ -103,7 +110,7 @@ Redis::throttle('key')->allow(10)->every(60)->then(function () {
 - 「基于时间的任务尝试」  
 > 作为定义一个任务最终失败之前尝试次数的可选方案，你现在可以一个任务的超时时间，这样的话在给定时间范围内该任务就可以尝试很多次，要定义这样的一个时间，可以添加一个 retryUntil 方法到任务类  
 
-- 「验证规则对象」  
+- 「[验证规则对象](https://laravel-news.com/laravel-5-5-custom-validator-rules)」  
 > 通过 Artisan 命令 make:rule 将会在 app/Rules 目录下生成一个新的验证规则  
 > 一个规则对象只包含两个方法：passes 和 message。passes 方法接收属性值和名称，然后基于属性值是否有效返回 true 或 false。message 方法会在验证失败时返回对应验证错误消息  
 
@@ -113,14 +120,17 @@ Redis::throttle('key')->allow(10)->every(60)->then(function () {
 - 「按需通知」  
 > 发送通知给应用中的非用户实体，使用新的 Notification::route 方法，可以在发送通知之前指定特别指定通知路由  
 
-- 「可渲染的邮件对象」  
+- 「[可渲染的邮件对象](https://laravel-news.com/render-mailables)」  
 > 邮件对象可以直接从路由返回，从而快速在浏览器中预览邮件设计  
 
-- 「可渲染 & 可报告异常」  
+- 「[可渲染 & 可报告异常](https://laravel-news.com/custom-exception-reporting)」  
 > 直接在异常中定义一个 render 方法，这样就可以直接在这个方法中设置自定义响应渲染逻辑，从而避免在异常处理器中堆积条件判断逻辑  
 > 如果你还想要为异常自定义报告逻辑，可以在该类中定义一个 report 方法
 
-- 「请求验证」  
+- 「[自定义默认报错视图](https://laravel-news.com/custom-exception-reporting)」  
+> 自定义 4xx、5xx 页面  
+
+- 「[请求验证](https://laravel-news.com/request-data-validator-improvements)」  
 > Illuminate\Http\Request 对象提供了一个 validate 方法，该方法允许你快速验证来自路由闭包或控制器的输入请求  
 ```php
 use Illuminate\Http\Request;
@@ -154,10 +164,13 @@ Route::get('/comment', function (Request $request) {
 }
 ```
 
-- 「缓存锁」  
-> 支持Redis 和 Memcached 缓存驱动获取和释放原子”锁”，该功能提供了一个获取任意锁的简单方法而不必担心任何竞争条件  
+- [新增异常抛出方法](https://laravel-news.com/throw_if-throw_unless)  
+> 新增 throw_if 和 throw_unless 方法  
 
-- 「Blade 优化」  
+- 「缓存锁」  
+> 支持 Redis 和 Memcached 缓存驱动获取和释放原子”锁”，该功能提供了一个获取任意锁的简单方法而不必担心任何竞争条件  
+
+- 「[Blade 优化](https://laravel-news.com/bladeif)」  
 > Blade 提供一个 Blade::if 方法帮助你使用闭包快速定义自定义条件指令  
 
 - 「[新的路由方法](https://laravel-news.com/laravel-5-5-router-view-and-redirect)」  
@@ -168,6 +181,13 @@ Route::get('/comment', function (Request $request) {
 > sticky 选项是可选的值，可用于允许在当前请求生命周期内立即读取刚刚写入数据库的记录  
 > 如果 sticky 选项被开启并且在当前请求生命周期内在数据库上进行了一次”写”操作，任意后续的”读”操作将会使用”写”连接，这样就可以确保任何在当前请求周期内写入的数据可以立即在同一个请求生命周期内被正确地从数据库读取  
 > 这可以看作是解决分布式数据库主从延迟的一种方案。
+
+- 「[使用 casts 定义数据表数据的类型](https://laravel-news.com/laravel-5-5-pivot-casting)」
+
+- 「[dd 和 dump 加入 colletions](https://laravel-news.com/dd-and-dump-collections)」  
+
+- 「[动态模板](https://laravel-news.com/dd-and-dump-collections)」  
+> 使用 View::first
 
 ### Laravel 5.4 新特性
 
