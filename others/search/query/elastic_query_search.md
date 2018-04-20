@@ -234,6 +234,23 @@ GET /index/type/_search
 }
 ```
 
+- match phrase prefix（短语前缀匹配）
+> 短语搜索，有遗漏时考虑使用  
+```
+POST /index/type/_search
+{
+  "profile": "true",
+  "query": {
+    "match_phrase_prefix": {
+      "field_name": {
+        "query": "field_value",
+        "max_expansions": [expansion_number]
+      }
+    }
+  }
+}
+```
+
 - 包含查询
 ```
 # 类似于 whereIn，多项则重复 match 部分
