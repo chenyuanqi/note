@@ -1,6 +1,8 @@
 # vikey's note
 人生苦短，谨慎撸文~  
 
+Evernote is a great tool to collect and connect to the word. But not a good tool to build links within. So I'm planning to migrate my favor note to github.   
+
 ### 大数据 bigdata
 [Hive](./bigdata/hive/basis.md)  
 [Impala](./bigdata/impala/basis.md)  
