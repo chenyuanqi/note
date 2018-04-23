@@ -434,7 +434,7 @@ env [OPTION]
 
 # 任务调度
 crontab [-u username] [-l|-e|-r]
-# * * * * * COMMAND 分 时 日 月 周
+# * * * * * COMMAND 分(0 - 59) 时(0 - 23) 日(1 - 31) 月(1 - 12) 周(0 - 7) (Sunday=0 or 7)
 # -u 只有 root 才能进行这个任务，也就是说帮其他使用者创建/移除 crontab 工作排程
 # -e 编辑 crontab 的工作内容
 # -l 查阅 crontab 的工作内容
