@@ -149,7 +149,8 @@ GET /index/type/_search
 }
 ```
 
-- mget 查询
+- mget 查询（或可指定 _id 对应的 _index 和 _type）
+> mget 很重要，一次性要查询多条数据的时候，批量操作的 api 尽可能减少网络开销次数，可能将性能提升数倍，甚至数十倍  
 ```
 GET /index/type/_search
 {

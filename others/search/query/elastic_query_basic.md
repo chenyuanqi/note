@@ -43,7 +43,7 @@ POST /index/type?pretty
 }
 ```
 
-- 更新数据  
+- 更新数据（partial update）  
 ```
 POST /index/type/[id]/_update?pretty
 {
@@ -61,15 +61,56 @@ PUT /index/type/[id]?pretty
 
 - 使用脚本更新  
 ```
+# 内置脚本
 POST /index/type/[id]/_update?pretty
 {
   "script": "ctx._source.[field] += [value]"
+}
+
+# 外部脚本
+# xxx 文件：ctx._source.tags+=tag_item
+POST /index/type/[id]/_update?pretty
+{
+  "script": {
+    "lang": "groovy", 
+    "file": "xxx",
+    "params": {
+      "tag_item": "tag_value"
+    }
+  }
+}
+```
+
+- 新增或更新（upsert）
+> 如果指定的 document 不存在，就执行 upsert 中的初始化操作；  
+> 如果指定的 document 存在，就执行 doc 或者 script 指定的 partial update 操作
+```
+POST /test_index/test_type/11/_update
+{
+   "script" : "ctx._source.num+=1",
+   "upsert": {
+       "num": 0,
+       "tags": []
+   }
 }
 ```
 
 - 删除文档  
 ```
 DELETE /index/type/[id]?pretty
+
+# 使用脚本删除
+# xxx 文件：ctx.op = ctx._source.num == count ? 'delete' : 'none'
+POST /index/type/[id]/_update?pretty
+{
+  "script": {
+    "lang": "groovy",
+    "file": "xxx",
+    "params": {
+      "count": 1
+    }
+  }
+}
 ```
 
 - 删除索引  
@@ -78,7 +119,19 @@ DELETE /index?pretty
 ```
 
 - 批量处理(_bulk)
+> bulk 操作中，任意一个操作失败，是不会影响其他的操作的，但是在返回结果里，会告诉你异常日志  
+> 
+> bulk request 会加载到内存里，如果太大的话，性能反而会下降，因此需要反复尝试一个最佳的 bulk size  
+> 一般从 1000~5000 条数据开始，尝试逐渐增加。另外，如果看大小的话，最好是在 5~15MB 之间  
+> 
+> bulk api 对 json 的语法，有严格的要求，每个 json 串不能换行，只能放一行，同时一个 json 串和一个 json 串之间，必须有一个换行
 ```
+# bulk 支持如下操作
+#（1）delete：删除一个文档，只要 1 个 json 串就可以了
+#（2）create：PUT /index/type/id/_create，强制创建
+#（3）index：普通的 put 操作，可以是创建文档，也可以是全量替换文档
+#（4）update：执行的 partial update 操作
+
 POST /index/type/_bulk?pretty
 {"index":{"_id":"[id]"}}
 {"field_name":"field_value"}
