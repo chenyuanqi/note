@@ -190,6 +190,91 @@ Route::get('/comment', function (Request $request) {
 > 使用 View::first
 
 ### Laravel 5.4 新特性
+- 「[when 加入 colletions](https://laravel-news.com/laravel-collections-when-method)」  
+> 允许使用 when 对执行有条件 where 的操作进行处理，而不需要中断链式操作  
+
+- 「[支持 Markdown 编写邮件和通知](https://laravel-news.com/laravel-markdown-emails)」  
+
+- 「[Laravel Dusk](http://laravelacademy.org/post/7047.html)」  
+> 提供优雅的、易于使用的浏览器自动化测试 API  
+
+- 「[Laravel Mix](http://laravelacademy.org/post/7047.html)」  
+> Laravel Mix 是 Laravel Elixir 的精神继承者，完全基于 Webpack 而不是 Gulp  
+> 使用通用 CSS 和 JavaScript 预处理器定义 Laravel 应用的 Webpack 构建步骤提供了流式 API  
+> 通过简单的方法链，可以定义流式资源管道  
+```php
+mix.js('resources/assets/js/app.js', 'public/js')
+   .sass('resources/assets/sass/app.scss', 'public/css');
+```
+
+- 「[Blade 组件&插槽](http://laravelacademy.org/post/6780.html)」  
+> 命名插槽允许我们在单个组件中定义多个插槽  
+> 命名插槽可以通过@slot指令进行注入，任意在@slot指令中的内容都会被传递给$slot变量  
+```php
+@component('alert')
+    @slot('title')
+        Forbidden
+    @endslot
+
+    You are not allowed to access this resource!
+@endcomponent
+```
+
+- 「[广播中的模型绑定](http://laravelacademy.org/post/6851.html)」  
+> 频道路由也可以显式或隐式进行模型绑定  
+```php
+use App\Order;
+
+Broadcast::channel('order.{order}', function ($user, Order $order) {
+    return $user->id === $order->user_id;
+});
+```
+
+- 「集合高阶消息传递」  
+> 集合现在支持“高阶消息传递”，从而精简对集合的操作  
+> 目前支持高阶消息传递的集合方法有：contains、each、every、filter、first、map、partition、reject、sortBy、sortByDesc 和 sum  
+
+- 「基于对象的 Eloquent 事件」  
+> Eloquent 事件处理器可以被映射到事件对象上，这为我们处理 Eloquent 事件并让其变得易于测试提供了一种直观的方式  
+
+- 「[任务级的重试&超时](http://laravelacademy.org/post/6922.html)」  
+> 队列任务的“重试”和“超时”设置可以在任务类中为每一个任务配置独立的“重试”次数和“超时”时间  
+```php
+namespace App\Jobs;
+
+class ProcessPodcast implements ShouldQueue
+{
+    /**
+     * The number of times the job may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 5;
+
+    /**
+     * The number of seconds the job can run before timing out.
+     *
+     * @var int
+     */
+    public $timeout = 120;
+}
+```
+
+- 「请求清理中间件」  
+> 在默认中间件堆栈中引入了两个新的中间件：TrimStrings 和 ConvertEmptyStringsToNull  
+
+- 「[“实时”门面](https://laravel.com/docs/5.4/mocking)」  
+> 可以轻松将任意类实时转化为一个门面，只需要将导入类包裹在 Facades 命名空间中即可  
+
+- 「自定义透视表模型」  
+> 所有隶属 belongsToMany 关联关系的透视表模型都使用同一个内置的 Pivot 模型实例，可以为这些数据透视表自定义模型类  
+
+- 「[优化 Redis 集群支持](http://laravelacademy.org/post/6974.html)」  
+> 可以在同一个应用中定义Redis连接指向多个主机和多个集群  
+
+- 「[迁移默认字符换长度](https://laravel-news.com/laravel-5-4-key-too-long-error)」  
+> 默认使用 utf8mb4 字符编码，该编码支持对 “emojis” 进行排序  
+> 在 AppServiceProvider 中调用 Schema::defaultStringLength 方法来实现手动配置迁移命令生成的默认字符串长度  
 
 ### Laravel 5.3 新特性
 
