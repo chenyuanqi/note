@@ -277,6 +277,58 @@ class ProcessPodcast implements ShouldQueue
 > 在 AppServiceProvider 中调用 Schema::defaultStringLength 方法来实现手动配置迁移命令生成的默认字符串长度  
 
 ### Laravel 5.3 新特性
+- 「[通知（Notifications）](http://laravelacademy.org/post/6116.html)」  
+> Laravel Notifications 为我们提供了简单、优雅的 API 用于在不同的发行渠道中发送通知，例如邮件、SMS、Slack 等等  
+
+- 「[WebSockets／事件广播](http://laravelacademy.org/post/6026.html)」  
+> 通过为已私有和已存在的 WebSocket 频道添加频道级认证对事件广播进行了极大的优化和提升  
+> Laravel Echo，通过NPM安装的全新的JavaScript包，将和Laravel 5.3一起发布  
+> Laravel Echo 用于为订阅频道以及在客户端 JavaScript 应用中监听服务器端事件提供了简单、优美的 API  
+> Laravel Echo 包含对 Pusher 和 Socket.io 的支持  
+
+- 「[Laravel Passport（OAuth2 服务器）](http://laravelacademy.org/post/5993.html)」  
+> 使用 Laravel Passport让API 认证变得简单  
+> Laravel Passport 可以在几分钟内为应用提供一个完整的 Oauth2 服务器实现，Passport 基于 Alex Bilbie 维护的 League OAuth2 server 实现    
+
+- 「[搜索（Laravel Scout）](http://laravelacademy.org/post/6277.html)」  
+> Laravel Scout 提供了一个简单的、基于驱动的针对 Eloquent 模型的全文搜索解决方案    
+> Laravel Scout 会自动同步更新 Eloquent 记录的搜索索引  
+
+- 「[支持邮寄对象](http://laravelacademy.org/post/6095.html)」  
+> 对象可以以一个简单对象的形式表示邮件信息，而不再需要在闭包中自定义邮件信息  
+
+- 「[存储上传文件](http://laravelacademy.org/post/5881.html#ipt_kb_toc_5881_8)」  
+> 通过在上传文件实例上使用新的 store 方法使得用户上传文件变得简单，只需要简单调用 store 方法并传入文件保存路径即可  
+
+- 「[Webpack & Laravel Elixir](http://laravelacademy.org/post/5962.html)」  
+> gulpfile.js 使用 webpack 编译 javascript  
+
+- 「[前端架构](http://laravelacademy.org/post/5956.html)」  
+> 不再从 cdn 中加载前端资源，所有依赖默认定义在 package.json 中  
+> 单文件 vue 组件开箱支持  
+
+- 「路由文件」  
+> 新的顶层目录 routes 包含两个 http 路由文件 web 和 api  
+
+- 「[闭包控制台命令](http://laravelacademy.org/post/6220.html)」  
+> 除了通过命令类定义之外，现在 Artisan 命令还可以在 app/Console/Kernel.php 文件的 commands 方法中以简单闭包的方式定义  
+> commands 方法会加载 routes/console.php 文件，从而允许你基于闭包、以路由风格定义控制台命令  
+
+- 「[$loop 变量](http://laravelacademy.org/post/5919.html)」  
+> 在 Blade 模板中循环遍历的时候，$loop 变量将会在循环中生效  
+```php
+@foreach ($users as $user)
+    @if ($loop->first)
+        This is the first iteration.
+    @endif
+
+    @if ($loop->last)
+        This is the last iteration.
+    @endif
+
+    <p>This is user {{ $user->id }}</p>
+@endforeach
+```
 
 ### Laravel 5.2 新特性
 
