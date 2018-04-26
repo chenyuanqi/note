@@ -331,5 +331,86 @@ class ProcessPodcast implements ShouldQueue
 ```
 
 ### Laravel 5.2 新特性
+- 「多认证驱动」
+> 可以定义多个认证驱动（不只是默认的、基于 session 的认证驱动），还有多个认证模型以及用户表，并且可以独立控制其认证处理（登录、注册、密码重置）
+
+- 「认证脚手架」
+> 提供了便捷的方式来创建前台认证视图，只需在终端执行如下 Artisan 命令即可
+```bash
+# 生成纯文本的、兼容 Bootstrap 样式的视图用于登录、注册和密码重置
+# 使用相应路由更新路由文件
+php artisan make:auth
+```
+
+- 「[隐式模型绑定](http://laravelacademy.org/post/2784.html#ipt_kb_toc_2784_18)」
+> 隐式模型绑定使得在路由或控制器中直接注入相应模型实例更加便捷
+```php
+use App\User;
+
+Route::get('/user/{user}', function (User $user) {
+    return $user;
+});
+```
+
+- 「[中间件组](http://laravelacademy.org/post/2803.html)」
+> 中间件组允许你通过单个方便的键来对相关路由中间件进行分组，从而为某个路由一次指定多个中间件
+
+- 「[访问频率限制]」
+> 一个新的访问频率限制中间件已经被内置到框架中，从而允许你轻松限制给定 IP 地址在指定时间内对某个路由发起请求的数目
+```php
+//  限制某个 IP 地址每分钟只能访问某个路由 60 次
+Route::get('/api/users', ['middleware' => 'throttle:60,1', function () {
+    // something
+}]);
+```
+
+- 「[数组输入验证](http://laravelacademy.org/post/3279.html)」
+> 表单字段的数组输入验证
+```php
+// 验证给定数组输入字段中的每一个 email 是唯一的
+// 使用 * 来指定验证数组字段
+$validator = Validator::make($request->all(), [
+    'person.*.email' => 'email|unique:users'
+]);
+```
+
+- 「[Eloquent 全局作用域优化](http://laravelacademy.org/post/2995.html#global-scopes)」
+> 全局查询作用域只需实现一个简单的方法 apply 即可
 
 ### Laravel 5.1 新特性
+- 「LTS」
+> Laravel 5.1 是 Laravel 第一个长期支持版本，将会提供两年的 bug 修复和安全修复  
+> 这是迄今为止，Laravel提供的最大跨度的支持，并且将会持续为更多的企业用户及普通用户提供稳定平滑的支持
+
+- 「[PSR-2](https://github.com/PizzaLiu/PHP-FIG/blob/master/PSR-2-coding-style-guide-cn.md)」
+> PSR-2 被采取为默认风格指南，此外，所有代码生成器已经被更新到生成兼容 PSR-2 语法的代码  
+
+- 「文档」
+> Laravel 文档的每一个页面都进行了一丝不苟的审查和引人注目的优化，所有代码示例都被审查并且扩展到更好的支持上下文相关性  
+
+- 「目录结构」
+> 为了更好地表达意图，app/Commands 目录被重命名为 app/Jobs，此外，app/Handlers 被合并到 app/Listeners 目录  
+> 并不是破坏式的改变，所以使用 Laravel 5.1 并不强制要求更新到新的目录结构  
+
+- 「[事件广播](http://laravelacademy.org/post/198.html)」
+> 在很多现代的 web 应用中，web 套接字被用于实现实时的，即时更新的用户接口  
+> 当服务器上的某些数据更新后，通常一条消息将会通过 websocket 连接发送到客户端并进行处理  
+> 广播 Laravel 事件允许你在服务端代码和客户端 JavaScript 框架之间共享相同的事件名称  
+
+- 「[中间件参数](http://laravelacademy.org/post/57.html)」
+> 中间件可以接受额外的自定义参数  
+
+- 「[测试革新](http://laravelacademy.org/post/238.html)」
+> 内置的测试功能获得了引入注目的提升，多个新方法提供了平滑的，富有变现力的接口和应用进行交互并测试响应
+
+- 「[模型工厂](http://laravelacademy.org/post/238.html#model-factories)」
+> 通过使用模型工厂附带一种简单的方式类创建Eloquent模型存根  
+> 模型工厂允许你为 Eloquent 模型定义一系列默认属性，然后为测试或数据库填充生成模型实例  
+> 模型工厂还可以利用强大的PHP扩展库 Faker 类生成随机的属性数据  
+
+- 「[Artisan优化](http://laravelacademy.org/post/170.html)」
+> Artisan 命令可以通过使用一个简单的，类似路由风格的“签名”（提供了一个非常简单的接口来定义命令行参数和选项）来定义
+
+- 「加密」
+> 在之前的 Laravel 版本中，加密是通过 PHP 扩展 mcrypt 来进行处理的  
+> 从 5.1 开始，加密改由通过 PHP 的另一个扩展 openssl 进行处理，因为该扩展较前者而言维护的更加活跃  
