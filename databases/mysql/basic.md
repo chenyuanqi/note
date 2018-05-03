@@ -11,3 +11,15 @@
 > 5、InnoDB 不支持 FULLTEXT 类型的索引  
 
 ### Mysql 基本增删改查
+```bash
+
+# 包含查询
+# 6 在  '[1,2,3,6]' 内，示例
+SELECT * FROM `articles_onlines` WHERE FIND_IN_SET('6', TRIM(TRAILING ']' FROM TRIM(LEADING '[' FROM `article_tags`)));
+# 6 在 '1,2,3,6' 内，示例
+SELECT * FROM `articles_onlines` WHERE FIND_IN_SET(6, `article_tags`);
+# 某字段是否存在字符串中，譬如 tags_id in ('1,2,3')
+SELECT * FROM `article_tabs` WHERE `tags_id` IN '1,2,3';
+
+```
+
