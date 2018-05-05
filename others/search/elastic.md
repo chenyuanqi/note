@@ -74,6 +74,21 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 > 全文检索是对一篇文章进行索引，可以根据关键字搜索，类似于 mysql 的模糊查询（like "%keyword%"）   
 > 全文索引是把内容根据词的意义进行分词，然后分别创建索引  
 
+
+- elasticsearch document 路由原理
+> 路由算法：shard = hash(routing) % number_of_primary_shards  
+> 
+> 一个 index 数据会被分为多片，每片在一个 shard 中，当客户端创建 document 时，elasticsearch 就需要决定 document 放在这个 index 的哪个 shard，这个过程就叫 document routing，即数据路由。  
+> primary shard 一旦由 index 建立是不可修改的，但是 replica shard 却是可以随时修改。  
+> 默认的 routing 就是 _id，也可以在发送请求的时候，手动指定一个routing value，比如说 put /index/type/id?routing=user_id。  
+> 手动指定 routing value 是很有用的，可以保证某一类 document 一定被路由到一个 shard 上去，那么在后续进行应用级别的负载均衡，以及提升批量读取的性能的时候，是很有帮助的。
+
+- elasticsearch document 增删改内部原理
+> 1、客户端选择一个 node 发送请求过去，这个 node 就是 coordinating node（协调节点）
+> 2、coordinating node，对 document 进行路由，将请求转发给对应的 node（有 primary shard）
+> 3、实际的 node 上的 primary shard 处理请求，然后将数据同步到 replica node
+> 4、coordinating node，如果发现 primary node 和所有 replica node 都搞定之后，就返回响应结果给客户端
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
