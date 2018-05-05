@@ -483,4 +483,12 @@ umount [OPTION] aim_dir
 # -a 卸除 /etc/mtab 中记录的所有文件系统
 # -r 若无法成功卸除，则尝试以只读的方式重新挂入文件系统
 # -n 卸除时不要将信息存入 /etc/mtab 文件中
+
+# 并发压力测试
+ab -n 100 -c 10 -l http://www.your_site.com
+# -n number 总的请求数
+# -c concurrency 并发数 
+# -l 表示当某个请求的回复长度不与第一个请求的回复长度一致时，不把它作为失败的请求
+ab -n 100 -c 10 -p post.txt http://www.your_site.com
+# post.txt 的内容是参数，如 data={"name":"wgc"}，但是，需要 url 编码
 ```
