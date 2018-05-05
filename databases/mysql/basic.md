@@ -27,8 +27,46 @@ DROP DATABASE test;
 # 创建数据表
 CREATE TABLE event (name VARCHAR(20), date DATE, type VARCHAR(15), remark VARCHAR(255));
 
+# 修改表名
+ALTER TABLE table_name RENAME TO wanted_table_name
+
 # 删除数据表
 DROP TABLE table_name;
+
+# 添加列
+alter table table_name add column column_name varchar(30);
+# 删除列
+alter table table_name drop column column_name;
+# 修改列名
+alter table table_name change column_name new_column_name new_column_type;
+# 修改列属性
+alter table table_name modify column_name column_type;
+# 建表时设置主键
+create table table_name( id int primary key);
+# 或者
+create table table_name(id int, primary key(id));
+# 非建表时设置主键
+alter table table_name add primary key;
+# 删除主键
+alter table table_name drop primary key;
+# 建表时添加唯一键
+create table table_name(columnName int unique);
+# 或者
+create table table_name(columnName int, unique key(column_name));
+# 非建表时添加唯一键
+alter table table_name add unique key(column_name);
+# 删除唯一键
+alter table table_name drop index unique_index_name;
+# 建表时添加索引
+create table table_name(column_name int key);
+# 或者
+create table table_name(column_name int, key/index index_name(column_name));
+# 建表时添加多列索引
+create table table_name(column_name1 int, column_name2 int, key/index index_name(column_name1, column_name2));
+# 非建表时添加索引
+alter table table_name add key/index index_name(column_name1, column_name2);
+# 删除索引
+alter table table_name drop key/index column_name;
 
 # 写入数据
 # INSERT INTO table_name ( field1, field2,...fieldN ) VALUES (value1, value2,...valueN );
