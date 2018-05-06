@@ -74,7 +74,6 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 > 全文检索是对一篇文章进行索引，可以根据关键字搜索，类似于 mysql 的模糊查询（like "%keyword%"）   
 > 全文索引是把内容根据词的意义进行分词，然后分别创建索引  
 
-
 - elasticsearch document 路由原理
 > 路由算法：shard = hash(routing) % number_of_primary_shards  
 > 
@@ -84,10 +83,22 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 > 手动指定 routing value 是很有用的，可以保证某一类 document 一定被路由到一个 shard 上去，那么在后续进行应用级别的负载均衡，以及提升批量读取的性能的时候，是很有帮助的。
 
 - elasticsearch document 增删改内部原理
-> 1、客户端选择一个 node 发送请求过去，这个 node 就是 coordinating node（协调节点）
-> 2、coordinating node，对 document 进行路由，将请求转发给对应的 node（有 primary shard）
-> 3、实际的 node 上的 primary shard 处理请求，然后将数据同步到 replica node
-> 4、coordinating node，如果发现 primary node 和所有 replica node 都搞定之后，就返回响应结果给客户端
+> 1、客户端选择一个 node 发送请求过去，这个 node 就是 coordinating node（协调节点）  
+> 2、coordinating node，对 document 进行路由，将请求转发给对应的 node（有 primary shard）  
+> 3、实际的 node 上的 primary shard 处理请求，然后将数据同步到 replica node  
+> 4、coordinating node，如果发现 primary node 和所有 replica node 都搞定之后，就返回响应结果给客户端  
+
+- elasticsearch document 写一致原理
+> 我们在发送任何一个增删改操作的时候，比如说 put /index/type/id，都可以带上一个 consistency 参数，指明我们想要的写一致性是什么？  
+> 如 put /index/type/id?consistency=quorum  
+> one：要求这个写操作，只要有一个 primary shard 是 active 活跃可用的，就可以执行  
+> all：要求这个写操作，必须所有的 primary shard 和 replica shard 都是活跃的，才可以执行这个写操作  
+> quorum：默认的值，要求所有的 shard 中，必须是大部分的 shard 都是活跃可用的，才可以执行这个写操作  
+> 
+> quroum = int( (primary + number_of_replicas) / 2 ) + 1，当 number_of_replicas > 1 时才生效  
+> 如果节点数少于 quorum 数量，可能导致 quorum 不齐全，进而导致无法执行任何写操作  
+> 如果 quorum 不齐全时，默认等待 1 分钟；等待期间，期望活跃的 shard 数量可以增加，最后实在不行，就会 timeout  
+> 其实，写操作时加一个 timeout 参数，如 put /index/type/id?timeout=30，即设定 quorum 不齐全时，timeout 时长可以缩短也可以增长  
 
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
