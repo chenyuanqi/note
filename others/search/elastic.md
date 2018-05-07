@@ -99,8 +99,8 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 > 如果节点数少于 quorum 数量，可能导致 quorum 不齐全，进而导致无法执行任何写操作  
 > 如果 quorum 不齐全时，默认等待 1 分钟；等待期间，期望活跃的 shard 数量可以增加，最后实在不行，就会 timeout  
 > 其实，写操作时加一个 timeout 参数，如 put /index/type/id?timeout=30，即设定 quorum 不齐全时，timeout 时长可以缩短也可以增长  
-- elasticsearch document 查询原理
-对于对请求，不一定就将请求转发到 primary shard 上，也可以转发到 replica shard 上，因为 replica shard 是可以服务所有读请求的。  
+- elasticsearch document 查询原理  
+> 对于读请求，不一定就将请求转发到 primary shard 上，也可以转发到 replica shard 上，因为 replica shard 是可以服务所有读请求的。  
 > 1、客户端发送请求到任意一个 node，成为 coordinate node（协调节点）  
 > 2、coordinate node 对 document 进行路由（之后就知道在哪个 primary shard 上），将请求转发到对应的 node，此时会使用 round-robin 随机轮询算法，在 primary shard 以及其所有 replica 中随机选择一个，让读请求负载均衡  
 > 3、接收请求的 node 返回 document 给 coordinate node  
