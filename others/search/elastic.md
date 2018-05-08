@@ -108,6 +108,10 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 > 
 > 特殊情况：document 如果还在建立索引过程中，可能只有 primary shard 有，任何一个 replica shard 都没有，此时可能会导致无法读取到 document，但是 document 完成索引建立之后，primary shard 和 replica shard 就都有了  
 
+- timeout 机制  
+> 默认情况下，没有所谓的 timeout，即每个 shard 搜索特别慢，需要花费几分钟的时间，那么搜索请求也会等待几分钟才会返回。  
+> timeout 机制，指定每个 shard，就只能在 timeout 时间范围内，将搜索到的部分数据（也有可能全部搜索到了），直接返回给 client 程序，而不是等到所有的数据都搜索出来才返回。确切的说，一次搜索请求可以在用户指定的 timeout 时长内完成，为一些时间敏感的应用提供了良好的支持。
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
