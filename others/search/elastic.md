@@ -112,6 +112,21 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 > 默认情况下，没有所谓的 timeout，即每个 shard 搜索特别慢，需要花费几分钟的时间，那么搜索请求也会等待几分钟才会返回。  
 > timeout 机制，指定每个 shard，就只能在 timeout 时间范围内，将搜索到的部分数据（也有可能全部搜索到了），直接返回给 client 程序，而不是等到所有的数据都搜索出来才返回。确切的说，一次搜索请求可以在用户指定的 timeout 时长内完成，为一些时间敏感的应用提供了良好的支持。
 
+- elasticsearch 搜索原理
+> multi-index 和 multi-type 搜索模式  
+> multi-index 和 multi-type 搜索模式可以一次性搜索多个 index 和多个 type 下的数据。  
+> 
+> /_search：所有索引，所有type下的所有数据都搜索出来  
+> /index1/_search：指定一个index，搜索其下所有type的数据  
+> /index1,index2/_search：同时搜索两个index下的数据
+> /*1,*2/_search：按照通配符去匹配多个索引  
+> /index1/type1/_search：搜索一个index下指定的type的数据  
+> /index1/type1,type2/_search：可以搜索一个index下多个type的数据  
+> /index1,index2/type1,type2/_search：搜索多个index下的多个type的数据  
+> /_all/type1,type2/_search：_all，可以代表搜索所有index下的指定type的数据  
+> 
+> client 发送一个搜索请求，会把请求打到所有的 primary shard 上执行，因为每个 shard 都包含部分数据，所以每个 shard 都可能会包含搜索请求的结果。但是，如果 primary shard 有 replica shard，那么请求也可以打到 replica shard 上。  
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
