@@ -127,6 +127,19 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 > 
 > client 发送一个搜索请求，会把请求打到所有的 primary shard 上执行，因为每个 shard 都包含部分数据，所以每个 shard 都可能会包含搜索请求的结果。但是，如果 primary shard 有 replica shard，那么请求也可以打到 replica shard 上。  
 
+- elasticsearch document _all metadata 原理和作用
+> elasticsearch 中的 _all 元数据，在建立索引的时候，我们插入一条 document，它里面包含了多个 field，此时，elasticsearch 会自动将多个 field 的值，全部用字符串的方式串联起来，变成一个长的字符串，作为 _all field 的值，同时建立索引。  
+> 之后，如果在搜索的时候，没有对某个 field 指定搜索，就默认搜索 _all field，其中是包含了所有 field 的值。  
+> 如下例子，"vikey 27 vikey@xxx.com shenzhen"将作为这一条 document 的 _all field 的值，同时进行分词后建立对应的倒排索引。  
+```json
+{
+  "name": "vikey",
+  "age": 27,
+  "email": "vikey@xxx.com",
+  "address": "shenzhen"
+}
+```
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）

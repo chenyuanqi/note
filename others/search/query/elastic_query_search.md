@@ -189,7 +189,7 @@ GET /index/type/[id]?pretty
 ```
 # query_syntax 语法说明
 # ① query_syntax 值为一般字符串，请求执行全文检索
-# ② query_syntax 值为 field_name:string 根据指定字段全文检索（全匹配）
+# ② query_syntax 值为 field_name:string 根据指定字段全文检索（全匹配），如果必须包含则在 field_name 前加 +，如果不包含则在 field_name 前加 -
 # ③ query_syntax 值为 field_name:'string' 指定字段精确检索
 # ④ query_syntax 值如 name:"production" AND date:"2017/08/08" ，执行多个检索条件组合，使用 NOT、AND、OR，注意必须是大写的，并且条件与条件之间需要空格分隔
 # ⑤ query_syntax 值如 name:product* ，使用通配符? 表示单字母或* 表示任意个字母
