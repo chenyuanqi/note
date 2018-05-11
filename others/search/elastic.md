@@ -156,6 +156,9 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 - 映射（Mapping）
 > Mapping 定义索引（Index）下的类型（Type）的字段处理规则，即索引如何建立、索引类型、是否保存原始索引 JSON 文档、是否压缩原始 JSON 文档、是否需要分词处理、如何进行分词处理等
 > Mapping 类似于关系型数据库的表、字段、表和字段的关系
+> 
+> dynamic mapping，自动为我们建立 index，创建 type，以及 type 对应的 mapping，mapping 中包含了每个 field 对应的数据类型，以及如何分词等设置  
+> 可以手动在创建数据之前，先创建 index 和 type，以及 type 对应的 mapping  
 
 - 复制（Replicas）  
 > 拷贝索引一份或多份  
