@@ -282,6 +282,10 @@ Elasticsearch 2.X 版本删除直接存储内存的方式，并在内存中映�
 > 取回阶段，协调节点辨别出哪些文档需要被取回并向相关的分片提交多个 GET 请求，每个分片加载并丰富文档
 > 如果有需要的话，接着返回文档给协调节点。一旦所有的文档都被取回了，协调节点返回结果给客户端
 
+- http 协议中 get 是否可以带上 request body  
+> HTTP 协议，一般不允许 get 请求带上 request body，但是因为 get 更加适合描述查询数据的操作，因此还是这么用了  
+> 碰巧，很多浏览器，或者是服务器，也都支持 GET + request body 模式；如果遇到不支持的场景，也可以用 POST /_search  
+
 ### Elasticsearch 的一些链接
 [国外社区](https://discuss.elastic.co/)  
 [国内社区](https://elasticsearch.cn/)  
@@ -315,4 +319,50 @@ GET /index/_search
 {
   "query": {"match_all": {}}
 }
+
+# query dsl 基本语法
+{
+    QUERY_NAME: {
+        ARGUMENT: VALUE,
+        ARGUMENT: VALUE,...
+    }
+}
+{
+    QUERY_NAME: {
+        FIELD_NAME: {
+            ARGUMENT: VALUE,
+            ARGUMENT: VALUE,...
+        }
+    }
+}
+# 组合多个搜索条件：title 必须包含 elasticsearch，content 可以包含 elasticsearch 也可以不包含，author_id 必须不为 1  
+GET /index/type/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title": "elasticsearch"
+          }
+        }
+      ],
+      "should": [
+        {
+          "match": {
+            "content": "elasticsearch"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "match": {
+            "author_id": 111
+          }
+        }
+      ]
+    }
+  }
+}
+
 ```
