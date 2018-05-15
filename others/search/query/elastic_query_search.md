@@ -65,6 +65,20 @@ GET /index/_search
 }
 ```
 
+- multi match
+```
+# 多字段匹配
+GET /test_index/test_type/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "test",
+      "fields": ["test_field", "test_field1"]
+    }
+  }
+}
+```
+
 - 条件组合
 ```
 # bool 查询，should 相当于逻辑或，must 相当于逻辑与，must_not 相当于逻辑非
@@ -169,6 +183,7 @@ GET /index/type/_search
 - term 查询
 ```
 # 处理匹配查询，也可查询某数值在数组中
+# 整个搜索词作为一块查询
 GET /index/type/_search
 {
    "query": {
@@ -176,6 +191,15 @@ GET /index/type/_search
          "field_name": "field_value"
       }
    }
+}
+```
+
+- terms 查询
+```
+# 一个搜索词作为一块，可设置多个搜索词
+GET /_search
+{
+    "query": { "terms": { "tag": [ "search", "full_text", "nosql" ] }}
 }
 ```
 
