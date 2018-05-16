@@ -1,4 +1,13 @@
 
+- 验证搜索是否合法
+```
+# 一般用在那种特别复杂庞大的搜索下，比如一下子写了上百行的搜索，这个时候可以先用 validate api 去验证一下，搜索是否合法
+GET /index/type/_validate/query?explain
+{
+  ...
+}
+```
+
 - 查询全部  
 ```
 GET /index/_search
