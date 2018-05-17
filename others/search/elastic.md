@@ -150,6 +150,14 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 - 字符串如何排序？
 > 如果对一个 string field 进行排序，结果往往不准确，因为分词后是多个单词，再排序就不是我们想要的结果了；通常的解决方案是，将一个 string field 建立两次索引，一个使用分词，用来进行搜索；一个不分词（"index": "not_analyzed"），用来进行排序
 
+- elasticsearch document 打分规则（关联匹配程度）  
+> elasticsearch 打分使用的是 TF/IDF（term frequency/inverse document frequency） 算法  
+> 1、Term frequency：搜索文本中的各个词条在field文本中出现了多少次，出现次数越多，就越相关  
+> 2、Inverse document frequency：搜索文本中的各个词条在整个索引的所有文档中出现了多少次，出现的次数越多，就越不相关  
+> 3、Field-length norm：field 长度越长，相关度越弱  
+> 
+> 分析 _score 是如何被计算出来的：GET /index/type/_search?explain -d "{}"
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
