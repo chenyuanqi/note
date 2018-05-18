@@ -158,6 +158,11 @@ ElasticSearch 的节点启动后，它会默认使用多播的方式（multicast
 > 
 > 分析 _score 是如何被计算出来的：GET /index/type/_search?explain -d "{}"
 
+- elasticsearch doc value
+> 搜索的时候，要依靠倒排索引；排序的时候，需要依靠正排索引，看到每个 document 的每个 field，然后进行排序，所谓的正排索引，其实就是 doc values  
+> 在建立索引的时候，一方面会建立倒排索引，以供搜索用；一方面会建立正排索引，也就是doc values，以供排序，聚合，过滤等操作使用
+doc values 是被保存在磁盘上的，此时如果内存足够，os 会自动将其缓存在内存中，性能还是会很高；如果内存不足够，os 会将其写入磁盘上
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
