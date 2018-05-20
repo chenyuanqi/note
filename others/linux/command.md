@@ -260,6 +260,9 @@ touch [OPTION] [FILE]
 # 查看文件类型
 file file_path
 
+# 查看文件的详细信息
+stat file_path
+
 # 修改文件权限
 chmod [OPTION] [FILE]
 # -R: 递归
