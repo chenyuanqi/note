@@ -275,6 +275,13 @@ chown [OPTION] [OWNER][:[GROUP]] [FILE]
 chgrp [OPTION] [GROUP] [FILE]
 # -R: 递归
 
+# 设置文件不允许修改、删除、移动、复制，root 用户也生效
+chattr +i file_path
+# 取消文件属性设置
+chattr -i file_path
+# 查看文件或目录属性设置
+lsattr file_path
+
 # 文件或目录创建时的遮罩码（掩码）
 umask [OPTION] [FILE]
 # -p：输出的权限掩码可直接作为指令来执行
