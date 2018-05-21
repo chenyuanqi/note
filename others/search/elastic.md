@@ -168,6 +168,13 @@ doc values 是被保存在磁盘上的，此时如果内存足够，os 会自动
 > 2、coordinate node 将请求转发到所有 shard，每个 shard 本地搜索，并构建一个本地的 priority queue  
 > 3、各个 shard 将自己的 priority queue 返回给 coordinate node，并构建一个全局的 priority queue  
 
+- fetch phbase
+> 1、coordinate node 构建完 priority queue之后，就发送 mget 请求去所有 shard 上获取对应的 document  
+> 2、各个 shard 将 document 返回给 coordinate node  
+> 3、coordinate node 将合并后的 document 结果返回给 client 客户端  
+> 
+> 一般的搜索，如果不加 from 和 size，就默认搜索前 10 条，按照 _score 排序
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
