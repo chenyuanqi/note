@@ -175,6 +175,32 @@ doc values 是被保存在磁盘上的，此时如果内存足够，os 会自动
 > 
 > 一般的搜索，如果不加 from 和 size，就默认搜索前 10 条，按照 _score 排序
 
+- scroll 滚动与扫描 
+> 使用 scroll 滚动搜索，可以先搜索一批数据，然后下次再搜索一批数据，以此类推，直到搜索出全部的数据来  
+> scroll 搜索会在第一次搜索的时候，保存一个当时的视图快照，之后只会基于该旧的视图快照提供数据搜索，如果这个期间数据变更，是不会让用户看到的  
+> 采用基于 _doc 进行排序的方式，性能较高  
+> 每次发送 scroll 请求，我们还需要指定一个 scroll 参数，指定一个时间窗口，每次搜索请求只要在这个时间窗口内能完成就可以了  
+> 
+> 获得的结果会有一个 scroll_id，下一次再发送 scroll 请求的时候，必须带上这个 scroll_id  
+> scroll，看起来挺像分页的，但是其实使用场景不一样。分页主要是用来一页一页搜索，给用户看的；scroll 主要是用来一批一批检索数据，让系统进行处理的  
+```
+# 第一次使用 scroll
+GET /index/type/_search?scroll=1m
+{
+  "query": {
+    "match_all": {}
+  },
+  "sort": [ "_doc" ],
+  "size": 3
+}
+# 从第一次的返回结果得到 scroll_id，后面的都拿前一个结果集的 scroll_id
+GET /index/type/_search/scroll
+{
+    "scroll": "1m",
+    "scroll_id" : "xxx"
+}
+```
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
