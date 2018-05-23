@@ -44,6 +44,9 @@ history -c
 # HISTFILE：命令历史记录存储文件，默认 ~/.bash_history
 # HISTFILESIZE：命令历史文件记录历史的条数
 
+# 收集系统日志及架构信息并输出诊断文档
+sosreport 
+
 # 回当前用户的主目录
 cd 或 cd ~
 # 切换至指定用户的主目录
@@ -301,6 +304,9 @@ ps [OPTION]
 # x 显示所有程序，不以终端机来区分
 # e 列出程序时，显示每个程序所使用的环境变量
 # f 用 ASCII 字符显示树状结构，表达程序间的相互关系
+
+# 查看进程 pid
+pidof [server_name]
 
 # 查看进程打开的文件、目录和套接字等信息（root 用户使用）
 lsof [OPTION]
