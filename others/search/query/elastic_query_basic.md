@@ -17,6 +17,28 @@ GET /_cat/indices?v
 - 创建索引  
 ```
 PUT /index?pretty
+{
+    "settings": { ... any settings ... },
+    "mappings": {
+        "type_one": { ... any mappings ... },
+        "type_two": { ... any mappings ... },
+        ...
+    }
+}
+```
+- 修改索引
+```
+PUT /index/_settings
+{
+    "number_of_replicas": 1
+}
+```
+- 删除索引
+```
+DELETE /index
+DELETE /index_one,index_two
+DELETE /index_*
+DELETE /_all
 ```
 
 ```
