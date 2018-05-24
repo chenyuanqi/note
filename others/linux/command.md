@@ -223,6 +223,11 @@ cut [OPTION] [FILE]
 #    -f1-3,7: 混合使用
 # --output-delimiter=STRING
 
+# 对比文件差异
+diff [OPTION] [FILE...]
+# --brief 显示比较后的结果
+# -c      描述文件内容具体的不同
+
 # 报告或忽略文件中的重复行 (连续且完全相同)
 uniq [OPTION] [FILE]
 # -c: 显示每行重复出现的次数
