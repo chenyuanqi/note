@@ -223,6 +223,13 @@ cut [OPTION] [FILE]
 #    -f1-3,7: 混合使用
 # --output-delimiter=STRING
 
+# 按照指定大小和个数的数据块复制文件或转换文件
+dd if=/dev/zero of=xx count=1 bs=600M
+# if 输入的文件名称
+# of 输出的文件名称
+# bs 设置每个“块”的大小
+# count 设置要复制“块”的个数 
+
 # 对比文件差异
 diff [OPTION] [FILE...]
 # --brief 显示比较后的结果
