@@ -205,6 +205,49 @@ GET /index/type/_search/scroll
 > 通常， 索引采用的是默认的配置，新的字段通过动态映射的方式被添加到类型映射。  
 > 但是，如果我们需要在建立索引的过程中做更多的控制，比如确保这个索引有数量适中的主分片。并且，在我们索引任何数据之前 ，分析器和映射需要先被建立好。
 
+- 定制 dynamic mapping 策略
+> true：遇到陌生字段，就进行 dynamic mapping  
+> false：遇到陌生字段，就忽略  
+> strict：遇到陌生字段，就报错  
+> 
+> 1、date_detection  
+> 默认会按照一定格式识别 date，比如 yyyy-MM-dd。但是，如果某个 field 先过来一个 2018-01-01 的值，就会被自动 dynamic mapping 成 date，后面如果再来一个"hello world"之类的值，就会报错。可以手动关闭某个 type 的date_detection，如果有需要，自己手动指定某个 field 为 date 类型。  
+> 2、定制自己的 dynamic mapping template（type level）  
+> 3、定制自己的 default mapping template（index level）  
+```
+# (type level)
+# 若字段没有匹配到任何的 dynamic 模板，默认就是 standard 分词器
+# 若字段匹配到了 dynamic 模板，就是 english 分词器
+PUT /index
+{
+    "mappings": {
+        "type": {
+            "dynamic_templates": [
+                { "en": {
+                      "match":              "*_en",
+                      "match_mapping_type": "string",
+                      "mapping": {
+                          "type":           "string",
+                          "analyzer":       "english"
+                      }
+                }}
+            ]
+}}}
+
+# (index level)
+PUT /index
+{
+    "mappings": {
+        "_default_": {
+            "_all": { "enabled":  false }
+        },
+        "blog": {
+            "_all": { "enabled":  true  }
+        }
+    }
+}
+```
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
