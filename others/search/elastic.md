@@ -248,6 +248,24 @@ PUT /index
 }
 ```
 
+- 基于 scroll+bulk+索引别名 实现零停机重建索引
+> 一个 field 的设置是不能被修改的，如果要修改一个 field，那么应该重新按照新的 mapping，建立一个 index，然后将数据批量查询出来，重新用 bulk api 写入 index 中。  
+> 批量查询的时候，建议采用 scroll api，并且采用多线程并发的方式来 reindex 数据，每次 scroll 就查询指定日期的一段数据，交给一个线程即可。  
+> 
+> 依靠 dynamic mapping，插入数据，但是不小心有些数据是 2017-01-01 这种日期格式的，所以 title 这种field 被自动映射为了 date 类型，实际上它应该是 string 类型的；当后期向索引中加入 string 类型的 title 值的时候，就会报错；如果此时想修改 title 的类型，是不可能的。  
+> 那么，唯一的办法，就是进行 reindex，也就是说，重新建立一个索引，将旧索引的数据查询出来，再导入新索引；如果说旧索引的名字是 old_index，新索引的名字是 new_index，终端 java 应用，已经在使用 old_index 在操作了，难道还要去停止 java 应用，修改使用的 old_index 为 new_index，才重新启动 java 应用吗？这个过程中，就会导致 java 应用停机，可用性降低！所以，给 java 应用一个别名，这个别名是指向旧索引的，java 应用先用着，java 应用先用 alias 来操作，此时实际指向的是 old_index；新建一个 new_index，调整其 title 的类型为 string，然后使用 scroll api 将 old_index 数据批量查询出来，采用 bulk api 将 srcoll 查出来的一批数据，批量写入新索引；将 alias 切换到 new_index 上去，java 应用会直接通过 index 别名使用新的索引中的数据，java 应用程序不需要停机，零提交，高可用。至于别名的切换，那就简单了，删掉原来 old_index 的别名，重新定义 new_index 的别名即可。
+```
+# 基于 alias 对 client 透明切换 index
+POST /_aliases
+{
+    "actions": [
+        { "remove": { "index": "old_index", "alias": "my_index" }},
+        { "add":    { "index": "new_index", "alias": "my_index" }}
+    ]
+}
+```
+
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
