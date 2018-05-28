@@ -284,6 +284,22 @@ POST /_aliases
 > 
 > 倒排索引不可变的坏处：每次都要重新构建整个索引  
 
+- document 写入原理
+> 1、数据写入内存 buffer 缓冲  
+> 2、commit point  
+> 3、buffer 中的数据写入新的 index segment  
+> 4、等待在 os cache 中的 index segment 被 fsync 强制刷到磁盘上  
+> 5、新的 index sgement 被打开，供 search 使用  
+> 6、buffer 被清空  
+> 
+> 如果是更新操作，实际是将现有的 doc 标记为 deleted，再将新的 doc 写入 index segment 中。下次 search 时，也许会匹配到该 doc 的多个版本，但是之前的版本已经被标记为 deleted，所以只会返回最新版本的 doc。  
+> 如果是删除操作，每次 commit 的时候会生成一个 .del 文件，表明哪个 index segment 中的哪个 doc 被删除了。  
+如果搜索请求过来，在 index segment 中匹配到 doc 但是发现在 .del 文件中已经标识为 deleted 了，所以这样的数据不会被返回，而是被过滤掉。  
+> 
+> 每次 commit point 时，会有一个 .del 文件，标记了哪些 segment 中的哪些 document 被标记为 deleted 了
+搜索的时候，会依次查询所有的 segment，从旧的到新的，比如被修改过的 document，在旧的 segment 中，会标记为 deleted，在新的 segment 中会有其新的数据。
+
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
