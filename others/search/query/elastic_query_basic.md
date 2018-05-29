@@ -46,6 +46,19 @@ DELETE /_all
 GET /_cat/indices?v
 ```
 
+```
+# 手动 refresh
+POST /index/_refresh
+
+#一般不需要手动执行，让 elasticsearch 自己来
+PUT /index
+{
+  "settings": {
+    "refresh_interval": "30s"
+  }
+}
+```
+
 - 新增记录  
 ```
 POST /index/type/[id]?pretty
