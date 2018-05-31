@@ -38,22 +38,22 @@ function quick_sort($arr)
         return [];
     }
 
-    $core_val  = $arr[0];
-	$left_arr  = [];
-	$right_arr = [];
-	
-	for ($i = 1;$i < $arr_length; ++$i) {
-	    if ($arr[$i] > $core_val) {
-	        array_push($right_arr, $arr[$i]);
-	    } else {
-	        array_push($left_arr, $arr[$i]);
-	    }
-	}
+    $core_val = $arr[0];
+    $left_arr = [];
+    $right_arr = [];
 
-	$left_arr  = quick_sort($left_arr);
-	$right_arr = quick_sort($right_arr);
+    for ($i = 1; $i < $arr_length; ++$i) {
+        if ($arr[$i] > $core_val) {
+            array_push($right_arr, $arr[$i]);
+        } else {
+            array_push($left_arr, $arr[$i]);
+        }
+    }
 
-	return array_merge($left_arr, [$core_val], $right_arr);
+    $left_arr = quick_sort($left_arr);
+    $right_arr = quick_sort($right_arr);
+
+    return array_merge($left_arr, [$core_val], $right_arr);
 }
 ```
 
