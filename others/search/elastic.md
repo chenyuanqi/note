@@ -300,10 +300,10 @@ POST /_aliases
 搜索的时候，会依次查询所有的 segment，从旧的到新的，比如被修改过的 document，在旧的 segment 中，会标记为 deleted，在新的 segment 中会有其新的数据。
 
 - 基于 translog 和 commit point，如何进行数据恢复
-1、fsync + 清空 translog，就是 flush，默认每隔 30 分钟 flush 一次，或者当 translog 过大的时候，也会 flush
-2、POST /index/_flush，一般来说别手动 flush，让它自动执行就可以了
-3、translog，每隔 5 秒被 fsync 一次到磁盘上。在一次增删改操作之后，当 fsync 在 primary shard 和 replica shard 都成功之后，那次增删改操作才会成功
-4、但是，这种在一次增删改时强行 fsync translog 可能会导致部分操作比较耗时，也可以允许部分数据丢失，设置异步 fsync translog
+> 1、fsync + 清空 translog，就是 flush，默认每隔 30 分钟 flush 一次，或者当 translog 过大的时候，也会 flush  
+> 2、POST /index/_flush，一般来说别手动 flush，让它自动执行就可以了  
+> 3、translog，每隔 5 秒被 fsync 一次到磁盘上。在一次增删改操作之后，当 fsync 在 primary shard 和 replica shard 都成功之后，那次增删改操作才会成功  
+> 4、但是，这种在一次增删改时强行 fsync translog 可能会导致部分操作比较耗时，也可以允许部分数据丢失，设置异步 fsync translog
 ```
 PUT /index/_settings
 {
@@ -311,6 +311,7 @@ PUT /index/_settings
     "index.translog.sync_interval": "5s"
 }
 ```
+
 ### Elasticsearch 数据架构的主要概念
 - 索引（Index）
 > 类似于关系型数据库中的数据库（DataBase）
