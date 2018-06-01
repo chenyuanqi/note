@@ -176,6 +176,9 @@ uname -a
 # 显示磁盘信息
 df -ah
 
+# 查看系统版本信息
+lsb_release -a
+
 # 显示本次开机运行的时间
 uptime
 
