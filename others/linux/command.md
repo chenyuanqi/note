@@ -286,6 +286,15 @@ tr [OPTION] SET1 [SET2]
 # 按照给定模式转换文本，如小写转大写
 cat example.txt | tr 'a-z' 'A-Z'
 
+# 读取非纯文本文件
+od [-t TYPE] file_path
+# 类型 a 默认字符输出
+# 类型 c 使用 ascill 字符输出
+# 类型 d 使用十进制输出
+# 类型 o 使用八进制输出
+# 类型 x 使用十六进制输出
+# 类型 f 使用浮点数输出
+
 # 创建新的空文件
 touch [OPTION] [FILE]
 # -a: 只更改存取时间
