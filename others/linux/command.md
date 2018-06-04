@@ -152,6 +152,12 @@ whereis command
 # 查找文件位置 whereis 文件名 或 find / -name 文件名
 # 查找文件夹位置 locate 文件夹名
 
+# 显示命令类型
+type [OPTION] [COMMAND]
+# -t 输出“file”、“alias”或者“builtin”，分别表示给定的指令为“外部指令”、“命令别名”或者“内部指令”；
+# -p 如果给出的指令为外部指令，则显示其绝对路径；
+# -a 在环境变量“PATH”指定的路径中，显示给定指令的信息，包括命令别名。
+
 # 按指定条件查找文件
 find [SEARCH_PATH] [SEARCH_CONDITION] [OPTION]
 # -name 匹配名称
