@@ -504,6 +504,15 @@ crontab [-u username] [-l|-e|-r]
 # -l 查阅 crontab 的工作内容
 # -r 移除所有的 crontab 的工作内容，若仅要移除一项，请用 -e 去编辑
 
+# 在指定时间执行一个任务
+at [OPTION] [PARAMS]
+# -f 指定包含具体指令的任务文件；
+# -q 指定新任务的队列名称；
+# -l 显示待执行任务的列表；
+# -d 删除指定的待执行任务；
+# -m 任务执行完成后向用户发送E-mail
+# 例如，at 5pm+3 days， at 17:30 tomorrow
+
 # 下载文件 
 wget [OPTIONS] URL
 # -O xxx 指定一个文件名
