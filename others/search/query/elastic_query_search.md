@@ -191,6 +191,9 @@ GET /index/type/_search
 
 - term 查询
 ```
+# 根据 exact value 进行搜索，数字、boolean、date 天然支持
+# text 需要建索引时指定为 not_analyzed，才能用 term query
+# 
 # 处理匹配查询，也可查询某数值在数组中
 # 整个搜索词作为一块查询
 GET /index/type/_search
