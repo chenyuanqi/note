@@ -139,8 +139,14 @@ cut -d: -f1 /etc/passwd
 # 查看系统所有用户组
 cut -d: -f1 /etc/group
 
-# 查看用户登录日志
+# 查看最近用户登录日志
 last
+# 显示最近登录的 6 条信息
+last -6
+# 显示指定用户的登录信息
+last -u user_name
+# 显示最后登录的用户信息
+lastlog
 
 # 显示主机名称
 hostname
