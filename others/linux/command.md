@@ -148,6 +148,11 @@ last -u user_name
 # 显示最后登录的用户信息
 lastlog
 
+# 显示最近登录失败的用户
+sudo lastb
+# 显示 2 天内登录失败的用户
+sudo lastb -2
+
 # 显示主机名称
 hostname
 
