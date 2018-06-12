@@ -9,9 +9,8 @@ function bubble_sort($arr)
         return false;
     }
 
-    for ($i = 0; $i < $arr_length; ++$i) {
-        $j_length = $arr_length - $i - 1;
-        for ($j = 0; $j < $j_length; ++$j) {
+    for ($i = 0; $i < $arr_length - 1; ++$i) {
+        for ($j = 0; $j < $arr_length - 1; ++$j) {
             $current = $arr[$j];
             $next    = $arr[$j + 1];
             if ($current > $next) {
