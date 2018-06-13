@@ -44,6 +44,9 @@ history -c
 # HISTFILE：命令历史记录存储文件，默认 ~/.bash_history
 # HISTFILESIZE：命令历史文件记录历史的条数
 
+# 显示执行过的命令
+fc -l
+
 # 收集系统日志及架构信息并输出诊断文档
 sosreport 
 
