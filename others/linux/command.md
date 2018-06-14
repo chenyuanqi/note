@@ -202,6 +202,9 @@ lsb_release -a
 # 显示本次开机运行的时间
 uptime
 
+# 统计执行命令时间
+time [COMMAND]
+
 # 显示某个文件或目录的磁盘使用量
 du file_name
 # -h 参数将返回的大小显示为人类可读的格式，即显示单位为 K、M、G 等
