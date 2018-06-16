@@ -424,6 +424,9 @@ sudo [OPTION] COMMAND
 # 重新加载 /etc/profile 文件以及 /etc/bashrc 文件等系统配置文件，并且还会重新加载 root 用户的 $SHELL 环境变量所对应的配置文件
 sudo su -
 
+# 切换用户
+login [USER_NAME]
+
 # 修改自己的登录密码
 passwd
 # 修改其他用户的登录密码（仅限 root）
