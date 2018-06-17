@@ -424,8 +424,11 @@ sudo [OPTION] COMMAND
 # 重新加载 /etc/profile 文件以及 /etc/bashrc 文件等系统配置文件，并且还会重新加载 root 用户的 $SHELL 环境变量所对应的配置文件
 sudo su -
 
-# 切换用户
+# 切换登录用户
 login [USER_NAME]
+
+# 以当前用户退出登录
+logout
 
 # 修改自己的登录密码
 passwd
