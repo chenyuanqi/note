@@ -12,6 +12,11 @@ info [COMMAND]
 # 显示命令帮助信息
 [COMMAND] --help
 
+# 以树状形式显示指定路径的目录和文件内容
+tree [FILE_PATH]
+# 以树状形式显示指定路径的目录
+tree -d [FILE_PATH]
+
 # 显示指定路径下的文件列表
 ls [OPTION]... [DIR]...
 # -a, --all: 显示所有文件，包括隐藏文件；
@@ -110,7 +115,7 @@ ln aim_file_path link_file_path
 # 打包与解包
 tar [OPTION] FILE
 # -c或--create：创建新的备份文件（打包）
-# -x或--extract或--get：从备份文件中还原文件（解包）
+# -x或--exact或--get：从备份文件中还原文件（解包）
 # -A 将 tar 文件添加到归档文件中
 # -z或--gzip或--ungzip：通过gzip指令处理备份文件
 # -Z或--compress或--uncompress：通过 compress 指令处理备份文件
