@@ -52,6 +52,9 @@ history -c
 # 显示执行过的命令
 fc -l
 
+# 查看主机系统信息
+nmap -sS -P0 -sV -O ip 
+
 # 收集系统日志及架构信息并输出诊断文档
 sosreport 
 
