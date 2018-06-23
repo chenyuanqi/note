@@ -583,6 +583,14 @@ curl [OPTION] URL
 # -X 以什么方式请求，如 -XPOST
 # -F "key=value" 模拟表单提交数据
 
+# 增量备份
+dump [OPTION] [AIM_PATH] [FILE_PATH]
+# 备份的级别有 0-9 
+# -u 代表添加备份记录
+# -j 代表使用 gzip2 压缩
+# -f 代表备份后的文件名
+# -W 代表查看需要备份的文件及其最后一次备份的层级、时间与日期
+
 # 查看备份数据内容
 restore [OPTION] [FILE_PATH]
 # -C 对比备份数据和原有数据的变化
