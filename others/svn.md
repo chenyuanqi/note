@@ -26,5 +26,5 @@ svn update
 
 ### svn 常用链接
 [svn 使用文档](https://tortoisesvn.net/docs/release/TortoiseSVN_zh_CN/index.html)  
-
+[svn 版本控制](http://svnbook.red-bean.com/nightly/zh/svn-book.html)  
 
