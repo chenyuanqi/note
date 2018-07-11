@@ -50,4 +50,10 @@
 > components 注册多个在其他地方使用的应用组件  
 > defaultRoute 如何加载控制器  
 
-- 
+- 别名
+> 别名是用来表示文件路径和 url ，目的是为了避免在代码中硬编码一些绝对路径和 url  
+> 一个别名必须以 @ 字符开头  
+> 别名的设置可以这样 Yii::setAlias('@foo', '/path/to')  
+> 别名的获取相应的 Yii::getAlias('@foo'), 或在路径中直接使用 new FileCache(['cachePath' => '@foo/cache'])  
+
+
