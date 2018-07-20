@@ -43,6 +43,7 @@ Evernote is a great tool to collect and connect to the word. But not a good tool
 [SEO](./others/seo.md)  
 
 [金融](./others/financial/basis.md)  
+[理财](./others/principle/money.md)  
 [基金](./others/fund/basic.md)  
 [股票](./others/stock/started.md)  
 [区块链](./others/areachain/basic.md)  
