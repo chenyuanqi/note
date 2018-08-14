@@ -93,3 +93,42 @@ php --ri swoole | grep Version
 # pecl 升级 swoole
 pecl upgrade swoole
 ```
+
+### 初识 swoole
+swoole 是既支持异步，也支持同步模式。  
+
+- socket 是什么？
+> socket 即套接字，是用来与另一个进程进行跨网络通信的文件（linux 中一切都可以理解为 “文件”）  
+> 比如客户端可以借助 socket 与服务器之间建立连接  
+> 也可以把 socket 理解为一组函数库，它确实也就是一堆函数  
+
+基于套接字接口的网络应用的描述，大致是这样的：服务器创建一个 socket，绑定 ip 和端口，在该端口处进行监听，然后通过 accept 函数阻塞。当有新的客户端连接进来时，server 接收客户端数据并处理数据，然后返回给客户端，客户端关闭连接，server 关闭该客户端，一次连接交互完成。  
+
+server，顾名思义，就是服务器。下面简单使用下 swoole server
+```php
+// 创建一个 server 对象
+$serv = new swoole_server('127.0.0.1', 9501);
+// 开启两个 worker 进程，官方建议设置为 CPU 核数的 1-4 倍
+$serv->set([
+    'worker_num' => 2,
+]);
+
+// 有新的客户端连接时，worker进程内会触发该回调
+$serv->on('Connect', function ($serv, $fd) {
+    echo "new client connected." . PHP_EOL;
+});
+// server接收到客户端的数据后，worker进程内触发该回调
+$serv->on('Receive', function ($serv, $fd, $fromId, $data) {
+    // 收到数据后发送给客户端
+    $serv->send($fd, 'Server '. $data);
+});
+// 客户端断开连接或者server主动关闭连接时 worker进程内调用
+$serv->on('Close', function ($serv, $fd) {
+    echo "Client close." . PHP_EOL;
+});
+
+// 启动server
+$serv->start();
+```
+执行 `php server.php` 即可启动如上 swoole server 了。
+ 
