@@ -183,3 +183,61 @@ $serv->on('Finish', function ($serv, $taskId, $data) {
 $serv->start();
 ```
 在 worker 进程收到数据后，直接调用 swoole_server->task 函数把数据投递给 task 进程，随后在 swoole_server->task 调用后和 task 进程内都输出内容。  
+
+### swoole 进程模型
+swoole 的进程模型可以用 Master-Manager-Worker 来形容，即在 Master-Worker 的基础上又增加了一层 Manager 进程。  
+Master 进程就是我们所说的主进程，掌管生杀大权，它挂了，那底下的都得玩完。Master 进程，包括主线程，多个 Reactor 线程等。Master 进程是一个多线程程序。  
+每一个线程都有自己的用途，比如主线程用于 Accept、信号处理等操作，而 Reactor 线程是处理 tcp 连接，处理网络 IO，收发数据的线程。主线程的 Accept 操作，socket 服务端经常用 accept 阻塞；信号处理，信号就相当于一条消息，比如我们经常操作的 Ctrl+C 其实就是给 Master 进程的主线程发送一个 SIGINT 的信号，意思就是你可以终止啦。  
+通常，主线程处理完新的连接后，会将这个连接分配给固定的 Reactor 线程，并且这个 Reactor 线程会一直负责监听此 socket（socket 即套接字，是用来与另一个进程进行跨网络通信的文件，文件可读可写），换句话就是当此 socket 可读时，会读取数据，并将该请求分配给 worker 进程，这也就解释了 worker 进程内的回调函数 onReceive 的第三个参数 $fromId 的含义；当此 socket 可写时，会把数据发送给 tcp 客户端。  
+
+在 linux 中，父进程可以通过调用 fork 函数创建一个新的子进程，子进程是父进程的一个副本，几乎但不完全相同，二者的最大区别就是都拥有自己独立的进程 ID，即 PID。  
+对于多线程的 Master 进程而言，想要多个 Worker 进程就必须 fork 操作，但是 fork 操作是不安全的，所以，在 swoole 中，有一个专职的 Manager 进程，Manager 进程就专门负责 worker/task 进程的 fork 操作和管理。换句话说，对于 worker 进程的创建、回收等操作全权有 “保姆” Manager 进程来进行管理。  
+通常，worker 进程被误杀或者由于程序的原因会异常退出，Manager 进程为了保证服务的稳定性，会重新拉起新的 worker 进程，意思就是 Worker 进程你发生意外 “死” 了，没关系，我自身不“死”，就可以 fork 千千万万个你。  
+```
+# 6 个主要的回调函数
+Master进程：
+    启动：onStart
+    关闭：onShutdown
+Manager进程：
+    启动：onManagerStart
+    关闭：onManagerStop
+Worker进程：
+    启动：onWorkerStart
+    关闭：onWorkerStop
+```
+```php
+$serv = new swoole_server('127.0.0.1', 9501);
+$serv->set([
+    'worker_num' => 2,
+    'task_worker_num' => 1,
+]);
+$serv->on('Connect', function ($serv, $fd) {
+});
+$serv->on('Receive', function ($serv, $fd, $fromId, $data) {
+});
+$serv->on('Close', function ($serv, $fd) {
+});
+$serv->on('Task', function ($serv, $taskId, $fromId, $data) {
+});
+$serv->on('Finish', function ($serv, $taskId, $data) {
+});
+// swoole_set_process_name 修改进程名，mac 下不支持
+$serv->on("start", function ($serv){
+    swoole_set_process_name('server-process: master');
+});
+// 以下回调发生在Manager进程
+$serv->on('ManagerStart', function ($serv){
+    swoole_set_process_name('server-process: manager');
+});
+$serv->on('WorkerStart', function ($serv, $workerId){
+    // $serv->setting 可以获取配置的 server 信息，在 swoole 中预留了一些 swoole_server 的属性，我们可以在回调函数中访问
+    // 如$serv->connections 属性获取当前 server 的所有的连接，$serv->master_pid 属性获取当前 server 的主进程 id
+    if($workerId >= $serv->setting['worker_num']) {
+        swoole_set_process_name("server-process: task");
+    } else {
+        swoole_set_process_name("server-process: worker");
+    }
+});
+$serv->start();
+```
+在 onWorkerStart 回调中，$workerId 表示的是一个值，这个值的范围是 0~worker_num，worker_num 是我们的对 worker 进程的配置，其中 0~worker_num 表示 worker 进程的标识，包括 0 但不包括 worker_num；worker_num~worker_num+task_worker_num 是 task 进程的标识, 包括 worker_num 不包括 worker_num+task_worker_num。  
