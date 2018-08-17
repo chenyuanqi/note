@@ -241,3 +241,49 @@ $serv->on('WorkerStart', function ($serv, $workerId){
 $serv->start();
 ```
 在 onWorkerStart 回调中，$workerId 表示的是一个值，这个值的范围是 0~worker_num，worker_num 是我们的对 worker 进程的配置，其中 0~worker_num 表示 worker 进程的标识，包括 0 但不包括 worker_num；worker_num~worker_num+task_worker_num 是 task 进程的标识, 包括 worker_num 不包括 worker_num+task_worker_num。  
+
+### 常驻内存及避免内存泄漏
+在传统的 web 开发模式中，我们知道，每一次 php 请求，都要经过 php 文件从磁盘上读取、初始化、词法解析、语法解析、编译等过程，而且还要与 nginx 或者 apache 通信，如果再涉及数据库的交互，还要再算上数据库的握手、验权、关闭等操作，可见一次请求的背后其实是有相当繁琐的过程，无疑，这个过程也就带来了相当多的开销！当然，所有的这些资源和内存，在一次请求结束之前，都会得到释放。  
+但是，swoole 是常驻内存运行的。  
+在运行 server 之后所加载的任何资源，都会一直持续在内存中存在。也就是说假设我们开启了一个 server，有 100 个 client 要 connect，加载一些配置文件、初始化变量等操作，只有在第一个 client 连接的时候才有这些操作，后面的 client 连接的时候就省去了重复加载的过程，直接从内存中读取就好了。这很明显，可以提升不小的性能。  
+但是，对开发人员的要求也更高了。因为这些资源常驻内存，并不会像 web 模式下，在请求结束之后会释放内存和资源。也就是说我们在操作中一旦没有处理好，就会发生内存泄漏，久而久之就可能会发生内存溢出。（swoole server 一开始就把我们的代码加载到内存中了，无论后期我们怎么修改本地磁盘上的代码，客户端再次发起请求的时候，永远都是内存中的代码在生效，所以我们只能终止 server，释放内存然后再重启 server，重新把新的代码加载到内存中）。对于局部变量，swoole 会在事件回调函数返回之后释放；对于全局变量（global 声明的变量，static 声明的对象属性或者函数内的静态变量和超全局变量）你就要悠着点了，因为他们在使用完之后并不会被释放。实际上，在多进程开发模式下，进程内的全局变量所用的内存那也是保存在子进程内存堆的，也并非共享内存，所以在 swoole 开发中我们还是尽量避免使用全局变量！  
+
+如何避免内存泄漏呢？  
+比如有一个 static 大数组，用于保存客户端的连接标识。我们就可以在 onClose 回调内清理变量。  
+此外，swoole 还提供了 max_request 机制，我们可以配置 max_request 和 task_max_request 这两个参数来避免内存溢出。max_request 的含义是 worker 进程的最大任务数，当 worker 进程处理的任务数超过这个参数时，worker 进程会自动退出，如此便达到释放内存和资源的目的。（不必担心 worker 进程退出后，没 “人” 处理业务逻辑了，因为我们还有 Manager 进程，Worker 进程退出后 Manager 进程会重新拉起一个新的 Worker 进程），同理，task_max_request 主要是针对 task 进程的。  
+```php
+/** server code */
+$serv = new swoole_server('127.0.0.1', 9501);
+
+$serv->set([
+    'worker_num' => 1,
+    'task_worker_num' => 1,
+    'max_request' => 3,
+    'task_max_request' => 4,
+]);
+$serv->on('Connect', function ($serv, $fd) {
+});
+$serv->on('Receive', function ($serv, $fd, $fromId, $data) {
+    $serv->task($data);
+});
+$serv->on('Task', function ($serv, $taskId, $fromId, $data) {
+
+});
+$serv->on('Finish', function ($serv, $taskId, $data) {
+});
+$serv->on('Close', function ($serv, $fd) {
+});
+$serv->start();
+
+/** client code */
+$client = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
+$client->connect('127.0.0.1', 9501) || exit("connect failed. Error: {$client->errCode}\n");
+
+// 向服务端发送数据
+$client -> send("Just a test.");
+$client->close();
+```
+max_request 参数对 server 有下面几种限制条件：  
+1、max_request 只能用于同步阻塞、无状态的请求响应式服务器程序  
+2、纯异步的 Server 不应当设置 max_request  
+3、使用 Base 模式时，max_request 是无效的  
