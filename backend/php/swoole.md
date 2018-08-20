@@ -302,4 +302,148 @@ SIGUSR2，将平稳的重启所有的 Task 进程
 如果我们要实现重启 server，只需要向主进程发送 SIGUSR1 信号。平滑重启的原理是当主进程收到 SIGUSR1 信号时，主进程就会向一个子进程发送安全退出的信号，所谓的安全退出的意思是主进程并不会直接把 Worker 进程杀死，而是等这个子进程处理完手上的工作之后，再让其光荣的 “退休”，最后再拉起新的子进程（重新载入新的 PHP 程序代码）。然后再向其他子进程发送“退休” 命令，就这样一个接一个的重启所有的子进程。实际上，平滑重启实际上就是让旧的子进程逐个退出并重新创建新的进程。为了在平滑重启时不影响到用户，这就要求进程中不要保存用户相关的状态信息，即业务进程最好是无状态的，避免由于进程退出导致信息丢失。  
 在 swoole 中，重启只能针对 Worker 进程启动之后载入的文件才有效，即只有在 onWorkerStart 回调之后加载的文件，重启才有意义。在 Worker 进程启动之前就已经加载到内存中的文件，如果想让它重新生效，只能关闭 server 再重启。  
 
+### swoole 定时器
+swoole 提供永久性定时器和一次性定时器。所谓的永久性定时器，就是在设定好定时器之后，该定时器就会按照一定的时间间隔执行，直到该定时器被删除。
+```php
+// 永久性定时器
+int swoole_timer_tick(int $ms, callable $callback, mixed $params);
+// $ms 指时间，单位毫秒
+// $callback 回调函数，定时器创建后会调用该函数
+// $params 传递给回调函数的参数
+
+// 定时器的清除
+bool swoole_timer_clear(int $timerId)
+
+// swoole_timer_tick 函数是全局性的，通常情况下是可以在任意地方调用
+$i = 0;
+swoole_timer_tick(1000, function ($timeId, $params) use (&$i) {
+    $i++;
+    echo "hello, {$params} --- {$i}\n";
+    if ($i >= 5) {
+        swoole_timer_clear($timeId);
+    }
+}, 'world');
+
+// 在事件的回调函数内，我们还可以通过 swoole_server->tick 函数创建永久性定时器
+// 使用 swoole_server->clearTimer 函数清除定时器
+$serv->set([
+    'worker_num' => 2,
+]);
+$serv->on('WorkerStart', function ($serv, $workerId){
+    // 只要一个定时器即可，所以判断 $workerId == 0
+    if ($workerId == 0) {
+        $i = 0;
+        $params = 'world';
+        $serv->tick(1000, function ($timeId) use ($serv, &$i, $params) {
+            $i ++;
+            echo "hello, {$params} --- {$i}\n";
+            if ($i >= 5) {
+                $serv->clearTimer($timeId);
+            }
+        });
+    }
+});
+```
+
+所谓的一次性定时器，就是一次性定时器执行完一次之后，便会自动销毁。这种场景往往是当 xxx 毫秒之后再执行。同样也有两个函数供我们使用，全局的 swoole_timer_after 和回调内可调用的 swoole_server->after（所支持的最大毫秒数是 86400000）。
+```php
+// 3 秒后再执行
+swoole_timer_after(3000, function () {
+    echo "only once.\n";
+});
+
+// 在事件的回调函数中
+$serv->on('Receive', function ($serv, $fd, $fromId, $data) {
+    $serv->after(3000, function () {
+        echo "only once.\n";
+    });
+});
+```
+
+### swoole 之粘包问题
+socket 有缓冲区 buffer 的概念，每个 TCP socket 在内核中都有一个发送缓冲区和一个接收缓冲区。客户端 send 操作仅仅是把数据拷贝到 buffer 中，也就是说 send 完成了，数据并不代表已经发送到服务端了，之后才由 TCP 协议从 buffer 中发送到服务端。此时服务端的接收缓冲区被 TCP 缓存网络上来的数据，而后 server 才从 buffer 中读取数据。所以，swoole_server 可能会同时收到多个请求包，也可能只收到一个请求包的一部分数据，这就是典型的粘包问题。  
+
+swoole 给我们提供了两种解决方案：EOF 结束协议和固定包头 + 包体协议。  
+EOF，end of file，意思是我们在每一个数据包的结尾加一个 eof 标记，表示这就是一个完整的数据包，但是如果你的数据本身含有 EOF 标记，那就会造成收到的数据包不完整，所以开启 EOF 支持后，应避免数据中含有 EOF 标记。在 swoole_server 中，我们可以配置 open_eof_check 为 true，打开 EOF 检测，配置 package_eof 来指定 EOF 标记。swoole_server 收到一个数据包时，会检测数据包的结尾是否是我们设置的 EOF 标记，如果不是就会一直拼接数据包，直到超出 buffer 或者超时才会终止，一旦认定是一个完整的数据包，就会投递给 Worker 进程，这时候我们才可以在回调内处理数据。这样 server 就能保证接收到一个完整的数据包了吗？不能保证，这样只能保证 server 能收到一个或者多个完整的数据包。
+```php
+// 服务端设置 eof，并对数据进行拆分处理
+$this->_serv->set([ 
+    'worker_num' => 1, 
+    'open_eof_check' => true, //打开EOF检测 
+    'package_eof' => "\r\n", //设置EOF 
+]);
+
+// 客户端发送数据
+for ($i = 0; $i < 3; $i++) { 
+    $client->send("Just a test.\r\n"); 
+}
+```
+考虑到自行分包稍微麻烦，swoole 提供了 open_eof_split 配置参数，启用该参数后，server 会从左到右对数据进行逐字节对比，查找数据中的 EOF 标记进行分包，效果跟我们刚刚自行拆包是一样的，性能较差。
+
+固定包头是一种非常通用的协议，它的含义就是在你要发送的数据包的前面，添加一段信息，这段信息了包含了你要发送的数据包的长度，长度一般是 2 个或者 4 个字节的整数。在这种协议下，我们的数据包的组成就是包头 + 包体。其中包头就是包体长度的二进制形式。当 server 收到一个数据包（可能是多个完整的数据包）之后，会先解出包头指定的数据长度，然后按照这个长度取出后面的数据，如果一次性收到多个数据包，依次循环，如此就能保证 Worker 进程可以一次性收到一个完整的数据包。
+```php
+// 发送一段数据给服务端
+pack('N', strlen("Just a test.")) . "Just a test."
+
+// 服务端的代码
+class ServerPack
+{
+    private $_serv;
+
+    /**
+     * init
+     */
+    public function __construct()
+    {
+        $this->_serv = new Swoole\Server("127.0.0.1", 9501);
+        $this->_serv->set([
+            'worker_num' => 1,
+            'open_length_check'     => true,      // 开启协议解析
+            'package_length_type'   => 'N',     // 长度字段的类型
+            'package_length_offset' => 0,       //第几个字节是包长度的值
+            'package_body_offset'   => 4,       //第几个字节开始计算长度
+            'package_max_length'    => 81920,  //协议最大长度
+        ]);
+        $this->_serv->on('Receive', [$this, 'onReceive']);
+    }
+    public function onReceive($serv, $fd, $fromId, $data)
+    {
+        $info = unpack('N', $data);
+        $len = $info[1];
+        $body = substr($data, - $len);
+        echo "server received data: {$body}\n";
+    }
+    /**
+     * start server
+     */
+    public function start()
+    {
+        $this->_serv->start();
+    }
+}
+
+$reload = new ServerPack;
+$reload->start();
+
+// 客户端的代码
+$client = new swoole_client(SWOOLE_SOCK_TCP, SWOOLE_SOCK_SYNC);
+$client->connect('127.0.0.1', 9501) || exit("connect failed. Error: {$client->errCode}\n");
+
+// 向服务端发送数据
+for ($i = 0; $i < 3; $i++) {
+    $data = "Just a test.";
+    $data = pack('N', strlen($data)) . $data;
+    $client->send($data);
+}
+
+$client->close();
+```
+1、首先，在 server 端我们配置了 open_length_check，该参数表明我们要开启固定包头协议解析  
+2、package_length_type 配置，表明包头长度的类型，这个类型跟客户端使用 pack 打包包头的类型一致，一般设置为 N 或者 n，N 表示 4 个字节，n 表示 2 个字节  
+3、我们看下客户端的代码 pack('N', strlen($data)) . $data，这句话就是包头 + 包体的意思，包头是 pack 函数打包的二进制数据，内容便是真实数据的长度 strlen($data)。在内存中，整数一般占用 4 个字节，所以我们看到，在这段数据中 0-4 字节表示的是包头，剩余的就是真实的数据。但是 server 不知道呀，怎么告诉 server 这一事实呢？看配置 package_length_offset 和 package_body_offset，前者就是告诉 server，从第几个字节开始是长度，后者就是从第几个字节开始计算长度。  
+4、既然如此，我们就可以在 onReceive 回调对数据解包，然后从包头中取出包体长度，再从接收到的数据中截取真正的包体。
+
+###
+
+
 
