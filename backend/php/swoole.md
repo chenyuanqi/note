@@ -443,7 +443,7 @@ $client->close();
 3、我们看下客户端的代码 pack('N', strlen($data)) . $data，这句话就是包头 + 包体的意思，包头是 pack 函数打包的二进制数据，内容便是真实数据的长度 strlen($data)。在内存中，整数一般占用 4 个字节，所以我们看到，在这段数据中 0-4 字节表示的是包头，剩余的就是真实的数据。但是 server 不知道呀，怎么告诉 server 这一事实呢？看配置 package_length_offset 和 package_body_offset，前者就是告诉 server，从第几个字节开始是长度，后者就是从第几个字节开始计算长度。  
 4、既然如此，我们就可以在 onReceive 回调对数据解包，然后从包头中取出包体长度，再从接收到的数据中截取真正的包体。
 
-###
+### 认识 websocket
 
 
 
