@@ -444,6 +444,15 @@ $client->close();
 4、既然如此，我们就可以在 onReceive 回调对数据解包，然后从包头中取出包体长度，再从接收到的数据中截取真正的包体。
 
 ### 认识 websocket
-
-
+swoole_http_server 继承自 swoole_server，用于创建 swoole 版的 http 服务器。所谓的 http 服务器，其含义就是一旦我们部署好，用户便可以直接通过浏览器访问该服务器。理论上而言，我们不需要再借用 nginx 或者 httpd 部署；但是，swoole_http_server 对 HTTP 协议的支持还不成熟，所以实际，我们还是需要用 nginx 作为代理。  
+虽然 swoole_http_server 继承自 swoole_server，但是除了 onConnect/onReceive 回调不能用之外，swoole_server 提供的其他 API 函数都可以直接使用。  
+```php
+$http = new swoole_http_server("127.0.0.1", 8000);
+$http->on('request', function (swoole_http_request $request, swoole_http_response $response) {
+    $response->status(200);
+    $response->end('hello world.');
+});
+$http->start();
+```
+swoole_http_request，负责 http 请求的相关信息。在这个对象上，可以获取 header\server\get\post\files\cookie 等信息，这等同于 php 的超全局变量，但不是超全局的，request 关联的这些信息可能不存在。swoole_http_response，负责处理 HTTP 响应信息，包括响应的头信息 header \ 响应状态等。  
 
