@@ -456,3 +456,76 @@ $http->start();
 ```
 swoole_http_request，负责 http 请求的相关信息。在这个对象上，可以获取 header\server\get\post\files\cookie 等信息，这等同于 php 的超全局变量，但不是超全局的，request 关联的这些信息可能不存在。swoole_http_response，负责处理 HTTP 响应信息，包括响应的头信息 header \ 响应状态等。  
 
+websocket != socket，二者之间并没多大关系，这就好比 javascript 和 java。  
+websocket 是一个协议，它仅仅就是一个协议而已，跟我们所了解的 http 协议、https 协议、ftp 协议等等一样，都是一种单纯的协议。相对于 Http 这种非持久连接而言，websocket 协议是一种持久化连接，它是一种独立的，基于 TCP 的协议。基于 websocket，我们可以实现客户端和服务端双向通信。websocket 是双向持久连接，客户端和服务端只需要第一次建立连接即可实现双向通信；基于 websocket，我们可以做一些通讯，推送相关的服务。  
+swoole 内置的 websocket 服务器，异步非阻塞多进程。  
+```php
+class WebSocketServer
+{
+    private $_serv;
+
+    public function __construct()
+    {
+        $this->_serv = new swoole_websocket_server("127.0.0.1", 9501);
+        $this->_serv->set([
+            'worker_num' => 1,
+        ]);
+        $this->_serv->on('open', [$this, 'onOpen']);
+        $this->_serv->on('message', [$this, 'onMessage']);
+        $this->_serv->on('close', [$this, 'onClose']);
+    }
+
+    /**
+     * 客户端与服务端建立连接的时候将触发该回调
+     * 第二个参数是 swoole_http_request 对象，包括了 http 握手的一些信息，比如 GET\COOKIE 等
+     * 
+     * @param $serv
+     * @param $request
+     */
+    public function onOpen($serv, $request)
+    {
+        echo "server: handshake success with fd{$request->fd}.\n";
+    }
+
+    /**
+     * 服务端收到客户端信息后回调
+     * 
+     * @param $serv
+     * @param $frame
+     */
+    public function onMessage($serv, $frame)
+    {
+        // $frame->fd websocket 客户端的标识
+        $serv->push($frame->fd, "server received data :{$frame->data}");
+    }
+    public function onClose($serv, $fd)
+    {
+        echo "client {$fd} closed.\n";
+    }
+
+    public function start()
+    {
+        $this->_serv->start();
+    }
+}
+
+$server = new WebSocketServer;
+$server->start();
+```
+```javascript
+var ws = new WebSocket('ws://127.0.0.1:9501');
+ws.onopen = function(event) {
+    // 发送消息
+    ws.send('This is websocket client.');
+};
+
+// 监听消息
+ws.onmessage = function(event) {
+    console.log('Client received a message: ', event.data);
+};
+ws.onclose = function(event) {
+    console.log('Client has closed.\n', event);
+};
+```
+
+
