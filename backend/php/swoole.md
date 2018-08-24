@@ -528,4 +528,82 @@ ws.onclose = function(event) {
 };
 ```
 
+心跳检测是 server 定时检测客户端是否还连接的意思，即 server 定时检测 client 是否还活着。客户端断开连接如果能够通知到 server，server 自然也就可以主动关闭连接。但是，有很多非正常情况的存在，比如断电断网尤其是移动网络盛行的当下，二者之间建立的友好关系（连接）非常不稳定，这就必然会导致大量的 fd被浪费！所以为了解决这些问题，swoole 内置了心跳检测机制。swoole 心跳检测的实现原理是：server 每次收到客户端的数据包都会记录一个时间戳，N 秒内循环检测下所有的连接，如果 M 秒内该连接还没有活动，才断开这个连接。
+```php
+// N 秒检查一次，看看哪些连接 M 秒内没有活动的，就认为这个连接是无效的，server 就会主动关闭这个无效的连接
+$serv->set([
+    'heartbeat_check_interval' => N,
+    'heartbeat_idle_time' => M,
+]);
+```
 
+把 server 监听的把 ip 修改为服务器外网的 ip 地址或者修改为 0.0.0.0，这时候就需要考虑校验客户端连接的有效性。比如我们可以在连接的时候认为只有 get 传递的参数 valid=1 才允许连接；或者我们只允许登录用户才可以连接 server；再或者我们可以校验客户端每次 send 所携带的 token，server 对该值校验通过后才认为当前是有效连接等等。并且，server 开启心跳检测，对于恶意无效的连接，直接杀死。  
+
+客户端重连机制又可以理解为一种保活机制，即如何能保证客户端和服务端的连接一直是有效的，不断开的。对客户端而言，只要触发 error 或者 close 再或者连接失败，就主动重连 server 即可。
+```javascript
+var ws;
+var lockReconnect = false;
+var wsUrl = 'ws://127.0.0.1:9501';
+
+function createWebSocket(url) {
+    try {
+        ws = new WebSocket(url);
+        initEventHandle();
+    } catch (e) {
+        reconnect(url);
+    }
+}
+
+function initEventHandle() {
+    ws.onclose = function () {
+        reconnect(wsUrl);
+    };
+    ws.onerror = function () {
+        reconnect(wsUrl);
+    };
+    ws.onopen = function () {
+        //心跳检测重置
+        heartCheck.reset().start();
+    };
+    ws.onmessage = function (event) {
+        //如果获取到消息，心跳检测重置
+        //拿到任何消息都说明当前连接是正常的
+        heartCheck.reset().start();
+    }
+}
+
+function reconnect(url) {
+    if(lockReconnect) return;
+    lockReconnect = true;
+    //没连接上会一直重连，设置延迟避免请求过多
+    setTimeout(function () {
+        createWebSocket(url);
+        lockReconnect = false;
+    }, 2000);
+}
+
+//心跳检测
+var heartCheck = {
+    timeout: 60000,//60秒
+    timeoutObj: null,
+    serverTimeoutObj: null,
+    reset: function(){
+        clearTimeout(this.timeoutObj);
+        clearTimeout(this.serverTimeoutObj);
+        return this;
+    },
+    start: function(){
+        var self = this;
+        this.timeoutObj = setTimeout(function(){
+            //这里发送一个心跳，后端收到后，返回一个心跳消息，
+            //onmessage拿到返回的心跳就说明连接正常
+            ws.send("");
+            self.serverTimeoutObj = setTimeout(function(){//如果超过一定时间还没重置，说明后端主动断开了
+                ws.close();//如果onclose会执行reconnect，我们执行ws.close()就行了.如果直接执行reconnect 会触发onclose导致重连两次
+            }, self.timeout);
+        }, this.timeout);
+    }
+}
+
+createWebSocket(wsUrl);
+```
