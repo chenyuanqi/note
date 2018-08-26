@@ -609,4 +609,56 @@ createWebSocket(wsUrl);
 ```
 
 ### swoole 与传统 MVC 框架
+传统 MVC 框架如 yii2 和 swoole 结合主要有这些问题，命名空间的问题、日志的使用问题、热重启的问题。  
+对于命名空间的问题，我们这样就可以正常使用 swoole 了
+```php
+new \Swoole\Server('127.0.0.1', 9501);
+```
+
+而日志使用的问题，以文件存储为例，在脚本运行时记录的日志信息并没有在脚本运行到记录的那行代码就把日志写到你的文件内，当脚本运行到记录的那行代码时，这些信息只是被暂时性的写入到内存，等脚本完全结束的时候，才最终把这些日志统一一次性输出到文件系统中。woole 是常驻内存型，除非遇到致命错误或者其他非正常中断时，脚本才会执行完毕，所以在 swoole 程序正常运行时，你所记录的日志并没有正常的记录到文件内。所以，大概是这样处理日志的
+```php
+namespace console\controllers;
+
+use Yii;
+use yii\console\Controller;
+
+/**
+* Test Console Application
+*/
+class TestController extends Controller
+{
+    private $_serv;
+    private function _prepare()
+    {
+        $this->_serv = new \Swoole\Server('127.0.0.1', 9501);
+        $this->_serv->set([
+            'worker_num' => 1,
+        ]);
+        $this->_serv->on('Start', [$this, 'onStart']);
+        $this->_serv->on('Receive', [$this, 'onReceive']);
+        $this->_serv->on('Close', [$this, 'onClose']);
+    }
+    public function actionStart ()
+    {
+        $this->_prepare();
+        $this->_serv->start();
+    }
+    public function onStart($serv)
+    {
+        // 这样，日志就会及时写入了
+        $logObject = Yii::getLogger();
+        $logObject->log("This is a warning message.", \yii\log\Logger::LEVEL_WARNING);
+        $logObject->flush(true);
+    }
+    public function onReceive($serv, $fd, $fromId, $data)
+    {
+    }
+    public function onClose($serv)
+    {
+    }
+}
+```
+
+还有，热重启的实质是重启 Worker 进程，在 Worker 进程启动之前加载的文件都不能实现热更新，为了实现热更新，我们需要把被热更新的程序文件，在 onWorkerStart 回调内重新加载，更新内存中已经被加载过的程序。  
+在 console 下不能完全有效的实现热重启，我们转换思路，摒弃 console，重新拾起 php xxx.php 的执行方式，把需要自动加载的类文件以及 components 的初始化工作放在 onWorkerStart 回调内去处理即可。      
 
