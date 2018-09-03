@@ -24,3 +24,9 @@
 > 理论上，include 和 require 后面加不加括号对执行结果没有区别，但是加上括号效率较低，所以后面能不加括号就不加括号。  
 > 
 
+- 打开php.ini中的safe_mode，会影响哪些函数
+> safe_mode，php安全模式，它提供一个基本安全的共享环境，在一个有多个用户账户存在的php开发的web服务器上  
+> 当安全模式打开的时候，一些函数将被完全的禁止，而另一些函数的功能将会受到限制，  
+> 如：chdir,move_uploaded_file,chgrp,parse_ini_file,chown,rmdir,copy,rename,fopen,require,mkdir,unlink 等。  
+> 
+> 注意，在 php5.3 以上版本，safe_mode 被弃用，在 php5.4 以上版本，则将此特性完全去除了。
