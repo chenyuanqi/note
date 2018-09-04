@@ -24,9 +24,53 @@
 > 理论上，include 和 require 后面加不加括号对执行结果没有区别，但是加上括号效率较低，所以后面能不加括号就不加括号。  
 > 
 
-- 打开php.ini中的safe_mode，会影响哪些函数
-> safe_mode，php安全模式，它提供一个基本安全的共享环境，在一个有多个用户账户存在的php开发的web服务器上  
+- 打开php.ini中的 safe_mode，会影响哪些函数
+> safe_mode，php 安全模式，它提供一个基本安全的共享环境，在一个有多个用户账户存在的php开发的web服务器上  
 > 当安全模式打开的时候，一些函数将被完全的禁止，而另一些函数的功能将会受到限制，  
 > 如：chdir,move_uploaded_file,chgrp,parse_ini_file,chown,rmdir,copy,rename,fopen,require,mkdir,unlink 等。  
 > 
 > 注意，在 php5.3 以上版本，safe_mode 被弃用，在 php5.4 以上版本，则将此特性完全去除了。
+
+- PHP 的垃圾收集机制 —— 引用计数  
+> PHP可以自动进行内存管理，清除不再需要的对象。  
+> PHP 使用了引用计数(reference counting)这种单纯的垃圾回收(garbage collection)机制，  
+> 每个对象都内含一个引用计数器，每个 reference 连接到对象，计数器加 1。当 reference 离开生存空间或被设为NULL，计数器减 1。  
+> 当某个对象的引用计数器为零时，PHP 知道你将不再需要使用这个对象，释放其所占的内存空间。
+
+- 论坛中无限分类的实现原理
+> 首先，创建类别表
+```mysql
+CREATE TABLE category(
+cat_id smallint unsigned not null auto_increment primary key comment'类别ID',
+cat_name VARCHAR(30)NOT NULL DEFAULT''COMMENT'类别名称',
+parent_id SMALLINT UNSIGNED NOT NULL DEFAULT 0 COMMENT'类别父ID'
+)engine=MyISAM charset=utf8;
+```
+> 编写一个函数，递归遍历，实现无限分类
+```php
+function tree($arr, $pid = 0, $level = 0)
+{
+    static $list = [];
+    foreach($arr as $v){
+        //如果父级分类一致，则将其存到 $list 中，并以此节点为根节点，遍历其子节点
+        if ($v['parent_id'] == $pid){
+            $v['level'] = $level;
+            $list[] = $v;
+            tree($arr, $v['cat_id'], $level + 1);
+        }
+    }
+
+    return $list;
+}
+```
+
+- 简述协程的优势
+> 协程的特点在于是一个线程执行  
+> 最大的优势就是协程极高的执行效率。因为子程序切换不是线程切换，而是由程序自身控制，因此，没有线程切换的开销，和多线程比，线程数量越多，协程的性能优势就越明显。  
+> 第二大优势就是不需要多线程的锁机制，因为只有一个线程，也不存在同时写变量冲突，在协程中控制共享资源不加锁，只需要判断状态就好了，所以执行效率比多线程高很多。  
+> 因为协程是一个线程执行，那怎么利用多核CPU呢？最简单的方法是多进程+协程，既充分利用多核，又充分发挥协程的高效率，可获得极高的性能。  
+
+
+### 开发进阶路线
+
+
