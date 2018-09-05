@@ -70,6 +70,45 @@ function tree($arr, $pid = 0, $level = 0)
 > 第二大优势就是不需要多线程的锁机制，因为只有一个线程，也不存在同时写变量冲突，在协程中控制共享资源不加锁，只需要判断状态就好了，所以执行效率比多线程高很多。  
 > 因为协程是一个线程执行，那怎么利用多核CPU呢？最简单的方法是多进程+协程，既充分利用多核，又充分发挥协程的高效率，可获得极高的性能。  
 
+- 唯一 ID 的产生与方案
+> 为什么要唯一 ID ?  
+> 1、数据库的自增 ID 在分库的时候, 会是一场灾难。假设分两个库, 因为每个库都会开始从 1 开始自增, 这时候系统中将会出现两个 id 为 1 的用户  
+> 2、自增 ID 会暴露用户量或者其他业务量  
+> 3、自增 ID 会让有心者通过API得到任意用户的信息资料  
+> 
+> 有哪些解决方案呢?  
+> 1、UUID，全称 Universally Unique Identifier，中文通用唯一标识符。这个是开放软件基金会组织提出的一个标准，为的就是解决分布式环境下生成唯一标识符的问题。  
+> UUID 的长度是固定的 32 位，组织格式 8-4-4-4-12；当然，在用的时候，中间的分隔符是要去掉的。这货有几个问题不得不提，首先是字母数字混合，在一些传统数据库下，索引不太好做，不仅索引体积大， 查询效率也差，其次是它本身也非常大。  
+> 2、 MongoDB ObjectId , 格式模样都很类似于 UUID，是 Mongodb 内置的一种数据类型，如果你在插入数据的时候不指定_id，那么 Mongodb 默认就会采用用这个货才填充_id， 在 Mongodb 这种类 key-value 性质的数据库中，有着不错的查询效率  
+> 3、自建解决方案。需要保证全局空间唯一性、尽量采取数字类型而非数字字母混合方式、一定的时序行和含义、一定的可反解性 , 通过反解的结果可以知道该 ID 的相关信息。  
+> 市面上有的几种解决方案为 Twitter 的 snowflake，Flikr 的数据库自增方案，Instagram 的数据库存储过程方案。  
+> 比如 snowflask 使用了 64bit 来表示一个 id，组织格式 41(时间戳)-10(机器 ID)-12(自增序列)。推荐基于 snowflask 的 PHP ID 产生器：[DonkeyID](https://github.com/osgochina/donkeyid)  
+
+- 自动加载与命名空间
+> PSR4 利用了命名空间和 spl_autoload_register() 在 php-fig 的倡导下形成的一种开发者约定俗成的开发标准和规则。只要开发者开发的库满足 PSR 系列的标准，那么这个库就可以在任意一个支持 PSR 标准的任意框架或项目中运行，最终诞生了伟大的 php composer。  
+> 
+> 众所周知，php 中有个大名鼎鼎的魔法函数__autoload() 用来实现自动加载，但是__autoload 有个巨大的缺陷，就是无法同时加载多个 autoload 方法。  
+> 于是，[spl_autoload_register()](http://php.net/manual/zh/function.spl-autoload-register.php) 来了，它可以注册多个 autoload 方法，即注册不同的自动加载机制。  
+> 
+> 命名空间，即 [namespace](http://www.php.net/manual/zh/language.namespaces.php)，是 php5.3 以后引入的新特性，用来解决包名冲突问题的。  
+> 命名空间通常对应了文件夹目录的层次关系，当然这并不是官方的规定，而是人们利用命名空间做出的一种规范，为的是方便开发和协调。  
+```php
+// 声明三个不同加载函数
+function autoload_1( $classname ){
+  echo "autoload 1";
+}
+function autoload_2( $classname ){
+  echo "autoload 2";
+}
+function autoload_3( $classname ){
+  echo "autoload 3";
+}
+
+// 将三个不同的函数注册到 autoload 栈中
+spl_autoload_register('autoload_1');
+spl_autoload_register('autoload_2');
+spl_autoload_register('autoload_3');
+```
 
 ### 开发进阶路线
 
