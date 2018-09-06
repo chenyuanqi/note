@@ -70,6 +70,47 @@ function tree($arr, $pid = 0, $level = 0)
 > 第二大优势就是不需要多线程的锁机制，因为只有一个线程，也不存在同时写变量冲突，在协程中控制共享资源不加锁，只需要判断状态就好了，所以执行效率比多线程高很多。  
 > 因为协程是一个线程执行，那怎么利用多核CPU呢？最简单的方法是多进程+协程，既充分利用多核，又充分发挥协程的高效率，可获得极高的性能。  
 
+- PHP 进程如何 daemon 化
+> daemon 音标: [‘di:mən]，中文含义为守护神或精灵的意思，即守护进程。  
+> 守护进程简单地说就是可以脱离终端而在后台运行的进程，在 Linux 中是非常常见的一种进程，比如 apache 或者 mysql 等服务启动后，就会以守护进程的方式进驻在内存中。  
+> 
+> 在 Linux 中，大概有三种方式实现脚本后台化  
+> 1、在命令后添加一个 & 符号，比如 php task.php & 。  
+> 这个方法的缺点在于如果 terminal 终端关闭（无论是正常关闭还是非正常关闭），这个php进程都会随着终端关闭而关闭，其次是代码中如果有echo或者print_r之类的输出文本 , 会被输出到当前的终端窗口中。  
+> 2、使用 nohup 命令，比如 nohup php task.php & 。  
+> 默认情况下，代码中 echo 或者 print_r 之类输出的文本会被输出到 php 代码同级目录的 nohup.out 文件中；  
+> 如果使用 exit 命令或者关闭按钮等正常手段关闭终端，该进程不会被关闭，依然会在后台持续运行；  
+> 但是，如果终端遇到异常退出或者终止，该 php 进程也会随即退出。本质上，也不属于稳定可靠的 daemon 方案。  
+> 3、使用 fork 和 setsid  
+```php
+// 一次fork  
+$pid = pcntl_fork();
+if ( $pid < 0 ) {
+  exit( ' fork error. ' );
+} else if( $pid > 0 ) {
+  exit( ' parent process. ' );
+}
+
+// 将当前子进程提升会会话组组长 这是至关重要的一步 
+if ( ! posix_setsid() ) {
+  exit( ' setsid error. ' );
+}
+
+// 二次 fork
+$pid = pcntl_fork();
+if( $pid < 0 ){
+  exit( ' fork error. ' );
+} else if( $pid > 0 ) {
+  exit( ' parent process. ' );
+}
+
+// 真正的逻辑代码，下面以循环写入文件为示例
+for( $i = 1 ; $i <= 100 ; $i++ ){
+  sleep( 1 );
+  file_put_contents( 'daemon.log', $i, FILE_APPEND );
+}
+```
+
 - 唯一 ID 的产生与方案
 > 为什么要唯一 ID ?  
 > 1、数据库的自增 ID 在分库的时候, 会是一场灾难。假设分两个库, 因为每个库都会开始从 1 开始自增, 这时候系统中将会出现两个 id 为 1 的用户  
@@ -109,6 +150,15 @@ spl_autoload_register('autoload_1');
 spl_autoload_register('autoload_2');
 spl_autoload_register('autoload_3');
 ```
+
+- 网站大规模并发处理方案
+> https://www.awaimai.com/348.html
+
+- PHP 读取大文件问题
+> 生成器
+
+- API 安全性问题
+> 
 
 ### 开发进阶路线
 
