@@ -155,10 +155,56 @@ spl_autoload_register('autoload_3');
 > https://www.awaimai.com/348.html
 
 - PHP 读取大文件问题
-> 生成器
+> PHP 默认最大只给每个进程分配 128MB 内存，读取大文件的最原始想法就是改配置，但是这显然不是好办法。  
+> 
+> PHP 读取大文件，PHP 提供的标准类库 [SplFileObject](http://php.net/manual/en/class.splfileobject.php) 可以作为参考。  
+> fgets 按行读取比 fgetc 按字符读取要快，而如果要读取指定行的内容可以考虑 ftell 和 fseek。  
+> 总而言之，要读取大文件，需要依次按适当大小获取文件内容，显然这是一种稍微优秀一些的办法。  
+> 
+> 我们还可以使用生成器读取大文件（当然，使用流读取速度也很可观 stream_get_line）
+```php
+function readBigFile($filePath)
+{
+    # code...
+    $fp = fopen($filePath, 'rb');
+    while(false !== ($buffer = fgets( $fp, 4096 ))){
+        # code...
+    }
+
+    fclose($handle);
+}
+
+foreach ($readBigFile('./test.txt') as $key => $value) {
+    # code...
+}
+```
 
 - API 安全性问题
+> 安全是恒久的话题。API 主要的安全问题比如  
+> 1、接口被大规模调用消耗系统资源，影响系统的正常访问，甚至系统瘫痪  
+> 2、数据泄露  
+> 3、伪造（篡改）数据，制造垃圾数据  
+> 4、App被仿制…  
 > 
+> 那么，我们又该如何设计我们的 API 呢？  
+> 需要保证对受限资源的登录授权、对请求做身份认证，并且防止篡改，重放攻击和对敏感的数据做加密。  
+> 
+> 对受限资源的登录授权的处理流程：客户端提交账号信息（用户名+密码）到服务端->服务端验证成功，返回AccessToken给客户端存储->访问受限资源时，客户端带入AccessToken就可访问  
+> 对请求做身份认证的处理流程：初始时，服务端存有各 App 版本的 SIGN_KEY，客户端存有对应版本的 SIGN_KEY->当要发送请求之前，通过签名方法加密，得到一个 sign（如 sign=signature(path?query&imei&timetamp&SIGN_KEY)），发送请求的时候，连同sign一起发送给服务器端->服务器端首先验证时间戳 timestamp 是否有效，比如是服务器时间戳 5 分钟之前和之后的请求视为无效->服务端取对应版本的 SIGN_KEY 验证 sign 是否合法->为了防止重放攻击，需要检查 sign 是否在 redis中 存储，如不存在则存入 redis（缓存 5 分钟）  
+> 对敏感数据加密：部署SSL基础设施（即HTTPS），敏感数据的传输全部基于SSL；仅对部分敏感数据做加密（例如账号+密码），并加入某种随机数作为加密盐，以防范数据被篡改  
+>
+> 签名机制是为了防止 API 被恶意调用，包括 API  
+> 加密是为了保证敏感数据，敏感数据可以包括 token（token 和 uid 对应关系可以考虑 redis hash 类型的数据结构，key 就用 token，hash 中保存完整的用户信息）  
+> token 本身与加密无关，只是 token 本身的含义总是跟加密似乎带点儿关系，但实际上 token 仅仅是个用户身份识别器  
+> 只要客户端被反编译了，加密方式和签名机制都会暴露出来，所以安全是需要双方配合的  
+
+- 消息队列
+> ...
+
+
+- 负债均衡
+> ...
+
 
 ### 开发进阶路线
 
