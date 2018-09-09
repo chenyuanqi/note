@@ -219,6 +219,15 @@ foreach ($readBigFile('./test.txt') as $key => $value) {
 > 
 > 下面，继续说说 Nginx 的负载均衡实现...  
 
-### 开发进阶路线
+### 开发进阶
+- PHP 弱类型的实现
+> ...
+
+- PHP 的生命周期
+> ...
+
+- PHP 框架 Laravel 和 Yii 路由原理对比
+> ...
+
 
 
