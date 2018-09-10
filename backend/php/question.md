@@ -219,6 +219,81 @@ foreach ($readBigFile('./test.txt') as $key => $value) {
 > 
 > 下面，继续说说 Nginx 的负载均衡实现...  
 
+
+- 百万级数据导出的实现
+> 导出大量的数据，在 PHP 设置层面主要是 set_time_limit(0) 和 ini_set('memory_limit', '1024M')，但是一个 PHP 程序占用那么大的内存的空间未免太奢侈；  
+> excel 表的限制，PHPExcel_Settings::setCacheStorageMethod 方法可以更改缓冲方式来减小内存的使用，但是内存溢出还是不容易避免；  
+```
+Excel 2003 及以下的版本，一张表最大支持 65536 行数据，256 列
+Excel 2007-2010 版本，一张表最大支持 1048576 行，16384 列
+```
+> csv 文件储存，既不限制数量，还能直接用 EXCEL 来查看，又能以后把文件导入数据库；但是，当我们用 putcsv() 输出缓存 buffer，如果几百万的数据一直用这个函数输出，会导致输出缓存太大而报错的；而且，使用 Excel 查看也查看不了全部  
+> 
+> 综上所述，数据的输出使用 csv 文件格式，并将数据分割保存在多个 csv 文件中，并且最后压缩成 zip 文件提供下载  
+```php
+function exportCsv(array $head, $data, $mark = 'attack_ip_info', $fileName = "test.csv")
+{
+    set_time_limit(0);
+    $sqlCount = $data->count();
+    // 输出 Excel 文件头
+    header('Content-Type: application/vnd.ms-excel;charset=utf-8');
+    header('Content-Disposition: attachment;filename="' . $fileName . '"');
+    header('Cache-Control: max-age=0');
+
+    //每次只从数据库取100000条以防变量缓存太大
+    $sqlLimit = 100000;
+    // 每隔$limit行，刷新一下输出buffer，不要太大，也不要太小
+    $limit = 100000;
+    // buffer计数器
+    $cnt = 0;
+    $fileNameArr = [];
+    // 逐行取出数据，不浪费内存
+    for($i = 0; $i < ceil($sqlCount / $sqlLimit); $i++){
+    	// 生成临时文件
+        $fp = fopen($mark . '_' . $i . '.csv', 'w'); 
+        // 修改可执行权限
+        // chmod('attack_ip_info_' . $i . '.csv',777);
+        $fileNameArr[] = $mark . '_' . $i . '.csv';
+        // 将数据通过fputcsv写到文件句柄
+        fputcsv($fp, $head);
+        $dataArr = $data->offset($i * $sqlLimit)->limit($sqlLimit)->get()->toArray();
+        foreach($dataArr as $a){
+            $cnt++;
+            if ($limit == $cnt){
+                // 刷新一下输出buffer，防止由于数据过多造成问题
+                ob_flush();
+                flush();
+                $cnt = 0;
+            }
+            fputcsv($fp, $a);
+        }
+        fclose($fp);
+    }
+    // 进行多个文件压缩
+    $zip = new ZipArchive();
+    $zipFileName = $mark . ".zip";
+    $zip->open($zipFileName, ZipArchive::CREATE); 
+    foreach($fileNameArr as $file){
+        $zip->addFile($file, basename($file));
+    }
+    $zip->close();
+    foreach($fileNameArr as $file){
+        unlink($file);
+    }
+    // 输出压缩文件提供下载
+    header("Cache-Control: max-age=0");
+    header("Content-Description: File Transfer");
+    header('Content-disposition: attachment; filename=' . basename($zipFileName));
+    header("Content-Type: application/zip");
+    header("Content-Transfer-Encoding: binary"); 
+    header('Content-Length: ' . filesize($zipFileName)); 
+    // 输出文件
+    @readfile($zipFileName);
+    // 删除压缩包临时文件
+    unlink($zipFileName);
+}
+```
+
 ### 开发进阶
 - PHP 弱类型的实现
 > ...
