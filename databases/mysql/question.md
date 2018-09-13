@@ -55,11 +55,9 @@ grep'INSERT INTO `t`' dump.sql
 - Explain 列的解释
 > EXPLAIN 显示了 MySQL 如何使用索引来处理 SELECT 语句以及连接表，可以帮助选择更好的索引和写出更优化的查询语句。  
 ```mysql
-EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
-```
 EXPLAIN 列的解释：  
 | 列 | 描述 |  
-| :-----:  | :----:  |
+| :-----:  | :----:  |  
 | table	| 显示这一行的数据是关于哪张表的。 |  
 | type | 这是重要的列，显示连接使用了何种类型。从最好到最差的连接类型为 const、eq_ref、ref、range、index和ALL。|  
 | possible_keys | 显示可能应用在这张表中的索引。如果为空，没有可能的索引。可以为相关的域从WHERE语句中选择一个合适的语句。|  
@@ -69,7 +67,7 @@ EXPLAIN 列的解释：
 | rows | MySQL 认为必须检查的用来返回请求数据的行数。|  
 | extra | 关于 MySQL 如何解析查询的额外信息。将在表 4.3 中讨论，但这里可以看到的坏的例子是Using temporary和Using filesort，意思 MySQL 根本不能使用索引，结果是检索会很慢。|  
 
-Extra 列返回的描述的意义：  
+> Extra 列返回的描述的意义：  
 | 值 | 意义 |  
 | :-----:  | :----:  |
 | Distinct | 一旦 MySQL 找到了与行相联合匹配的行，就不再搜索了。|  
@@ -87,3 +85,5 @@ Extra 列返回的描述的意义：
 | index	| 这个连接类型对前面的表中的每一个记录联合进行完全扫描（比ALL更好，因为索引一般小于表数据）。|  
 | ALL	| 这个连接类型对于前面的每一个记录联合进行完全扫描，这一般比较糟糕，应该尽量避免。|  
 
+EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
+```
