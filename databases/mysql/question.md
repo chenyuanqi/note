@@ -87,3 +87,15 @@ EXPLAIN 列的解释：
 
 EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
 ```
+
+- 数据库设计和查询优化
+> Schema 设计时主要考虑: 标准化,数据类型,索引  
+> 一个数据库设计可以混合使用,一部分表格标准化,一部分表格非标准化(非标准化表格适当冗余)  
+> 最优的数据类型,使表在磁盘上占据的空间尽可能小,读写快,占用内存少(索引也尽量建立在较小的列上)  
+> 正确索引,提高 Select,Update,Delete 性能  
+> 
+> 不同的Sql不同的优化方案  
+> Explain Sql 查看结果,分析查询  
+> 查询使用匹配的类型  
+> 使用 long-slow-queries 记录较慢查询,分析优化  
+
