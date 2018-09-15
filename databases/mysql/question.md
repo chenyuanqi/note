@@ -98,4 +98,15 @@ EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
 > Explain Sql 查看结果,分析查询  
 > 查询使用匹配的类型  
 > 使用 long-slow-queries 记录较慢查询,分析优化  
-
+>
+> 服务器端优化  
+> 安装适当的 MySql 版本  
+> 如果服务器使用 Intel 处理器, 使用 Intel C++ 版本可提高 30 % 效率  
+> 
+> 配置优化，常见优化项:  
+> charset  
+> max_allowed_packet  
+> max_connections  
+> table_cache_size  
+> query_cache_size  
+>
