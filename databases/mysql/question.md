@@ -109,4 +109,40 @@ EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
 > max_connections  
 > table_cache_size  
 > query_cache_size  
+> 
+> 存储引擎优化  
+> MyISAM  
+> MyISAM 引擎特点  
+> 不支持事务, 提供高速存储, 检索以及全文搜索能力.  
+> 宕机会破坏表.  
+> 使用的磁盘和内存空间小.  
+> 基于表的锁, 并发更新数据会出现严重性能问题.  
+> MySql 只缓存索引, 数据由 OS 缓存.  
+> MyISAM 适用情况
+> 日志系统.  
+> 只读操作或者大部分读操作.  
+> 全表扫描.  
+> 批量导入数据.  
+> 没有事务的低并发读写.  
+> MyISAM 优化策略  
+> NOT NULL, 可以减少磁盘存储.  
+> Optimize Table, 碎片整理, 回收空闲空间.  
+> Deleting/updating/adding 大量数据的时候禁止使用 index.  
+> 参数优化, key_buffer_size_variable 索引缓存设置.  
+> 避免并发 Inset Update.  
 >
+> InnoDB  
+> InnoDB 引擎特点  
+> 具有提交, 回滚和崩溃恢复能力的事务安全存储引擎.  
+> 处理巨大数据量性能卓越, 它的 CPU 使用效率非常高.  
+> 需要更多的内存和磁盘存储空间.  
+> 数据和索引都缓存在内存中.  
+> InnoDB 适用情况  
+> 需要事务的应用.  
+> 高并发的应用.  
+> 自动恢复.  
+> 较快速的基于主键的操作.  
+> InnoDB 优化策略  
+> 尽量使用 short,integer 的主键.  
+> 使用 prefix keys, 因为 InnoDB 没有 key 压缩功能.  
+> 参数优化, innodb_buffer_pool_size,innodb_data_home_dir 等等  
