@@ -146,3 +146,6 @@ EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
 > 尽量使用 short,integer 的主键.  
 > 使用 prefix keys, 因为 InnoDB 没有 key 压缩功能.  
 > 参数优化, innodb_buffer_pool_size,innodb_data_home_dir 等等  
+
+- mysql 主从同步如何实现
+> 
