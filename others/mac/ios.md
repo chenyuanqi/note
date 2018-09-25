@@ -34,6 +34,13 @@ to:day: 计划+提醒
 # 朗读指定内容
 say anything
 
+# 查看当前电源的使用方案
+pmset -g
+# 设置不休眠
+pmset noidle
+# 设置电池供电时，显示器5分钟内进入睡眠
+sudo pmset -b displaysleep 5
+
 # 
 
 ```
