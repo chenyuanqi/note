@@ -117,6 +117,17 @@ public function rules()
             return StringHelper::msubstr($value, 0, 50);
         }
     ],
+
+    [
+        ['audit_status'],
+        'filter',
+        'filter' => function (){
+            return Teachers::AUDIT_STATUS_REVIEW_SUCCESS;
+        },
+        'when' => function (self $model){
+            return static::STATUS_NORMAL == $model->status;
+        }
+    ],
 }
 
 // 状态常量定义
