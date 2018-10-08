@@ -19,6 +19,8 @@ date;hwclock -r
 # 不可以联网时
 date -s 20181009
 date -s 23:40:00
+# 设置时区
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 # 以树状形式显示指定路径的目录和文件内容
 tree [FILE_PATH]
