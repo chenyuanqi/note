@@ -12,6 +12,14 @@ info [COMMAND]
 # 显示命令帮助信息
 [COMMAND] --help
 
+# 时间同步，同步交通大学时间
+ntpdate ntp.sjtu.edu.cn && hwclock -w
+# 查看时间
+date;hwclock -r
+# 不可以联网时
+date -s 20181009
+date -s 23:40:00
+
 # 以树状形式显示指定路径的目录和文件内容
 tree [FILE_PATH]
 # 以树状形式显示指定路径的目录
