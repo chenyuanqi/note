@@ -15,6 +15,12 @@
 > InnoDB 支持外键，而 MyISAM 不支持
 > InnoDB 不支持全文索引，而 MyISAM 支持
 
+- MySQL 中索引方法 btree 和 hash 的区别
+> 1.在精确查找的情况下：hash 索引要高于 btree 索引，因为 hash 索引查找数据基本上能一次定位数据（大量 hash 值相等的情况下性能会有所降低，也可能低于 btree）,而 btree 索引基于节点上查找，所以在精确查找方面 hash 索引一般会高于 btree 索引。  
+> 2.在范围性查找情况下：比如 'like'等范围性查找 hash 索引无效，因为 hash 算法是基于等值计算的。  
+> 3.btree 支持的联合索引的最优前缀；hash 是无法支持的，hash 联合索引要么全用，要么全不用。  
+> 4.hash 是不支持索引排序的，索引值和 hash 计算出来的 hash 值大小并不一定一致
+
 - MySQL 中 varchar 与 char 的区别以及 varchar(50) 中的 50 代表的含义
 > varchar 与 char 的区别在于 char 是一种固定长度的类型，varchar 则是一种可变长度的类型  
 > varchar(50) 中 50 的含义是最多存放 50 个字符，varchar(50) 和 varchar(200) 存储 hello 所占空间一样，但后者在排序时会消耗更多内存，因为 order by column 采用 fixed_length 计算 column 长度(memory 存储引擎也一样)  
@@ -23,6 +29,33 @@
 > int(20）中 20 的含义是指显示字符的长度（默认不补全 0），最大为 255，比如它是记录行数的 id,插入 10 笔资料，它就显示 00000000001 ~~~ 00000000010
 > 当字符的位数超过 11,它也只显示 11 位，如果你没有加那个让它未满 11 位就前面加 0 的参数，20 不会显示为 020，但仍占 4 字节存储，存储范围不变；  
 > mysql 这么设计对大多数应用是没有意义的，只是规定一些工具用来显示字符的个数；int(1) 和 int(20) 存储和计算均一样  
+
+- MySQL 统计 sum 返回 null，那么如何变成 0？
+> 使用 COALESCE 即可：SELECT COALESCE(SUM(total),0)  FROM table_name 
+
+- MySQL 统计最近 7 天数据
+```mysql
+select a.click_date,ifnull(b.count,0) as count_reg  
+from (  
+    SELECT curdate() as click_date  
+    union all  
+    SELECT date_sub(curdate(), interval 1 day) as click_date  
+    union all  
+    SELECT date_sub(curdate(), interval 2 day) as click_date  
+    union all  
+    SELECT date_sub(curdate(), interval 3 day) as click_date  
+    union all  
+    SELECT date_sub(curdate(), interval 4 day) as click_date  
+    union all  
+    SELECT date_sub(curdate(), interval 5 day) as click_date  
+    union all  
+    SELECT date_sub(curdate(), interval 6 day) as click_date  
+) a left join (  
+  select date(FROM_UNIXTIME(reg_time)) as datetime, count(*) as count  
+  from member  
+  group by date(FROM_UNIXTIME(reg_time))  
+) b on a.click_date = b.datetime;
+```
 
 - 如何从 MySQL 全库备份中恢复某个库和某张表
 > 这里主要用到的参数是 --one-database（简写 -o），极大方便了我们的恢复灵活性。
