@@ -163,6 +163,7 @@ $data = [
 ];
 $xxx->setAttributes($data);
 if (false === $xxx->save()){
+    // 取第一条报错，current($xxx->getErrors())[0]
     throw new ServiceException('插入失败，error：' . Json::encode($xxx->getErrors()), 0);
 }
 
