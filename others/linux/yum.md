@@ -17,3 +17,10 @@ yum search xxx #搜索软件
 
 yum update #升级所有软件
 ```
+
+### 问题与解决方案
+```bash
+# 中文文件名乱码
+yum install convmv –y 
+convmv -f gbk -t utf-8 -r --notest /dir_path 
+```
