@@ -1,6 +1,14 @@
 
 ### Mac 快捷键
 ```
+# 选中文字后，按住 「ctrl + esc」 键，会将文字进行朗读
+
+# 查看文件、文件夹属性
+command + I
+
+# 切换输入法
+ctrl+space
+
 # 全屏幕截图
 shift+command+3
 # 鼠标选取截图
@@ -15,6 +23,44 @@ Command+X 只能剪切文字文本
 
 # 清空废纸篓
 shift+command+delete
+
+# 快速推出程序
+command + Q
+# 隐藏当前程序
+command + H
+# 打开偏好设置
+command + ,
+# 新建一个当前应用程序的窗口
+command + N
+# 当前窗口最小化
+command + M
+# 关闭当前窗口
+command + W
+
+# 隐藏 dock 栏
+option + command + D
+
+# 打开强制退出的窗口
+option + command + esc
+
+# 隐藏除当前应用程序之外的其他应用程序
+option + command + H
+# 快速关闭当前应用程序的所有窗口
+option + command + W
+# 查看多个文件的总的属性
+option + command + I
+
+# 浏览器中，新建一个标签
+command + T
+# 强制刷新
+command + R
+# 定位到地址栏
+command + L
+# 关闭当前标签
+command + W
+
+# 退出 Safari，下次进入 Safari 的时候，上次退出时的网址会自动被打开
+option + command + Q
 ```
 
 ### Mac 命令行
