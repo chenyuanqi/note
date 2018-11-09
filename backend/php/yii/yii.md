@@ -57,3 +57,36 @@
 > 别名的获取相应的 Yii::getAlias('@foo'), 或在路径中直接使用 new FileCache(['cachePath' => '@foo/cache'])  
 
 
+### Yii 的跨域问题
+```php
+// 1、入口处理浏览器的 option 验证请求
+if ('OPTIONS' == $_SERVER['REQUEST_METHOD']) {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Headers: Content-Type, Content-Length, User-Agent, Accept-Language, Accept-Encoding, Authorization, Auth-Sign, Client-date, Client-Timestamp, Accept, X-Requested-With');
+
+    echo json_encode(['code' => 200, 'message' => 'ok']);exit();
+}
+
+// 2、相应 Response 基类设置头部
+public function sendHeaders()
+{
+  $this->headers->add("Access-Control-Allow-Origin", "*");
+  $this->headers->add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  $this->headers->add('Access-Control-Allow-Credentials', 'true');
+  $this->headers->add("Access-Control-Allow-Headers", "Content-Type, Content-Length, User-Agent, Accept-Language, Accept-Encoding, Authorization, Auth-Sign, Client-date, Client-Timestamp, Accept, X-Requested-With");
+  $this->headers->add('Hxxx', gethostname());
+
+  return parent::sendHeaders();
+}
+// 或在控制器限制行为
+[
+    'class' => Cors::className(),
+    'cors' => [
+        'Origin' => ['*'],
+        'Access-Control-Request-Method' => [],
+        'Access-Control-Request-Headers'=>['*']
+    ],
+]
+```
