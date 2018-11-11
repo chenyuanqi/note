@@ -101,7 +101,7 @@ alter table table_name add column column_name varchar(30);
 alter table table_name drop column column_name;
 # 修改列名
 alter table table_name change column_name new_column_name new_column_type;
-# 修改列属性
+# 修改列属性，修改字段数据类型
 alter table table_name modify column_name column_type;
 # 建表时设置主键
 create table table_name( id int primary key);
@@ -133,6 +133,7 @@ alter table table_name drop key/index column_name;
 # 写入数据
 # INSERT INTO table_name ( field1, field2,...fieldN ) VALUES (value1, value2,...valueN );
 INSERT INTO pet VALUES ('Puffball','Diane','hamster','f','1999-03-30',NULL);
+INSERT INTO table_name (column1, column2) VALUES (value1, value2);
 
 # 更新数据
 # UPDATE table_name SET field1=new-value1, field2=new-value2 [WHERE Clause]
@@ -140,34 +141,83 @@ UPDATE pet SET birth = '1989-08-31' WHERE name = 'Bowser';
 
 # 删除数据
 # DELETE FROM table_name [WHERE Clause]
-DELETE pet WHERE id=100;
+DELETE FROM table_name WHERE condition;
+DELETE * FROM table_name;
 
 # 基本条件查询
 SELECT name, email FROM pet WHERE birth >= '1998-1-1';
+SELECT column1, column2 FROM table_name WHERE condition;
+SELECT * FROM table_name WHERE condition1 AND condition2;
+SELECT * FROM table_name WHERE condition1 OR condition2;
+SELECT * FROM table_name WHERE NOT condition;
+SELECT * FROM table_name WHERE condition1 AND (condition2 OR condition3);
+SELECT * FROM table_name WHERE EXISTS (SELECT column_name FROM table_name WHERE condition);
+
+# AS 用于给表或者列分配别名
+SELECT column_name AS alias_name FROM table_name;
+SELECT column_name FROM table_name AS alias_name;
+SELECT column_name AS alias_name1, column_name2 AS alias_name2;
+SELECT column_name1, column_name2 + ‘, ‘ + column_name3 AS alias_name;
+
+# IN 运算符是多个 OR 条件的简写
+SELECT column_names FROM table_name WHERE column_name IN (value1, value2, …);
+SELECT column_names FROM table_name WHERE column_name IN (SELECT STATEMENT);
+
+# BETWEEN 用于过滤给定范围的值的运算符
+SELECT column_names FROM table_name WHERE column_name BETWEEN value1 AND value2;
+SELECT * FROM Products WHERE (column_name BETWEEN value1 AND value2) AND NOT column_name2 IN (value3, value4);
+SELECT * FROM Products WHERE column_name BETWEEN \#01/07/1999\# AND \#03/12/1999\#;
 
 # 去重查询
 SELECT DISTINCT owner FROM pet;
 
-# is null 查询
+# is null 查询，代表一个字段没有值
 SELECT name, birth FROM pet WHERE death IS NOT NULL;
+SELECT * FROM table_name WHERE column_name IS NULL;
 
 # 模糊查询(_ 匹配一个，% 匹配零个或多个)
 SELECT * FROM pet WHERE name LIKE '_b%';
+# LIKE ‘a_%_%’ （查找任何以 “a” 开头且长度至少为 3 的值）
+# LIKE ‘[a-c]%’（查找任何以 “a” 或“b”或 “c” 开头的值）
 
 # 正则查询(^ 开头定位符，$ 结尾定位符，. 任意字符，{number} 出现次数...)
 SELECT * FROM pet WHERE name REGEXP '^b.{5}$';
 
 # 统计
+# COUNT 返回出现次数
 SELECT COUNT(*) FROM pet;
+SELECT COUNT (DISTINCT column_name);
+
+# MIN() and MAX() 返回所选列的最小 / 最大值
+SELECT MIN (column_names) FROM table_name WHERE condition;
+SELECT MAX (column_names) FROM table_name WHERE condition;
+
+# AVG() 返回数字列的平均值
+SELECT AVG (column_name) FROM table_name WHERE condition;
+
+# SUM() 返回数值列的总和
+SELECT SUM (column_name) FROM table_name WHERE condition;
 
 # 排序(默认升序)
 SELECT name, birth FROM pet ORDER BY birth [DESC];
 
-# 分组
+# 分组，通常与聚合函数（COUNT，MAX，MIN，SUM，AVG）一起使用，用于将结果集分组为一列或多列
 SELECT sex, COUNT(*) FROM pet GROUP BY sex;
+SELECT column_name1, COUNT(column_name2) FROM table_name WHERE condition GROUP BY column_name1 ORDER BY COUNT(column_name2) DESC;
+# HAVING 子句指定 SELECT 语句应仅返回聚合值满足指定条件的行。它被添加到 SQL 语言中，因为 WHERE 关键字不能与聚合函数一起使用
+SELECT COUNT(column_name1), column_name2 FROM table GROUP BY column_name2 HAVING COUNT(column_name1) > 5;
 
-# 连表查询
-SELECT pet.name,TIMESTAMPDIFF(YEAR,birth,date) AS age,remark FROM pet INNER JOIN event ON pet.name = event.name WHERE event.type = 'litter';
+# UNION 用于组合两个或者多个 SELECT 语句的结果集的运算符
+SELECT columns_names FROM table1 UNION SELECT column_name FROM table2;
+# 每个 SELECT 语句必须拥有相同的列数  
+# 列必须拥有相似的数据类型  
+# 每个 SELECT 语句中的列也必须具有相同的顺序
+# UNION 仅允许选择不同的值, UNION ALL 允许重复
+
+# ANY|ALL 用于检查 WHERE 或 HAVING 子句中使用的子查询条件的运算符
+SELECT columns_names FROM table1 WHERE column_name operator (ANY|ALL) (SELECT column_name FROM table_name WHERE condition);
+# ANY 如果任何子查询值满足条件，则返回 true
+# ALL 如果所有子查询值都满足条件，则返回 true
 
 # 导入数据
 LOAD DATA LOCAL INFILE '路径/pet.txt' INTO TABLE event;
@@ -189,5 +239,26 @@ SELECT * FROM `articles_onlines` WHERE FIND_IN_SET(6, `article_tags`);
 # 某字段是否存在字符串中，譬如 tags_id in ('1,2,3')
 SELECT * FROM `article_tabs` WHERE `tags_id` IN '1,2,3';
 
+# 创建视图
+CREATE VIEW view_name AS SELECT column1, column2 FROM table_name WHERE condition;
+# 检索视图
+SELECT * FROM view_name;
+# 删除视图
+DROP VIEW view_name;
+
+# 连表查询
+SELECT pet.name,TIMESTAMPDIFF(YEAR,birth,date) AS age,remark FROM pet INNER JOIN event ON pet.name = event.name WHERE event.type = 'litter';
+# INNER JOIN 内连接，返回在两张表中具有匹配值的记录
+SELECT column_names FROM table1 INNER JOIN table2 ON table1.column_name=table2.column_name;
+SELECT table1.column_name1, table2.column_name2, table3.column_name3 FROM ((table1 INNER JOIN table2 ON relationship) INNER JOIN table3 ON relationship);
+
+# LEFT (OUTER) JOIN 左外连接，返回左表（table1）中的所有记录，以及右表中的匹配记录（table2）
+SELECT column_names FROM table1 LEFT JOIN table2 ON table1.column_name=table2.column_name;
+# RIGHT (OUTER) JOIN 右外连接，返回右表（table2）中的所有记录，以及左表（table1）中匹配的记录
+SELECT column_names FROM table1 RIGHT JOIN table2 ON table1.column_name=table2.column_name;
+# FULL (OUTER) JOIN 全外连接，全连接是左右外连接的并集. 连接表包含被连接的表的所有记录, 如果缺少匹配的记录, 以 NULL 填充。
+SELECT column_names FROM table1 FULL OUTER JOIN table2 ON table1.column_name=table2.column_name;
+# Self JOIN 自连接，表自身连接
+SELECT column_names FROM table1 T1, table1 T2 WHERE condition;
 ```
 
