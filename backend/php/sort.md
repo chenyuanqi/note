@@ -56,3 +56,8 @@ function quick_sort($arr)
 }
 ```
 
+### 插入排序
+
+
+### 选择排序
+
