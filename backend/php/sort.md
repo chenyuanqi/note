@@ -84,4 +84,33 @@ function insertion_sort($arr)
 ```
 
 ### 选择排序
+选择排序算法的实现思路有点类似插入排序，也分已排序区间和未排序区间。但是选择排序每次会从未排序区间中找到最小的元素，将其放到已排序区间的末尾。  
+选择排序的时间复杂度是 O(n^2)；由于不涉及额外的存储空间，所以是原地排序；由于涉及非相邻元素的位置交换，所以是不稳定的排序算法。  
+```php
+function selection_sort($arr)
+{
+    $arr_length = count($arr);
+    if (!is_array($arr) || 0 === $arr_length) {
+        return [];
+    }
+
+    for ($i = 0; $i < $arr_length; $i++) {
+        $min= $i;
+        for ($j = $i + 1; $j < $arr_length; $j++) {
+            if ($arr[$j] < $arr[$min]) {
+                $min = $j;
+            }
+        }
+        if ($min != $i) {
+            $temp = $arr[$i];
+            $arr[$i] = $arr[$min];
+            $arr[$min] = $temp;
+        }
+    }
+
+    return $arr;
+}
+```
+
+### 归并排序
 
