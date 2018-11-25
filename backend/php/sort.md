@@ -113,4 +113,61 @@ function selection_sort($arr)
 ```
 
 ### 归并排序
+所谓归并排序，指的是如果要排序一个数组，我们先把数组从中间分成前后两部分，然后对前后两部分分别排序，再将排好序的两部分合并在一起，这样整个数组就都有序了。  
+归并排序使用了分治思想，分治，顾名思义，就是分而治之，将一个大问题分解成小的子问题来解决。说到这里，可能你就能联想起我们之前讲到的一个编程技巧 —— 递归，没错，归并排序就是通过递归来实现的。这个递归的公式是每次都将传入的待排序数组一分为二，直到不能分割，然后将排序后序列合并，最终返回排序后的数组。  
+归并排序不涉及相等元素位置交换，是稳定的排序算法，时间复杂度是 O(nlogn)，要优于 O(n^2)，但是归并排序需要额外的空间存放排序数据，不是原地排序，最多需要和待排序数组同样大小的空间，所以空间复杂度是 O(n)。  
+```php
+function merge_sort($arr)
+{
+    if (count($arr) <= 1) {
+        return  $arr;
+    }
+
+    merge_sort_c($arr, 0, count($arr) - 1);
+    return $arr;
+}
+
+function merge_sort_c(&$arr, $p, $r)
+{
+    if ($p >= $r) {
+        return;
+    }
+
+    $q = floor(($p + $r) / 2);
+    merge_sort_c($arr, $p, $q);
+    merge_sort_c($arr, $q + 1, $r);
+
+    merge($arr, ['start' => $p, 'end' => $q], ['start' => $q + 1, 'end' => $r]);
+}
+
+function merge(&$arr, $arr_p, $arr_q){
+    $temp = [];
+    $i = $arr_p['start'];
+    $j = $arr_q['start'];
+    $k = 0;
+    while ($i <= $arr_p['end'] && $j <= $arr_q['end']) {
+        if ($arr[$i] <= $arr[$j]) {
+            $temp[$k++] = $arr[$i++];
+        } else {
+            $temp[$k++] = $arr[$j++];
+        }
+    }
+
+    if ($i <= $arr_p['end']) {
+        for (; $i <= $arr_p['end']; $i++) {
+            $temp[$k++] = $arr[$i];
+        }
+    }
+
+    if ($j <= $arr_q['end']) {
+        for (; $j <= $arr_q['end']; $j++) {
+            $temp[$k++] = $arr[$j];
+        }
+    }
+
+    for ($x = 0; $x < $k; $x++) {
+        $arr[$arr_p['start'] + $x] = $temp[$x];
+    }
+}
+```
 
