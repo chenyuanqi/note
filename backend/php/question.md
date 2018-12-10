@@ -24,6 +24,8 @@
 > 理论上，include 和 require 后面加不加括号对执行结果没有区别，但是加上括号效率较低，所以后面能不加括号就不加括号。  
 > 
 
+额外阅读：[PHP 自动加载机制](https://blog.csdn.net/zhihua_w/article/details/52723402)
+
 - isset 和 empty 的区别
 > isset() 函数 一般用来检测变量是否设置  
 > 若变量不存在则返回 FALSE   
