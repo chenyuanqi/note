@@ -124,8 +124,16 @@ public function rules()
         'filter' => function (){
             return Teachers::AUDIT_STATUS_REVIEW_SUCCESS;
         },
-        'when' => function (self $model){
+        'when' => function ($model){
             return static::STATUS_NORMAL == $model->status;
+        }
+    ],
+
+    [
+        ['joined_count'],
+        'integer',
+        'when' => function (self $model){
+            return !$model->joined_count instanceof Expression;
         }
     ],
 }
