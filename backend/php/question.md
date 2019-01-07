@@ -238,7 +238,42 @@ foreach ($readBigFile('./test.txt') as $key => $value) {
 > 硬件设备的主要产品是 F5-BIG-IP-GTM（简称F5)，软件产品主要有 LVS、HAProxy、Nginx。其中 LVS、HAProxy 可以工作在 4-7 层，Nginx 工作在 7 层。硬件负载均衡设备可以将核心部分做成芯片，性能和稳定性更好，而且商用产品的可管理性、文档和服务都比较好。唯一的问题就是价格。  
 > 软件负载均衡通常是开源软件。自由度较高，但学习成本和管理成本会比较大。  
 > 
-> 下面，继续说说 Nginx 的负载均衡实现...  
+> 下面，继续说说 Nginx 的负载均衡实现  
+> 1、轮询  
+> 这种是默认的策略，把每个请求按顺序逐一分配到不同的 server，如果 server 挂掉，能自动剔除。
+```
+upstream  fengzp.com {   
+    server   192.168.99.100:42000; 
+    server   192.168.99.100:42001;  
+}
+```
+> 2、最少连接  
+> 把请求分配到连接数最少的 server  
+```
+upstream  fengzp.com {   
+    least_conn;
+    server   192.168.99.100:42000; 
+    server   192.168.99.100:42001;  
+}
+```
+> 3、权重  
+> 使用 weight 来指定 server 访问比率，weight 默认是 1。以下配置会是 server2 访问的比例是 server1 的两倍。
+```
+upstream  fengzp.com {   
+    server   192.168.99.100:42000 weight=1; 
+    server   192.168.99.100:42001 weight=2;  
+}
+```
+> 4、ip_hash  
+> 每个请求会按照访问 ip 的 hash 值分配，这样同一客户端连续的 Web 请求都会被分发到同一 server 进行处理，可以解决 session 的问题。如果 server 挂掉，能自动剔除。
+```
+upstream  fengzp.com {   
+    ip_hash;
+    server   192.168.99.100:42000; 
+    server   192.168.99.100:42001;  
+}
+```
+> ip_hash 可以和 weight 结合使用。  
 
 
 - 百万级数据导出的实现

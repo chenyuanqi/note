@@ -627,4 +627,9 @@ ab -n 100 -c 10 -l http://www.your_site.com
 # -l 表示当某个请求的回复长度不与第一个请求的回复长度一致时，不把它作为失败的请求
 ab -n 100 -c 10 -p post.txt http://www.your_site.com
 # post.txt 的内容是参数，如 data={"name":"wgc"}，但是，需要 url 编码
+
+# Ctrl + Z 程序转为后台运行
+# bg 查看后台运行程序
+# fg 序号 调到前台
 ```
+
