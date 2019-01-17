@@ -234,6 +234,21 @@ EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
 > snowflake 是 Twitter 开源的分布式 ID 生成算法，结果是一个 long 型的 ID。其核心思想是：使用 41 bit 作为毫秒数，10 bit 作为机器的 ID（5 个 bit 是数据中心，5 个 bit 的机器 ID），12bit 作为毫秒内的流水号（意味着每个节点在每毫秒可以产生 4096 个 ID），最后还有一个符号位，永远是 0。  
 > 这个算法单机每秒内理论上最多可以生成 1000 * (2 ^ 12)，也就是 409.6 万个 ID。  
  
+- Mysql 的死锁问题
+> 原理：当对于数据库某个表的某一列做更新或删除等操作，执行完毕后该条语句不提交，另一条对于这一列数据做更新操作的语句在执行的时候就会处于等待状态，此时的现象是这条语句一直在执行，但一直没有执行成功，也没有报错。  
+> 
+> 定位：  
+> 1、用 dba 用户执行以下语句
+> select username,lockwait,status,machine,program from v$session where sid in(select session_id from v$locked_object)  
+> 如果有输出的结果，则说明有死锁，且能看到死锁的机器是哪一台（username 死锁语句所用的数据库用户；lockawait 死锁的状态，如果有内容表示被死锁；status 状态，active 表示被死锁；machine 死锁语句所在的机器；program 产生死锁的语句主要来自哪个应用程序）  
+> 2、用 dba 用户执行以下语句，可以查看到被死锁的语句  
+> select sql_text from v$sql where hash_value in (select sql_hash_value from v$session where sid in(select session_id from v$locked_object))  
+> 
+> 解决方案：  
+> 一般情况下，只要将产生死锁的语句提交就可以了，但是在实际的执行过程中。用户可能不知道产生死锁的语句是哪一句。可以将程序关闭并重新启动就可以了。  
+> 查找死锁的进程：sqlplus "/as sysdba" (sys/change_on_install) SELECT s.username,l.OBJECT_ID,l.SESSION_ID,s.SERIAL#,l.ORACLE_USERNAME,l.OS_USER_NAME,l.PROCESS FROM V$LOCKED_OBJECT l,V$SESSION S WHERE l.SESSION_ID=S.SID;  
+> kill 掉这个死锁的进程：alter system kill session ‘sid,serial#’; （其中 sid=l.session_id）  
+> 如果还不能解决：select pro.spid from v$session ses,v$process pro where ses.sid=XX and ses.paddr=pro.addr;（其中，sid 用死锁的 sid 替换：ps -ef|grep spid）  
 
 
 
