@@ -300,3 +300,19 @@ public static function trimBlankCharacter($str)
 }
 
 ```
+
+### 常用命令行
+```
+# 建表
+./console/yii migrate/create create_test_table -p=common/migrations
+# 添加字段
+./console/yii migrate/create add_test_column -p=common/migrations
+# 迁移
+./console/yii migrate/up -p=common/migrations/
+# 指定文件迁移
+./console/yii migrate/to  m190125_060854_create_test_table -p=common/migrations/
+
+# 创建模型
+./console/yii gii/model --tableName="db.configs" --modelClass=Configs --queryNs="\common\models\test" --ns="\common\models\test" --generateLabelsFromComments=1 --enableI18N=1 --overwrite=1
+```
+
