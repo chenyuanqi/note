@@ -202,9 +202,80 @@ echo intdiv(10, 3);
 3、支持「[跳标签 goto](http://php.net/manual/zh/control-structures.goto.php)」  
 4、支持「[匿名函数](http://php.net/manual/zh/functions.anonymous.php)」  
 5、新增「[魔术方法 __callStatic](http://php.net/manual/zh/language.oop5.overloading.php#language.oop5.overloading.methods)」  
+调用一个不存在的静态方法时被调用  
 6、新增「[魔术方法 __invoke](http://php.net/manual/zh/language.oop5.magic.php#language.oop5.magic.invoke)」  
+该魔术方法会在将一个对象作为函数调用时被调用  
 7、新增「[Nowdoc 结构](http://php.net/manual/zh/language.types.string.php#language.types.string.syntax.nowdoc)」，类似「[Heredoc 结构](http://php.net/manual/zh/language.types.string.php#language.types.string.syntax.heredoc)」  
+Heredoc 以三个左尖括号开始，后面跟一个标识符, 直到一个同样的顶格的标识符(不能缩进) 结束。就像双引号字符串一样，其中可以嵌入变量。  
+Nowdoc 的行为像一个单引号字符串，不能在其中嵌入变量，和 Heredoc 唯一的区别就是，三个左尖括号后的标识符要以单引号括起来  
 8、支持类外部使用 const 关键词声明「[常量](http://php.net/manual/zh/language.constants.syntax.php)」  
 9、支持「[三元运算符](http://php.net/manual/zh/language.operators.comparison.php#language.operators.comparison.ternary)」简写“?:”  
 10、支持「[异常](http://php.net/manual/zh/language.exceptions.php)」内嵌  
 11、新增循环引用的垃圾回收器（默认开启）  
+12、Phar 即 PHP Archive, 起初只是 Pear 中的一个库而已，后来在 PHP5.3 被重新编写成 C 扩展并内置到 PHP 中。  
+Phar 用来将多个 .php 脚本打包 (也可以打包其他文件) 成一个 .phar 的压缩文件(通常是 ZIP 格式)。
+目的在于模仿 Java 的 .jar, 不对，目的是为了让发布 PHP 应用程序更加方便。同时还提供了数字签名验证等功能。  
+
+.phar 文件可以像 .php 文件一样，被 PHP 引擎解释执行，同时你还可以写出这样的代码来包含 (require) .phar 中的代码：
+```php
+require("xxoo.phar");
+```
+
+13、后期静态绑定  
+PHP 的 OPP 机制，具有继承和类似虚函数的功能，例如如下的代码：
+```php
+class A
+{
+    public function callFuncTest()
+    {
+        print $this->funcTest();
+    }
+
+    public function funcTest()
+    {
+        return "A::funcTest";
+    }
+}
+
+class B extends A
+{
+    public function funcTest()
+    {
+        return "B::funcTest";
+    }
+}
+
+$b = new B;
+$b->callFuncTest();
+```
+输出是：B::funcTest    
+可以看到，当在 A 中使用 $this->funcTest() 时，体现了 “虚函数” 的机制，实际调用的是 B::funcTest()。
+然而，如果将所有函数都改为静态函数：
+```php
+class A
+{
+    static public function callFuncTest()
+    {
+        echo self::funcTest();
+    }
+
+    static public function funcTest()
+    {
+        return "A::funcTest";
+    }
+}
+
+class B extends A
+{
+    static public function funcTest()
+    {
+        return "B::funcTest";
+    }
+}
+
+$b = new B;
+$b->callFuncTest();
+```
+情况就没这么乐观了，输出是：A::funcTest  
+这是因为 self 的语义本来就是 “当前类”，所以 PHP5.3 给 static 关键字赋予了一个新功能：后期静态绑定。
+
