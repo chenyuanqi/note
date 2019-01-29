@@ -7,6 +7,9 @@ svn checkout url
 # 查看状态
 svn status
 
+# 查看信息
+svn info
+
 # 查看变动
 svn diff [file_path]
 
@@ -22,6 +25,8 @@ svn revert [file_path]
 # 更新所有提交
 svn update
 
+# 切换分支
+svn sw [svn_path]
 ```
 
 ### svn 常用链接
