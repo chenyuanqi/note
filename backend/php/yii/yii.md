@@ -6,6 +6,7 @@
 [yii 学习社区-阿北](https://nai8.me/)  
 [yiigist](https://yiigist.com/)  
 [yii 速查表](https://nai8.me/tool-sc.html)  
+[yii project](https://yiipowered.com/en)  
 
 ### Yii 的生命周期
 - 请求到响应的生命周期
