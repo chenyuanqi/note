@@ -1,5 +1,16 @@
 
 ### 开发问题汇集
+- BOM 头是什么，怎么去除
+> BOM 头是放在 UTF-8 编码的文件的头部的三个字符（0xEF 0xBB 0xBF，即BOM）占用三个字节，用来标识该文件属于 UTF-8 编码。现在已经有很多软件识别 BOM 头，但是还有些不能识别 BOM 头，比如 PHP 就不能识别 BOM 头，所以 PHP 编码规范PSR-4：“无 BOM 的 UTF-8 格式”。同时这也是用 Windows 记事本编辑 UTF-8 编码后执行就会出错的原因了（Windows 记事本生成文件自带 BOM）。
+```php
+function remove_utf8_bom($text){
+    $bom = pack('H*','EFBBBF');
+    $text = preg_replace("/^$bom/", '', $text);
+
+    return $text;
+}
+```
+
 - include、include_once 和 require、require_once 的区别
 > include 函数：会将指定的文件读入并且执行里面的程序（失败返回 FALSE 并且发出警告；成功返回 1，除非在包含文件中另外给出返回值）；  
 > require 函数：会将目标文件的内容读入，并且把自己本身代换成这些读入的内容（失败发出致命错误并终止程序；成功返回 1，除非在包含文件中另外给出返回值）；  
