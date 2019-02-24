@@ -1,5 +1,5 @@
 # vikey's note
-人生苦短，谨慎撸文~  
+人生苦短，笔记疯狂~  
 
 Evernote is a great tool to collect and connect to the world. But not a good tool to build links within. So I'm planning to migrate my favor note to github.   
 
