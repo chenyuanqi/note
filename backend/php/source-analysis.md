@@ -55,6 +55,51 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystac
 ```
 
 - PHP 变量的实现
-> 
+> 在 PHP 的核心代码中，变量被称为 ZVAL。  
+> ZVAL 这个结构之所以那么重要是有原因的，不仅仅是因为 PHP 使用弱类型而 C 使用强类型
+```c
+struct _zval_struct {
+    /* Variable information */
+    zvalue_value value; /* value */
+    zend_uint refcount__gc; // 指向 PHP 变量容器的指针的计数器
+    zend_uchar type; /* active type，比如使用 zval.type = IS_LONG 来定义整型数据 */
+    zend_uchar is_ref__gc; // 标识变量是否为引用
+};
 
+// union 是单独的类型，它根据怎么被访问而使用不同的方式解释
+typedef union _zvalue_value {
+    long lval; /* long value */
+    double dval; /* double value */
+    struct {
+        char *val;
+        int len;
+    } str;
+    HashTable *ht; /* hash table value */
+    zend_object_value obj;
+} zvalue_value;
+```
 
+- PHP 数组的实现
+> PHP 里面的所有东西都是哈希表。在 C 里面，数组是内存块，你可以通过下标访问这些内存块。即在 C 里面的数组只能使用整数且有序的键值。  
+> 哈希表是这样的：它们使用哈希函数转换字符串键值为正常的整型键值。哈希后的结果可以被作为正常的 C 数组的键值（又名为内存块）。现在的问题是，哈希函数会有冲突，那就是说，多个字符串键值可能会生成一样的哈希值。这个问题可以通过存储可能冲突的值到链表中，而不是直接将值存储到生成的下标里。  
+> Zend Engine 定义了大量的 API 函数供哈希表使用。低级的哈希表函数预览可以在 zend_hash.h 文件里面找到。另外 Zend Engine 在 zend_API.h 文件定义了稍微高级一些的 API。  
+```c
+// hash 表结构
+typedef struct _hashtable {
+    uint nTableSize;
+    uint nTableMask;
+    uint nNumOfElements;
+    ulong nNextFreeElement;
+    Bucket *pInternalPointer;
+    Bucket *pListHead;
+    Bucket *pListTail;
+    Bucket **arBuckets;
+    dtor_func_t pDestructor;
+    zend_bool persistent;
+    unsigned char nApplyCount;
+    zend_bool bApplyProtection;
+     #if ZEND_DEBUG
+        int inconsistent;
+     #endif
+} HashTable;
+```
