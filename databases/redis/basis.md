@@ -113,6 +113,7 @@ redis> del NAME
 
 - 字符串（string）  
 > Redis 最简单而且最常用的数据类型之一，字符串（string）类型也可以用来存储数字，并支持对数字的加减操作  
+> 应用场景：流量访问限制、投票统计、用户 token 和 uid 的对应关系  
 > ![redis_string_command](./static/redis_string_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
@@ -149,6 +150,7 @@ redis> decrby age 2
 
 - 哈希（hash）  
 > Redis hash 是一个 string 类型的 field 和 value 的映射表，hash 特别适合用于存储对象，能够存储 key 对多个属性的数据  
+> 应用场景： 存储用户信息  
 > ![redis_hash_command](./static/redis_hash_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
@@ -190,11 +192,11 @@ redis> hscan user 0
 
 - 列表（list）  
 > Redis 列表就是有序元素的序列，比如 1,2,3,4,5,6 就是一个列表；  
-> Redis 列表是简单的字符串列表，按照插入顺序排序，可以在头部或尾部添加元素  
->   
+> Redis 列表是简单的字符串列表，按照插入顺序排序，可以在头部或尾部添加元素    
 > Redis 列表是基于 Linked List 实现（用数组实现的 List 和用 Linked List 实现的 List，在属性方面大不相同）  
 > 这意味着即使在一个列表中有数百万个元素，在头部或尾部添加一个元素的操作，其时间复杂度也是常数级别的  
 > 也就是说，用 LPUSH 命令在十个元素的列表头部添加新元素，和在千万元素列表头部添加新元素的速度相同  
+> 应用场景：消息队列  
 > ![redis_list_command](./static/redis_list_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
@@ -223,6 +225,7 @@ redis> lrange demo 0 3
 - 集合（set）
 > Redis 集合是 string 类型的无序集合  
 > 集合成员是唯一的，这就意味着集合中不能出现重复的数据  
+> 应用场景：关注和共同关注  
 > ![redis_set_command](./static/redis_set_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
@@ -246,6 +249,7 @@ redis> smembers lang
 - 有序集合（sorted set）
 > Redis 有序集合和集合一样也是 string 类型元素的集合，且不允许重复的成员  
 > 不同的是，Redis 有序集合每个元素都会关联一个 double 类型的分数，redis 正是通过分数来为集合中的成员进行从小到大的排序  
+> 应用场景： 排行榜  
 > ![redis_sorted_set_command](./static/redis_sorted_set_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
