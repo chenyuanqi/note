@@ -462,4 +462,10 @@ function exportCsv(array $head, $data, $mark = 'attack_ip_info', $fileName = "te
 > 5、在数据库里添加约束  
 > 在数据库里添加唯一约束或创建唯一索引，防止出现重复数据。这是最有效的防止重复提交数据的方法。
 
+- PHP 中布尔值为 false 的情况
+> 1、undefined（未定义，找不到值时出现）  
+> 2、null（代表空值）  
+> 3、false（布尔值的 false，字符串 "false" 布尔值为 true）  
+> 4、0（数字 0，字符串 "0" 布尔值都为 false）  
+> 5、""（双引号）或''（单引号） （空字符串，中间有空格时也是 true）
 
