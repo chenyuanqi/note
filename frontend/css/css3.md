@@ -108,6 +108,23 @@ E::selection 可改变选中文本的样式；
 
 ":" 与 "::" 区别在于区分伪类和伪元素  
 
+#### 2.5 新增选择器
+E:nth-child (n)：匹配元素类型为 E 且是父元素的第 n 个子元素   
+E:nth-last-child (n)：匹配元素类型为 E 且是父元素的倒数第 n 个子元素（与上一项顺序相反）  
+E:first-child：匹配元素类型为 E 且是父元素的第一个子元素  
+E:last-child：匹配元素类型为 E 且是父元素的最后一个子元素  
+E:only-child：匹配元素类型为 E 且是父元素中唯一的子元素  
+E:nth-of-type (n)：匹配父元素的第 n 个类型为 E 的子元素  
+E:nth-last-of-type (n)：匹配父元素的倒数第 n 个类型为 E 的子元素（与上一项顺序相反）  
+E:first-of-type：匹配父元素的第一个类型为 E 的子元素  
+E:last-of-type：匹配父元素的最后一个类型为 E 的子元素  
+E:only-of-type：匹配父元素中唯一子元素是 E 的子元素  
+E:empty 选择一个空的元素  
+E:enabled 可用的表单控件  
+E:disabled 失效的表单控件  
+E:checked 选中的 checkbox  
+E:not (s) 不包含某元素  
+
 ### 三 盒模型
 #### 3.1 CSS3 盒模型简介
 CSS3 中可以通过 box-sizing 属性来指定盒模型，根据不同的盒模型，采用不同的盒子大小计算方式，优点是兼容性好。
@@ -667,4 +684,21 @@ cubic-bezier(number, number, number, number)：
 
 end 函数：
 obj.addEventListener('webkitAnimationEnd', function (){}, false);
+```
+
+### 八、CSS 浏览器前缀
+为了让 CSS3 样式兼容，需要将某些样式加上浏览器前缀：
+
+-ms- 兼容 IE 浏览器
+-moz- 兼容 firefox
+-o- 兼容 opera
+-webkit- 兼容 chrome 和 safari
+```css
+div{    
+    -ms-transform: rotate(30deg);        
+    -webkit-transform: rotate(30deg);    
+    -o-transform: rotate(30deg);        
+    -moz-transform: rotate(30deg);    
+    transform: rotate(30deg);
+}
 ```
