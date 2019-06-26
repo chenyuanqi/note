@@ -69,7 +69,193 @@ let vm = new Vue({
 ```
 
 实际上，每个 Vue 实例在被创建时都要经过一系列的初始化过程 —— 例如，需要设置数据监听、编译模板、将实例挂载到 DOM 并在数据变化时更新 DOM 等。同时在这个过程中也会运行一些叫做生命周期钩子的函数，这给了用户在不同阶段添加自己的代码的机会。  
-参考 [Vue 生命周期图示](https://cn.vuejs.org/v2/guide/instance.html#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%9B%BE%E7%A4%BA)
+参考 [Vue 生命周期图示](https://cn.vuejs.org/v2/guide/instance.html#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%9B%BE%E7%A4%BA)  
+1. beforeCreate  
+此阶段为实例初始化之后，此时的数据观察和事件配置都没好准备好。此时的实例中的 data 和 el 还是 undefined，不可用的。  
+2. created  
+beforeCreate 之后紧接着的钩子就是创建完毕 created，我们同样打印一下数据 data 和挂载元素 el。此时，我们能读取到数据 data 的值，但是 DOM 还没生成，所以属性 el 还不存在，输出 $data 为一个 Object 对象，而 $el 的值为 undefined。  
+3. beforeMount  
+此阶段为即将挂载。$el 不再是 undefined，而是成功关联到我们指定的 dom 节点 <div id=”app”></div>，但此时 {{ name }} 还没有被成功地渲染成我们 data中 的数据。  
+4. mounted  
+mounted 也就是挂载完毕阶段，到了这个阶段，数据就会被成功渲染出来。此时打印属性 el，我们看到 {{ name }} 已经成功渲染成我们 data.name 的值。  
+5. beforeUpdate  
+当修改 vue 实例的 data 时，vue 就会自动帮我们更新渲染视图，在这个过程中，vue 提供了 beforeUpdate 的钩子给我们，在检测到我们要修改数据的时候，更新渲染视图之前就会触发钩子 beforeUpdate。  
+在控制台把 app.name 的值修改，在更新视图之前 beforeUpdate 打印视图上的值，结果依然为原来的值，表明在此阶段，视图并未重新渲染更新。  
+6. updated  
+此阶段为更新渲染视图之后，此时再读取视图上的内容，已经是最新的内容。在控制台把 app.name 的值修改，在此阶段，视图将重新渲染更新。   
+7. beforeDestroy  
+调用实例的 destroy() 方法可以销毁当前的组件，在销毁前，会触发 beforeDestroy 钩子。   
+8. destroyed  
+成功销毁之后，会触发 destroyed 钩子，此时该实例与其他实例的关联已经被清除，它与视图之间也被解绑。  
+销毁之前，修改 name 的值，可以成功修改视图显示的内容，一旦效用实例的 $destroy() 方法销毁之后，实例与视图的关系解绑，再修改 name 的值，已于事无补，视图再也不会更新了，说明实例成功被销毁了。  
+9. actived  
+keep-alive 组件被激活的时候调用。  
+10. deactivated  
+keep-alive 组件停用时调用。  
+```html
+<!-- ref 属性，用于获取 DOM 元素（beforeUpdate 用到） -->
+<div ref="app" id="app">{{name}}</div>
+<script>
+  let app = new Vue({
+    el:"#app",
+      data:{
+       name:"vikey"
+    },
+    beforeCreate(){
+       console.log('即将创建');
+       console.log(this.$data);
+       console.log(this.$el);
+    },
+    created(){
+      console.log('创建完毕');
+      console.log(this.$data);
+      console.log(this.$el);
+   },
+   beforeMount(){
+      console.log('即将挂载');
+      console.log(this.$el);
+   },
+   mounted(){
+      console.log('挂载完毕');
+      console.log(this.$el);
+   },
+    beforeUpdate(){
+      console.log('=即将更新渲染=');
+      let name = this.$refs.app.innerHTML;
+      console.log('name:'+name);
+   },
+    updated(){
+      console.log('==更新成功==');
+      let name = this.$refs.app.innerHTML;
+      console.log('name:'+name);
+     },
+      beforeDestroy(){
+       console.log('销毁之前');
+     },
+     destroyed(){
+       console.log('销毁成功');
+     }
+  });
+</script>
+```
+
 
 #### 2.5 Vue 实例的常用选项
+定义一个 Vue 实例，4 个常用参数选项：filters 过滤器、computed  计算属性、methods  方法、watch 观察。  
 
+filters 过滤器  
+顾名思义，就是定义过滤数据处理的方法。  
+```html
+<div id="app">
+  数字1：{{ num1 | toInt }}<br>
+  数字2：{{ num2 | toInt }}<br>
+  数字3：{{ num3 | toInt }}
+</div>
+
+<script>
+let vm = new Vue({
+    //挂载元素
+  el:'#app',
+    //实例vm的数据
+  data:{
+         num1:33.141,
+         num2:46.212,
+         num3:78.541
+    },
+    //过滤器
+  filters:{
+      toInt(value){
+         return parseInt(value);
+      }
+    }
+  });
+</script>
+```
+如上面代码所示，通过管道符 | 把函数 toInt 放在变量后面即可，num1，num2，num3 会分别作为参数 value 传入 toInt( value )方法进行运算，并返回一个整数。  
+
+computed  计算属性  
+有时候，我们拿到一些数据，需要经过处理计算后得到的结果，才是我们要展示的内容。计算属性 computed 的定义语法和过滤器 filters 类似，但是用法不一。  
+```html
+<div id="app">
+ 总和：{{ sum }}
+</div>
+<script>
+let vm = new Vue({
+//挂载元素
+el:'#app',
+  //实例vm的数据
+  data:{
+         num1:1,
+         num2:3,
+         num3:6
+  },
+  //计算属性
+  computed:{
+      sum(){
+        return this.num1 + this.num2 + this.num3
+      }
+  }
+});
+</script>
+```
+需要注意的是，sum 的值是依赖 data 中的数据 num1，num2，num3 的，一旦它们发生了变化，sum 的值也会自动更新。  
+
+methods  方法  
+在 methods 中，我们可以定义一些方法，供组件使用。  
+```html
+<div id="app">
+  {{ a }}
+  <button v-on:click="plus">加1</button>
+</div>
+<script>
+let vm = new Vue({
+  //挂载元素
+  el:'#app',
+  //实例vm的数据
+  data:{
+         a:0
+    },
+  //方法
+  methods:{
+        plus(){
+            return this.a++;
+        }
+    }
+ });
+</script>
+```
+
+watch 观察  
+watch 选项是 Vue 提供的用于检测指定的数据发生改变的 api。  
+```html
+<div id="app">
+  {{ a }}
+  <button v-on:click="plus">加1</button>
+</div>
+<script>
+let vm = new Vue({
+  //挂载元素
+  el:'#app',
+  //实例vm的数据
+  data:{
+         a:0
+    },
+  //方法
+  methods:{
+        plus(){
+            return this.a++;
+        }
+    },
+  //观察
+  watch:{
+        // a() 表示我们要观察监听的就是数据 a
+        a(){
+          console.log(`有变化了，最新值：`);
+          console.log(this.a);
+        }
+    }
+ });
+</script>
+```
+
+#### 2.6 在 html 中绑定数据
