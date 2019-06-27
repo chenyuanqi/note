@@ -259,3 +259,266 @@ let vm = new Vue({
 ```
 
 #### 2.6 在 html 中绑定数据
+vue 提供的 v-html 指令，可以输出 html 标签的效果。  
+```html
+<div id="app" v-html="name"></div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+   name:"<strong>在 html 中绑定数据</strong>"
+  }
+});
+</script>
+```
+
+html 标签的属性也很重要，用 v-bind 指令可以绑定属性。  
+对于 v-bind 指令，如果一个标签中需要绑定多个属性的话，就得连续写多个 v-bind。
+```html
+<div id="app">
+ <!--在href前用v-bind：修饰-->
+ <a v-bind:href="link">hello官网</a>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+   link:"http://hello.com"
+  }
+});
+</script>
+```
+渲染的属性值是布尔值的时候（true 和 false），效果就不一样了，并不是简单地将 true 或者 false 渲染出来，而是当值为 false 的时候，属性会被移除。  
+```html
+<div id="app">
+ <!--用缩写的语法-->
+ <button :disabled="dis_true">
+    我是true
+ </button>
+ <button :disabled="dis_false">
+    我是false
+ </button>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+    dis_true:true,
+    dis_false:false
+  }
+});
+</script>
+```
+我们看到，当属性值设置成 true 的时候，disabled 的值为解析成 disabled ，当属性值设置成 false 的时候，属性 disabled 直接被移除掉了。
+
+vue 支持 javascript 表达式的写法  
+```html
+<div id="app">
+    {{ num+3 }}<br>
+    {{ ok ? 'yes':'no' }}<br>
+    <a :href="'http://'+host">hello</a>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+      num:2,
+      ok:true,
+      host:'hello.com'
+  }
+});
+</script>
+```
+虽然 vue 支持 javascript 表达式运算，我们只会在运算比较简单的情况下才会这么玩，当运算比较繁琐复杂的时候，一定要用 vue 的 computed 属性来进行计算。  
+
+#### 2.7 vue 必备指令
+v-text 用于更新标签包含的文本，它的作用跟双大括号的效果一样  
+```html
+<div id="app">
+  <p v-text="msg"></p>
+  <!--效果相同-->
+  <p>{{ msg }}</p>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+      msg:'hello,vue'
+  }
+});
+</script>
+```
+
+v-html 用于更新标签包含的 html，用于渲染 html 标签  
+```html
+<div id="app">
+  <p v-html="msg"></p>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+    msg:'<b>hello,vue</b>'
+  }
+});
+</script>
+```
+
+v-show 用来控制元素的 display css 属性  
+v-show 指令的取值为 true/false，分别对应着显示/隐藏。  
+```html
+<div id="app">
+  <p v-show="show1">我是true</p>
+  <!-- false 的时候，不会显示 -->
+  <p v-show="show2">我是false</p>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+      show1:true,
+      show2:false
+  }
+});
+</script>
+```
+
+v-if 控制元素是否需要被渲染出来  
+v-if 指令的取值为 true/false，分别对应着渲染/不渲染元素。  
+```html
+<div id="app">
+  <p v-if="if_1">我是true</p>
+  <!-- 下面的 p 标签不会渲染 -->
+  <p v-if="if_2">我是false</p>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+      if_1:true,
+      if_2:false
+  }
+});
+</script>
+```
+如果需要频繁切换显示/隐藏的，就用 v-show；如果运行后不太可能切换显示/隐藏的，就用 v-if。  
+
+v-else 与 v-if 结对，当 v-if 为 false 时执行  
+```html
+<div id="app">
+  <p v-if="if_1">我是if</p>
+  <p v-else>我是else</p>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+      if_1:false
+  }
+});
+</script>
+```
+
+v-for 迭代数组、对象和整数  
+```html
+<div id="app">
+ <div v-for="(item,index) in list">
+     {{index}}.{{item}}
+ </div>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+      list:['Tom','John','Lisa']
+  }
+});
+</script>
+```
+
+v-bind 用于动态绑定 DOM 元素的属性  
+v-bind 指令可以简写成一个冒号 :  
+```html
+<div id="app">
+  <a :href="link">hello world</a>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+      link:"http://helloworld.com"
+  }
+});
+</script>
+```
+
+v-on 指令相当于绑定事件的监听器，绑定的事件触发了，可以指定事件的处理函数，配合 methods 使用  
+```html
+<div id="app">
+ <button v-on:click="say('Tom')">
+      点击
+</button>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  methods:{
+    say(name){
+      console.log('hello,'+name);
+    }
+  }
+});
+</script>
+```
+
+v-model 一般用在表单输入，它帮助我们轻易地实现表单控件和数据的双向绑定  
+```html
+ <div id="app">
+    <input v-model="msg" type="text">
+    <p>你输入的是：{{ msg }}</p>
+ </div>
+ <script>
+ let app = new Vue({
+    el:"#app",
+    data:{
+        msg:''
+    }
+ });
+ </script>
+```
+
+v-once 只渲染一次，后面元素中的数据再更新变化，都不会重新渲染，可以用于优化更新性能  
+```html
+<div id="app">
+ <input v-model="msg"  type="text">
+ <p v-once>你输入：{{ msg }}</p>
+</div>
+<script>
+let app = new Vue({
+  el:"#app",
+  data:{
+      msg:'hello, everyone'
+  }
+});
+</script>
+```
+由于 msg 有了初始值，第一次渲染的时候，input 控件和 p 标签都有了内容，由于 p 标签添加了 v-once 指令，所以后期再更新 msg 的值的时候，p 标签的内容不会发生改变。  
+
+v-cloak 指令保持在元素上直到关联实例结束编译  
+通常结合 CSS 规则，解决插值表达式"闪烁"问题。  
+和 CSS 规则如 [v-cloak] { display: none } 一起用时，这个指令可以隐藏未编译的 Mustache 标签直到实例准备完毕。  
+```html
+<style>
+// 带有v-cloak的标签隐藏
+[v-cloak] {
+  display: none;
+}
+</style>
+
+// 标签
+<div v-cloak>
+  {{ message }}
+</div>
+```  
+
+### 三、Vuejs 组件
