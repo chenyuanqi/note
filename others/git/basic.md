@@ -1,4 +1,26 @@
 
+### 4 个基本概念
+Workspace 工作区  
+当前开发改动的地方，是你当前看到的，也是最新的；平常我们开发就是拷贝远程仓库中的一个分支，基于该分支进行开发。在开发过程中就是对工作区的操作。  
+
+Index / Stage 暂存区  
+.git 目录下的 index 文件，暂存区会记录 git add 添加文件的相关信息 (文件名、大小、timestamp...)，不保存文件实体，通过 id 指向每个文件实体。可以使用 git status 查看暂存区的状态。暂存区标记了你当前工作区中，哪些内容是被 git 管理的。  
+当你完成某个需求或功能后需要提交到远程仓库，那么第一步就是通过 git add 先提交到暂存区，被 git 管理。  
+
+Repository 本地仓库  
+保存了对象被提交过的各个版本，比起工作区和暂存区的内容，它要更旧一些。  
+git commit 后同步 index 的目录树到本地仓库，方便从下一步通过 git push 同步本地仓库与远程仓库的同步。  
+
+Remote 远程仓库  
+远程仓库的内容可能被分布在多个地点的处于协作关系的本地仓库修改，因此它可能与本地仓库同步，也可能不同步，但是它的内容是最旧的。  
+
+> 1、任何对象都是在工作区中诞生和被修改；  
+> 2、任何修改都是从进入 index 区才开始被版本控制；  
+> 3、只有把修改提交到本地仓库，该修改才能在仓库中留下痕迹；  
+> 4、与协作者分享本地的修改，可以把它们 push 到远程仓库来共享。  
+![Git 基本概念](./images/git-area.png)  
+
+### 常用命令
 ```bash
 # 生成公钥 ~/.ssh/id_rsa.pub （用于仓库 ssh key 白名单）
 ssh-keygen -t rsa -C "xxx@xxx.com"
@@ -10,10 +32,19 @@ cd xxx
 git status [-sb]
 # -sb 参数表示开启小白显示
 
-# 添加到指定变更文件，增加跟踪、预备 commit
+# 添加到指定变更文件，增加跟踪、预备 commit 【到暂存区】
 git add file_path
 # 添加所有变更且未被忽略(gitignore)的文件 
 git add .
+# 1.x 版本中：
+# git add all 可以提交未跟踪、修改和删除文件；
+# git add . 可以提交未跟踪和修改文件，但是不处理删除文件。
+# 2.x 版本
+# 两者功能在提交类型方面是相同的。
+# 所在目录不同导致的差异：
+# git add all 无论在哪个目录执行都会提交相应文件；
+# git add . 只能够提交当前目录或者它后代目录下相应文件。
+
 # 对于同一个文件的多处变化，可以多次提交
 git add -p [file_path]
 # 此时，可以撤销 add 操作
@@ -28,7 +59,7 @@ git rm --cached [file]
 # 改名文件，并且将这个改名放入暂存区
 git mv [file_original] [file_renamed]
 
-# 提交到「暂存区」
+# 提交到「到本地仓库」
 git commit -m"commit detailed message."
 # add + commit 所有文件已跟踪过的文件
 git commit -am"commit detailed message."
@@ -49,25 +80,30 @@ git branch -D local_branch_name
 git push origin :remote_branch_name
 
 # 列出所有本地分支
-$ git branch
+git branch
 
 # 列出所有远程分支
-$ git branch -r
+git branch -r
 
 # 列出所有本地分支和远程分支
-$ git branch -a
+git branch -a
 
 # 新建一个分支，但依然停留在当前分支
-$ git branch [local_branch_name]
+git branch [local_branch_name]
 
 # 新建一个分支，并切换到该分支(+绑定远程分支)
-$ git checkout -b [local_branch_name] [origin/remote_branch_name]
+git checkout -b [local_branch_name] [origin/remote_branch_name]
 
 # 新建一个分支，指向指定commit
-$ git branch [local_branch_name] [commit]
+git branch [local_branch_name] [commit]
 
 # 新建一个分支，与指定的远程分支建立追踪关系
-$ git branch --track [local_branch_name] [remote_branch_name]
+git branch --track [local_branch_name] [remote_branch_name]
+
+# 删除本地分支
+git branch -d [local_branch_name]
+# 删除远程分支
+git push origin :[remote_branch_name]
 
 # 切换到指定分支，并更新工作区
 git checkout [local_branch_name]
@@ -219,4 +255,56 @@ git revert [commit]
 git stash
 git stash pop
 
+```
+
+### 命令理解
+```bash
+# 合并
+# merge 命令把不同的分支合并起来
+git fetch [remote]	# merge 之前先拉一下远程仓库最新代码
+git merge [branch]	# 合并指定分支到当前分支
+# merge 之后出现 conflict，需要针对冲突情况手动解除
+
+# rebase 又称为衍合【变基】，是合并的另外一种选择
+git rebase [branch] # 当前分支上新的 commit 都在 [branch] 分支上重演一遍
+
+# merge 和 rebase 的区别
+# 比如有两个分支：test 和 master
+#       D---E test
+#      /
+# A---B---C---F master
+# 在 master 执行 git merge test, 会得到如下结果：
+#       D--------E
+#      /          \
+# A---B---C---F----G   test, master
+# 在 master 执行 git rebase test，会得到如下结果：
+# A---B---D---E---C'---F'   test, master
+# 
+# 如果你想要一个干净的，没有 merge commit 的线性历史树，那么你应该选择 git rebase；
+# 如果你想保留完整的历史记录，并且想要避免重写 commit history 的风险，你应该选择使用 git merge
+
+# 撤销 add、commit  
+# reset 命令把当前分支指向另一个位置，并且相应的变动工作区和暂存区
+git reset —soft [commit] # 只改变提交点，暂存区和工作目录的内容都不改变
+git reset —mixed [commit] # 改变提交点，同时改变暂存区的内容 【默认】
+git reset —hard [commit] # 暂存区、工作区的内容都会被修改到与提交点完全一致的状态
+git reset --hard HEAD # 让工作区回到上次提交时的状态
+
+# revert 用一个新提交来消除一个历史提交所做的任何修改
+git revert HEAD # 撤销上一次 commit
+git revert HEAD^ # 撤销上上一次 commit
+git revert [commit] # 撤销指定的版本，撤销也会作为一次提交进行保存
+
+# reset 和 revert  
+# git revert 是用一次新的 commit 来回滚之前的 commit，git reset 是直接删除指定的 commit。  
+# git reset 是把 HEAD 向后移动了一下，而 git revert 是 HEAD 继续前进，只是新的 commit 的内容和要 revert 的内容正好相反，能够抵消要被 revert 的内容。  
+# 在回滚这一操作上看，效果差不多，但是，在后面继续 merge 以前的老版本时有区别。因为 git revert 是用一次逆向的 commit 回滚之前的提交，因此后面合并老的 branch 时，导致这部分改变不会再次出现，减少冲突。但是 git reset 是直接把某些 commit 在某个 branch 上删除，因而和老的 branch 再次 merge 的时候，这些被回滚的 commit 还会被引入，从而产生更多的冲突。
+#  
+# 应用场景：  
+# 如果回退分支的代码以后还需要的话用 git revert 就再好不过了；  
+# 如果分支就是提错了没用了还不想让别人发现错的代码，那就 git reset。  
+# 再比如，  
+# develop 分支已经合并了 a、b、c 三个分支，忽然发现 b 分支没用，代码也没必要。  
+# 这个时候就不能用 reset 了，因为使用 reset 之后 a 和 c 分支也同样消失了；  
+# 只能用 git revert b_commit，这样 a 和 c 的代码依然还在。
 ```
