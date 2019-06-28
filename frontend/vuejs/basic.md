@@ -205,6 +205,7 @@ methods  方法
 ```html
 <div id="app">
   {{ a }}
+  <!-- v-on 可缩写为 @ -->
   <button v-on:click="plus">加1</button>
 </div>
 <script>
@@ -521,4 +522,180 @@ v-cloak 指令保持在元素上直到关联实例结束编译
 </div>
 ```  
 
+#### 2.8 动态绑定 class 和 style
+对象语法：动态绑定的 class 的值是一个对象 {}
+```html
+ <div id="app">
+  <!-- 当 isActive 为 true 时，class='active' -->
+   <p :class="{'active':isActive}">这是文字</p>
+ </div>
+ <script>
+    //创建一个实例 vm
+    const vm = new Vue({
+        el:"#app",
+        data:{
+            isActive:true
+        }
+    });
+ </script>
+```
+
+数组语法：用数组语法来绑定 class  
+```html
+ <!-- 拼接数组内的所有样式 -->
+ <p :class="[activeClass,errorClass]">
+    这是文字
+ </p>
+
+  <script>
+    //创建一个实例 vm
+    const vm = new Vue({
+        el:"#app",
+        data:{
+            activeClass:'active',
+            errorClass:'error'
+        }
+    });
+ </script>
+```
+
+绑定内联样式也有 2 种语法：对象语法【常用】和数组语法  
+```html
+ <p :style="{color:colorStyle}">
+   这是文字
+ </p> 
+ <!-- 组合所有样式 -->
+ <div :style="[baseStyles, overridingStyles]">我像风一样自由</div>
+ <script>
+    //创建一个实例vm
+    const vm = new Vue({
+        el:"#app",
+        data:{
+            colorStyle:'red',
+            baseStyles:{color:'red'},
+            overridingStyles:{'font-size':'10px'}
+        }
+    });
+ </script>
+```
+
 ### 三、Vuejs 组件
+组件是我们人为地把页面合理地拆分成一个个区块，让这些区块更方便我们重复使用，有了组件，我们可以更高效合理地开发和维护我们的项目。  
+
+#### 3.1 创建组件
+vue 提供的全局 API: Vue.component() 可以用于创建组件。  
+创建之后，可以用 `<my-article></my-article>` 的方式来使用组件。  
+```html
+<div id="app">
+    <my-article></my-article>
+</div>
+<script>
+  // 要确保实例 vm 在创建之前， <my-article> 组件已经被成功注册
+  Vue.component('my-article',{
+     template:`<div>
+              <div>
+              <h1>this is a article title</h1>
+              <div>
+              <span>2019/06/28</span>
+              <span>Original</span>
+              </div>
+              </div>
+              <img src="cover.jpg" alt="">
+              </div>`
+  });
+
+  let vm = new Vue({
+     el:"#app",
+  });
+</script>
+```
+
+#### 3.2 组件传参  
+不但函数可以接受参数，vue 的组件也可以。  
+```html
+<div id="app">
+    <my-article 
+            v-for="item in articles" 
+            :detail="item">
+    </my-article>
+</div>
+<script>
+  // 要确保实例 vm 在创建之前， <my-article> 组件已经被成功注册
+  Vue.component('my-article',{
+     // props 接受传参
+     props:['detail'],
+     template:`<div>
+              <div>
+              <h1>{{ detail.title }}</h1>
+              <div>
+              <span>{{ detail.date }}</span>
+              <span v-show="detail.is_original">Original</span>
+              </div>
+              </div>
+              <img src="detail.cover_url" alt="">
+              </div>`
+  });
+
+  let vm = new Vue({
+     el:"#app",
+     data:{
+       articles:[
+           {
+               title:"first",
+               date:" 2019/06/28",
+               is_original:true,
+               cover_url:"cover.jpg"
+           },
+           {
+               title:"second",
+               date:" 2019/06/18",
+               is_original:false,
+               cover_url:"cover.jpg"
+           }
+       ]
+   }
+  });
+</script>
+```
+
+#### 3.3 组件通信
+##### 3.3.1 props 父组件→子组件传递数据  
+【参考】 3.2 组件传参  
+
+##### 3.3.2 自定义事件 子组件→父组件传递数据  
+每一个 vue 实例都实现了事件接口，我们可以用它提供的 API $emit( eventName) 来触发一个事件。  
+```html
+<div id="app">
+    <son @connect="say"></son>
+ </div>
+<script>
+  Vue.component('son',{
+    template:`<button @click="send">
+                点击
+               </button>`,
+    data(){
+        return{
+            msg:'大家好，我是子组件的数据'
+        }
+    },
+    methods:{
+      send(){
+          this.$emit('connect',this.msg);
+      }
+    }
+ });
+
+  const app = new Vue({
+    el:"#app",
+    methods:{
+      say(msg){
+        console.log(msg);
+      }
+    }
+ });
+ </script>
+```
+
+##### 3.3.3 非父子组件通信
+非父子关系的组件，可以巧妙地利用一个空的 vue 实例来作为一个中央事件总线。但是在实际开发中，我们不会这么做，我们会使用专门用于状态管理的 vuex。  
+

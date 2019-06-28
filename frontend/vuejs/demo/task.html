@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
+    <script src="https://unpkg.com/vue"></script>
+    <title>demo</title>
+    <style>
+        .add-task {
+            display: block;
+            width: 80%;
+            height: 35px;
+            line-height: 35px;
+            margin: 30px auto;
+            box-sizing: border-box;
+            padding-left: 4px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            outline: 0;
+            box-shadow: 0 0 5px #ccc;
+        }
+
+        .list-task {
+            margin: 0 auto;
+            width: 80%;
+        }
+
+        .none-task {
+            font-size: 13px;
+            color: #ccc;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .unit-task {
+            position: relative;
+            padding: 10px 0;
+            border-bottom: 1px solid #efefef;
+        }
+
+        .unit-task:last-child {
+            border-bottom: 0;
+        }
+
+        .finish-task {
+            text-decoration: line-through;
+            color: #ccc;
+        }
+
+        .delete-task {
+            background: red;
+            text-decoration: none;
+            position: absolute;
+            right: 0;
+            font-size: 12px;
+            border: 0;
+            outline: 0;
+            padding: 2px 5px;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>task demo</h1>
+    <hr>
+    <div id="app">
+        <input type="text" class="add-task" placeholder="add task"
+        @keydown.enter="addTask" v-model="task.content">
+
+         <div class="list-task">
+            <div class="unit-task" v-for="(task, index) in tasks">
+                <label>
+                    <input type="checkbox" 
+                    @click="changeState(index)" :checked="task.finished"> 
+                    <span :class="{'finish-task':task.finished}">
+                        {{ index+1 }}、{{ task.content }}
+                    </span>
+                </label>
+                <button class="delete-task" 
+                @click="removeTask(index)">delete</button>
+            </div>
+            <p v-if="tasks.length === 0" class="none-task">no task in here.</p>
+         </div>
+    </div>
+    <script type="text/javascript">
+        'use strict';
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                // 单任务
+                task:{
+                    content: '',
+                    finished: false,
+                    deleted: false
+                },
+                // 任务集
+                tasks: []
+            },
+            methods: {
+                // 添加任务
+                addTask: function() {
+                    this.tasks.push(this.task);
+                    this.task = {
+                        content: '',
+                        finished: false,
+                        deleted: false
+                    };
+                },
+                // 更改任务状态
+                changeState: function(index) {
+                    let curState =  this.tasks[index].finished;
+                    this.tasks[index].finished = !curState;
+                },
+                // 移除任务
+                removeTask: function(index) {
+                    this.tasks.splice(index, 1);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
