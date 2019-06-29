@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0">
+    <script src="https://unpkg.com/vue"></script>
+    <title>calc demo</title>
+</head>
+
+<body>
+	<h1>calc demo</h1>
+    <hr>
+    <div id="app">
+        <input @keyup="calculate" type="text" v-model="augend"> <span>+</span>
+        <input @keyup="calculate" type="text" v-model="addend"> <span>=</span>
+        <input type="text" :value="sum">
+        <br>
+        <br>
+        <button @click="reset">清空数据</button>
+    </div>
+    <script>
+        const app = new Vue({
+            el: "#app",
+            data: {
+                augend: '',
+                addend: '',
+                sum: ''
+            },
+            methods: {
+                calculate() {
+                    this.sum = Number(this.augend) + Number(this.addend);
+                },
+                reset() {
+                    this.sum = this.augend = this.addend = '';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
