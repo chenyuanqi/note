@@ -699,3 +699,94 @@ vue 提供的全局 API: Vue.component() 可以用于创建组件。
 ##### 3.3.3 非父子组件通信
 非父子关系的组件，可以巧妙地利用一个空的 vue 实例来作为一个中央事件总线。但是在实际开发中，我们不会这么做，我们会使用专门用于状态管理的 vuex。  
 
+### 四、Vue 进阶
+#### 4.1 transition 组件
+除了 CSS3 的 transition 属性，Vue 提供的组件也叫 transition，它们是两个不同的东西。  
+Vue提供的 `<transition/>` 组件，会在下列四种情况下起作用：
+> 1. 条件渲染（使用v-if）  
+> 2. 条件展示（使用了v-show）  
+> 3. 动态组件  
+> 4. 组件根节点   
+
+当一个被 `<transition/>` 组件包含的节点出现了以上的 4 种情况的任意一种的时候，Vue 自动嗅探目标元素是否应用了 CSS 过渡或动画，如果是，在恰当的时机添加/删除 CSS 类名。  
+> 1.v-enter：进入过渡效果（enter）刚刚开始那一刻。在元素被插入或者 show 的时候生效，在下一个帧就会立刻移除，一瞬间的事。  
+> 2.v-enter-active: 表示进入过渡（entering）的结束状态。在元素被插入时生效，在 transition/animation 完成之后移除。  
+> 3.v-leave: 离开过渡（leave）的开始那一刻。在离开过渡被触发时生效，在下一个帧移除，也是一瞬间的事。  
+> 4.v-leave-active：离开过渡（leaving）的结束状态。在离开过渡被触发时生效，在 transition/animation 完成之后移除。  
+`注意：.v-enter 中的 v- 只是前缀，如果我们 <transition/> 组件的 name 值为 box，那么它实际的 class 为 .box-enter。`
+
+整个动画的过程大概是这样的：  
+> 当它进入过渡的时候（隐藏→显示），就会依次发生：
+> 1. 添加 .box-enter 样式  
+> 2. 删除 .box-enter 样式，添加 .box-enter-active 样式  
+> 3. 删除 .box-enter-active 样式  
+>  
+> 当它离开过渡的时候（显示→隐藏），就会依次发生：
+> 1. 添加 .box-leave 样式  
+> 2. 删除 .box-leave 样式，添加 .box-leave-active 样式  
+> 3. 删除 .box-leave-active 样式  
+
+```html
+ <style>
+ /*box节点本身的样式*/
+ .box{
+    width:100%;
+    height:100%;
+    text-align: center;
+    line-height: 200px;
+    background: #ff8282;
+    color: #Fff;
+    /*以下两个默认值，可不写*/
+    /*写上只是为了便于讲解，记住这两个*/
+    opacity: 1;
+    margin-left: 0;
+ }
+
+.box-enter-active,.box-leave-active{
+    transition: all .8s;
+ }
+
+.box-enter{
+    opacity: 0;
+    margin-left: 100%;
+ }
+ 
+ .box-leave-active{
+    opacity: 0;
+    margin-left: 100%;
+ }
+ </style>
+ <div id="app" class="app">
+     <button 
+            @click="showBox = !showBox" 
+            class="btn">
+        切换
+     </button>
+    <div class="container">
+         <transition name="box">
+            <div v-show="showBox" class="box">
+                i am the box
+            </div>
+         </transition>
+    </div>
+ </div>
+
+  <script>
+    const app = new Vue({
+        el:"#app",
+        data:{
+            showBox:false
+        }
+    });
+ </script>
+```
+
+#### 4.2 vue-router
+
+
+#### 4.3 vuex
+
+
+#### 4.4 axios 实现数据请求
+
+
