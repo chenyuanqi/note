@@ -782,7 +782,84 @@ Vue提供的 `<transition/>` 组件，会在下列四种情况下起作用：
 ```
 
 #### 4.2 vue-router
+vue-router 是 vue 官方的路由插件，它和 vue.js 是深度集成的，适合用于构建 SPA 单页面应用。vue 的单页面应用是基于路由和组件的，相当于传统页面是基于 `<a/>` 标签链接和页面，路由用于设定访问路径，并将路径和组件映射起来，这样就可以实现通过路由 router 来切换组件。
+```html
+ <div id="app">
+    <!--使用 router-link 组件来导航.-->
+    <!-- 通过传入 `to` 属性指定链接. -->
+    <div class="nav">
 
+      <router-link to="/vue">
+        简易vue
+      </router-link>
+
+      <router-link to="/es6">
+        趣味ES6
+      </router-link>
+
+      <router-link to="/career">
+        人在职场
+   </router-link>
+
+    </div>
+
+    <div class="content">
+       !--匹配到的组件将渲染在这里 -->
+       <router-view></router-view>
+    </div>
+
+ </div>
+
+ <script>
+  // 定义路由对应的组件
+  // 1.简易 vue 对应的视图组件
+  const vueComponent = {
+    // template 属性对应的内容，就是将会被替换渲染到 <router-view/> 组件的内容
+    template:`<div>
+                这里是《简易vue》教程
+              </div>`
+  };
+
+  // 2.趣味 ES6 对应的视图组件
+  const es6Component = {
+    template:`<div>
+                这里是《趣味ES6》教程
+              </div>`
+  };
+
+  // 3.人在职场 对应的视图组件
+  const careerComponent = {
+    template:`<div>
+                《混口饭吃》与《工资待遇》
+              </div>`
+  };
+
+  // 创建 router 实例，并定义导航和组件的映射关系
+  const router = new VueRouter({
+  // 配置routes
+  routes:[
+      // 定义 3 个导航和组件的映射关系
+      {
+          path:"/vue",
+          component:vueComponent
+      },
+      {
+          path:"/es6",
+          component:es6Component
+      },
+      {
+          path:"/career",
+          component:careerComponent
+      },
+  ]});
+
+   //创建 vue 实例，注入路由 router
+   const app = new Vue({
+      el:"#app",
+      router //此处是 ES6 语法，相当于 router:router
+   });
+ </script>
+```
 
 #### 4.3 vuex
 
