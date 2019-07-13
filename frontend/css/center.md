@@ -1,4 +1,23 @@
 
+居中，很常见的页面处理。  
+主要会用到如下方式:
+```css
+// 行内元素
+text-align: center;
+// 块元素
+margin: 0 auto;
+// 定位方式
+position: relative | absolute; left: 50%;
+// 垂直方向居中
+vertical-align: middle;
+// 元素转换
+transform: translate(-50%);
+// 浮动元素居中
+margin-left: 50%; transform: translate(-50%);
+// 绝对定位的 div 居中
+top:0; left:0; bottom:0; right:0; margin: auto;
+```
+
 ### css 水平垂直居中实现方式
 水平垂直居中包括行内元素居中，以及块级元素居中。  
 ```html
