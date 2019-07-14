@@ -511,4 +511,4 @@ display 属性是用来设置元素的类型及隐藏的，常用的属性有：
 在 css 中，后面的样式代码会覆盖之前的相同的样式代码。  
 a 标签的四个伪类执行顺序时 :link，:visited，:hover，:active。  
 
-移动端点击事件（或页面设置 viewpoint）会有延迟，原因时等待 300 ms 看用户是否点击还是双击缩放，解决方法是禁止缩放、设置默认视口宽度为设备宽度、设置 css touch-action:none、fastclick.js。
+移动端点击事件（或页面设置 viewpoint）会有延迟，原因时等待 300 ms 看用户是否点击还是双击缩放，解决方法是禁止缩放、设置默认视口宽度为设备宽度、设置 css touch-action:none、fastclick.js。  
