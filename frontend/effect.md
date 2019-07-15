@@ -242,6 +242,23 @@ box-shadow: 0 1px 1px rgba(0,0,0,.2);
 </style>
 ```
 
+### 一次性禁用所有表单元素
+```html
+<form>
+    <fieldset disabled>
+        <legend>完成您的购物订单</legend>
+        <...>
+    </fieldset>
+</form>
+
+<style>
+fieldset[disabled] {
+   -ms-pointer-events: none;
+   pointer-events: none;
+}
+</style>
+```
+
 ### form 表单两端对齐
 ```html
 <div class="box">
