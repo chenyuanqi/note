@@ -7,6 +7,19 @@ HTML:Hyper text markup language （超文本标记语言，即能够实现网页
 - 表现标准：CSS			
 - 行为标准：JS
 
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+```
+
 ### 二 常见标签
 #### 2.0 标签分类
 单标签：只有开始没有结束 
@@ -285,11 +298,20 @@ input标签的type可以指定控件的类型为文本、密码、单选框等�
 <input type="text" id="username">
 ```
 
+### 五、meta 标签
+meta 即元数据 (Metadata)，是用来概括描述数据的一些基本数据。  
+meta 常用于定义页面的说明，关键字，最后修改日期，和其它的元数据。这些元数据将服务于浏览器（如何布局或重载页面），搜索引擎和其它网络服务。  
 
+所有浏览器都支持 meta 标签，meta 标签就是包含网页的一些元数据。meta 元素可提供有关页面的元信息（meta-information），比如针对搜索引擎和更新频度的描述和关键词。meta 标签位于文档的头部，不包含任何内容，meta 标签的属性定义了与文档相关联的名称 / 值对。
 
+meta 标签共有两个属性：name 和 content。  
+name 属性主要用于描述网页，比如网页的关键词，叙述等。  
+content 中的内容是对 name 填入类型的具体描述，便于搜索引擎抓取。  
 
-
-
+常见 name 取值：  
+keywords（关键字），用于告诉搜索引擎，你网页的关键字，一般网站 SEO 这个属性是必备。  
+description（网站内容描述），用于告诉搜索引擎，你网站的主要内容，对于 SEO 也很重要。  
+viewport（视口），在移动端的时候尤为重要。  
 
 
 
