@@ -1,4 +1,36 @@
 
+### 什么是 Jquery
+jQuery 是 js 的一个库，封装了我们开发过程中常用的一些功能，方便我们调用，提高开发效率。
+
+### Jquery 版本
+Jquery2.0.3 并不完全兼容 IE 6、7、8，解决方案如下
+```html
+// 不是 IE 就用 2.03，IE8 以上也用 2.0.3，IE8 及以下用 1.11 版本 
+<!--[if !IE]> -->
+     <script src="/Scripts/jquery-2.0.3.min.js"></script>
+ <!-- <![endif]-->
+
+ <!--[if lte IE 8]>
+     <script src="/Scripts/jquery-1.11.1.min.js"></script>
+ <![endif]-->
+
+ <!--[if gt IE 8]>
+      <script src="/Scripts/jquery-2.0.3.min.js"></script>
+ <![endif]-->
+```
+
+### Jquery 入口函数
+```js
+$(document).ready(function () {
+  alert("入口函数");
+})
+
+// 简写形式
+$(function () {
+  alert("入口函数");
+});
+```
+
 ### Jquery 常用选择器
 ```
 基本选择器  
