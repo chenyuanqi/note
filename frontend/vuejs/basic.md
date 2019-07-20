@@ -906,6 +906,4 @@ const store = new Vuex.Store({
 ```
 
 
-#### 4.4 axios 实现数据请求
-
 
