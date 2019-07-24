@@ -43,6 +43,16 @@ git commit -m "Try to revert our commit"
 # 撤销已经提交的更改【撤销】
 git revert HEAD --no-edit
 
+# 修改并提交到本地仓库
+echo "append some content and excute commit." >> first.txt
+git add first.txt
+git commit -m "Try to append"
+# 再次修改
+echo "append more." >> first.txt
+# 修正之前的提交
+git add first.txt
+git commit --amend -m "Try to append more."
+
 # 加个文件
 echo "the second file" > second.txt
 git add second.txt
@@ -55,7 +65,12 @@ git commit -m "Second commit"
 git add second.txt
 git commit -m "Append comment"
 # 查看提交的历史
-git log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short'
+git log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+
+# 移动文件
+mkdir src
+git mv *.txt src
+git commit -m "Moved .txt to src"
 ```
 
 ### 别名
