@@ -11,6 +11,11 @@ git config --global core.autocrlf input
 git config --global core.safecrlf true
 ```
 
+.git 目录说明。  
+.git/config 项目配置文件；  
+.git/HEAD HEAD 文件；  
+.git/refs/tags 标签。  
+
 ### 创建项目与基本操作
 ```bash
 mkdir demo
@@ -98,4 +103,30 @@ git checkout v1-beta
 
 # 删除无效标签
 git tag -d v1-beta
+```
+
+### 分支操作 
+```bash
+# 创建分支
+git checkout -b new_branch
+
+echo "The third file" > third.txt
+git add third.txt
+git commit -m "Add file"
+
+# 切换分支
+git checkout master
+
+echo "This is a example file" > README.md
+git add -a
+git commit -m "Added README"
+
+# 查看分叉的分支历史
+git log --all
+
+# 合并分支
+git checkout new_branch
+git merge master
+
+# 冲突解决
 ```
