@@ -129,4 +129,31 @@ git checkout new_branch
 git merge master
 
 # 冲突解决
+git checkout master
+echo "make conflict" >> README.md
+git commit -am "make conflict"
+git checkout new_branch
+git merge master
+# 修复冲突，编辑保留需要的代码
+git add README.md
+git commit -m "fixed conflict"
+
+# 使用变基合并代码，回到合并前的代码
+git log
+git reset reset --hard <hash>
+git checkout master
+git log
+git reset reset --hard <hash>
+# 变基
+git checkout new_branch
+git rebase master
+# 变基的最终结果与合并很相似，但是提交树却十分不同
+# 变基后 new_branch 分支的提交树已被重写，以致 master 分支成为了其提交历史的一部分。这样使得提交链更加线性，且更易阅读
+# 针对短期生命的本地分支使用变基，而对公开仓库的分支使用合并
+
+# 合并回 master
+git checkout master
+git merge new_branch
+
+# 
 ```
