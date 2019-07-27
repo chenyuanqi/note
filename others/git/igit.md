@@ -155,5 +155,15 @@ git rebase master
 git checkout master
 git merge new_branch
 
-# 
+# 添加本地分支跟踪远程
+git branch --track new_branch origin/new_branch
+# 推送更改
+git push origin new_branch
+# 拉下更改、合并
+git checkout master
+git fetch 
+git merge origin/new_branch
+
+# 仓库共享
+git daemon
 ```
