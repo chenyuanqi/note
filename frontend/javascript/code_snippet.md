@@ -181,3 +181,52 @@ function getPageWidth(){
     return Math.max(f.scrollWidth, a.scrollWidth, d.clientWidth);
 }
 ```
+
+### 复制文本到剪切板
+```js
+function copyToClipboard(data) {
+    const _tempInput = document.createElement('input')
+    _tempInput.value = data.value
+    document.body.appendChild(_tempInput)
+    _tempInput.select()
+    document.execCommand('Copy')
+    document.body.removeChild(_tempInput)
+}
+```
+
+### 前端生成文件并下载
+```js
+function createAndDownloadFile(fileName, content) {
+    const aTag = document.createElement('a');
+    const blob = new Blob([content]);
+    aTag.download = `${fileName}.json`;
+    aTag.href = URL.createObjectURL(blob);
+    aTag.click();
+    URL.revokeObjectURL(blob);
+}
+```
+
+### 防止被 Iframe 嵌套
+```js
+if(top != self){
+    location.href = ”about:blank”;
+}
+```
+
+### 从全局捕获错误
+```js
+window.onerror = function (errMsg, scriptURI, lineNumber, columnNumber, errorObj) {
+    setTimeout(function () {
+        var rst = {
+            "错误信息：": errMsg,
+            "出错文件：": scriptURI,
+            "出错行号：": lineNumber,
+            "出错列号：": columnNumber,
+            "错误详情：": errorObj
+        };
+
+        alert(JSON.stringify(rst, null, 10));
+    });
+};
+```
+

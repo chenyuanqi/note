@@ -166,6 +166,21 @@ html {
 }
 ```
 
+### 移除 HTML5 input 在 type="number" 时的上下小箭头
+方案一：将 type="number" 改为 type="tel"，同样是数字键盘，但是没有箭头  
+方案二：
+```css
+/* chrome */
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{
+  -webkit-appearance: none !important;
+  margin: 0; 
+}
+/* firefox */
+input[type="number"]{
+    -moz-appearance:textfield;
+}
+```
+
 ### CSS3 对话气泡
 ```css
 .chat-bubble {
