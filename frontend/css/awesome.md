@@ -9,6 +9,8 @@
 [css 技巧](https://github.com/AllThingsSmitty/css-protips/tree/master/translations/zh-CN)  
 [css 常用样式](https://qishaoxuan.github.io/css_tricks/)  
 
+[css 隐藏元素方法对比](http://luopq.com/2016/02/15/css-tricks-of-hide-element/)  
+
 ### Css 小技巧
 1、不使用 !important 也能让它变绿
 ```html
