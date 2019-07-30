@@ -1,8 +1,12 @@
 
 ### Ansible Link
 [Ansible 官网](https://www.ansible.com/)  
+
 [Ansible 文档](https://docs.ansible.com/ansible/latest/index.html)  
 [Ansible 权威指南](https://ansible-tran.readthedocs.io/en/latest/)  
+[Ansible examples](https://github.com/ansible/ansible-examples)  
+
+[Ansible 7小时入坑](https://www.bilibili.com/video/av25424954/)  
 
 ### Ansible 是什么
 Ansible 的 slogan 从 “IT Automation Software for System Administrators” 变成了 “AUTOMATION FOR EVERYONE”。从一个给系统管理员使用的工具变成了给所有人使用的工具。
