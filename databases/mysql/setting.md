@@ -1,6 +1,28 @@
 
 ### 慢日志
+```bash
+mysql -uroot -p
+# 查看是否开启慢日志
+show variables like '%slow_query_log%';
+# 当前查询，开启慢日志
+set global slow_query_log=1;
+```
 
+开启慢日志配置
+```
+# /etc/my.cnf
+slow_query_log =1
+slow_query_log_file=/var/logs/mysql/slow-queries.log
+```
+
+使用 mysqldumpslow 分析慢日志
+```bash
+# 分析出使用频率（访问次数）最高的前 50 条慢 sql
+mysqldumpslow -s c -t 50 /var/logs/mysql/slow-queries.log
+
+# 分析处理速度最慢的 10 条 sql
+mysqldumpslow -t 10 /var/logs/mysql/slow-queries.log
+```
 
 ### 主从复制
 假设有两台服务器，一台做主，一台做从。  
@@ -52,5 +74,86 @@ CHANGE MASTER TO
 > Slave_SQL_Running:Yes 如果值为 No，可以检查从库下的错误日志：cat /usr/local/mysql/data/mysql-error.log 如果提示 uuid 错误，请尝试编辑从库的配置文件：/usr/local/mysql/data/auto.cnf的 server-uuid 值保证和主库的值不一样即可  
 
 ### 集群
+Percona XtraDB Cluster (简称 PXC) 集群是基于 Galera 2.x library，事务型应用下的通用的多主同步复制插件，主要用于解决强一致性问题，使得各个节点之间的数据保持实时同步以及实现多节点同时读写。提高了数据库的可靠性，也可以实现读写分离，是 MySQL 关系型数据库中大家公认的集群优选方案之一。  
 
+安装前的准备
+```bash
+echo "192.168.1.1 node1" >> /etc/hosts
+echo "192.168.1.2 node2" >> /etc/hosts
+echo "192.168.1.3 node3" >> /etc/hosts
 
+# 关闭防火墙
+service iptables stop
+
+# 安装基本依赖
+yum -y install cmake gcc gcc-c++ libaio libaio-devel automake autoconf bzr  ncurses5-devel 
+yum -y install perl-DBD-MySQL  perl-DBI  perl-Time-HiRes
+```
+
+开始安装
+```bash
+yum install http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
+yum install Percona-XtraDB-Cluster-56
+```
+
+配置主节点 192.168.1.1  
+```bash
+# 初始化 
+/usr/bin/mysql_install_db --basedir=/usr --user=mysql
+# 启动 mysql
+service mysql start
+# 修改密码
+/usr/bin/mysqladmin -u root -h localhost password 'pass'
+# 创建用户
+mysql -uroot -p
+grant reload,lock tables,replication client on *.* to 'sstuser'@'%' identified by 'xxx';
+# 关闭 mysql
+service mysql stop
+```
+```
+# /etc/my.cnf
+[mysql]
+user=root
+password=pass
+
+[mysqld]
+datadir=/var/lib/mysql
+user=mysql
+server_id=1
+wsrep_provider=/usr/lib64/libgalera_smm.so
+wsrep_cluster_address="gcomm://192.168.1.1,192.168.1.2,192.168.1.3"
+wsrep_sst_auth=wsrep_sst_auth=sstuser:xxx
+wsrep_cluster_name=my_pxc_cluster
+wsrep_sst_method=rsync
+wsrep_node_address=192.168.1.1
+wsrep_slave_threads=2
+innodb_locks_unsafe_for_binlog=1
+innodb_autoinc_lock_mode=2
+binlog_format=ROW
+```
+启动 mysql 及 pxc 服务
+```bash
+/etc/init.d/mysql bootstrap-pxc
+```
+
+配置其他节点
+```
+[mysql]
+user=root
+password=pass
+
+[mysqld]
+datadir=/var/lib/mysql
+user=mysql
+server_id=2
+wsrep_provider=/usr/lib64/libgalera_smm.so
+wsrep_cluster_address="gcomm://192.168.1.1,192.168.1.2,192.168.1.3"
+wsrep_sst_auth=wsrep_sst_auth=sstuser:xxx
+wsrep_cluster_name=my_pxc_cluster
+wsrep_sst_method=rsync
+wsrep_node_address=192.168.1.2
+wsrep_slave_threads=2
+innodb_locks_unsafe_for_binlog=1
+innodb_autoinc_lock_mode=2
+binlog_format=ROW
+```
