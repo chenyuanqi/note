@@ -15,6 +15,13 @@ info [COMMAND]
 # 显示命令帮助信息
 [COMMAND] --help
 
+# 查看 Linux 版本
+cat /proc/version
+cat /etc/issue
+# 只适用 redhat 系
+cat /etc/redhat-release
+
+
 # 时间同步，同步交通大学时间
 ntpdate ntp.sjtu.edu.cn && hwclock -w
 # 查看时间
