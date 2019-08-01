@@ -25,6 +25,12 @@ sass input.scss output.css
 sass --watch LearnSass:LearnCss
 ```
 
+### Sass 注释
+```scss
+// 单行注释，当 Sass 被编译成 CSS 后会被删除
+/* 多行注释将保留. */
+```
+
 ### Sass 变量
 sass 用 $ 定义变量，用来存储一些重复的 CSS 值 (在整个站点中一致的值)。  
 ```scss
