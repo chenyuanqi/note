@@ -187,6 +187,8 @@ gitlab-ctl restart
 ### Gitlab 问题
 1、Error: Cannot allocate memory  
 ```bash
+# 如果不打算开启休眠功能，物理内存在 8G 以下，则交换内存 swap 设置为与物理内存一样大
+# 如果物理内存在 8G 以上，swap 空间设置为 8G 即可
 /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
 /sbin/mkswap /var/swap.1
 /sbin/swapon /var/swap.1

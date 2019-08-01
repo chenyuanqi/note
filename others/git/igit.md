@@ -13,7 +13,7 @@ git config --global core.safecrlf true
 
 .git 目录说明。  
 .git/config 项目配置文件；  
-.git/HEAD HEAD 文件；  
+.git/HEAD HEAD 文件指向（命令查看：git symbolic-ref HEAD）；  
 .git/refs/tags 标签。  
 
 ### 创建项目与基本操作
