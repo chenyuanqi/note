@@ -10,12 +10,14 @@ systemctl start sshd
 yum install -y firewalld
 systemctl unmask firewalld
 systemctl enable firewalld
-# 开放 ssh、http服务
+# 开放 ssh、http 服务（对应配置文件位于 /etc/firewalld/zones）
 firewall-cmd --add-service=ssh --permanent
 firewall-cmd --add-service=http --permanent
 firewall-cmd --zone=public --add-port=80/tcp --permanent
 firewall-cmd --zone=public --add-port=22/tcp --permanent
 firewall-cmd --reload
+# 查看配置
+firewall-cmd --zone=public --list-all
 # 启动防火墙
 systemctl start firewalld
 systemctl status firewalld

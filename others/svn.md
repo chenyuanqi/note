@@ -1,4 +1,93 @@
 
+### svn 安装
+```bash
+yum install -y httpd subversion mod_dav_svn
+# 查看 subversion 安装位置
+rpm -ql subvserion 
+# 查看版本
+svnserve --version
+
+# 避免启动告警
+echo "export LC_ALL=C" >> /etc/profile
+
+# 卸载
+yum remove subversion
+```
+
+### svn 代码库创建
+```bash
+mkdir -p /opt/svn/repo
+svnadmin create /opt/svn/repo
+```
+自动建立 repo 库，查看 /opt/svn/repo 文件夹发现包含了 conf, db,format,hooks, locks, README.txt 等文件，说明一个 SVN 库已经建立。  
+
+### svn 配置
+在 /source/svn/repo/conf 目录下有三个文件：  
+> passwd ： 里面保存用户信息，基本格式为：user = passwd
+> authz ： 里面保存用户的分组信息，以及每个组的访问权限
+> svnserve.conf ： 里面保存服务器的基本配置（下面介绍）
+
+在 passwd 文件中添加用户
+```
+[users]
+admin = 123456
+vikey = 123456
+```
+
+在 authz 文件中配置用户权限
+```
+[groups]
+admin = admin
+
+# 该项目的权限配置
+[/]
+@admin=rw      # admin分组配置读写权限（实际中可以增加只读分组）
+* = r          # 其他用户的权限为只读
+```
+
+svnserve.conf 配置
+```
+[general]
+# 匿名用户权限（none：拒绝， write：读写， read：只读权限）
+anon-access = none # 控制非鉴权用户访问版本库的权限
+auth-access = write # 控制鉴权用户访问版本库的权限
+password-db = passwd  # 指定用户名口令文件名
+authz-db = authz # 指定权限配置文件名
+realm = repo # 指定版本库的认证域，即在登录时提示的认证域名称
+```
+
+### svn 启动与停止
+```bash
+# 防火墙需要开启 3690 端口
+firewall-cmd --zone=public --add-port=3690/tcp --permanent
+firewall-cmd --zone=public --add-port=3690/udp --permanent
+firewall-cmd --reload
+
+# 创建的工程 repo 启动指定目录为 /opt/svn
+svnserve -d -r /opt/svn/repo
+
+# 查看 svn
+ps aux | grep svnserve
+
+# 停止 svn
+killall svnserve 
+```
+
+启动后，测试下载项目
+```bash
+svn checkout svn://server_ip/svn/repo
+```
+
+错误解决：  
+1、svn: E204900: Can't open file '/opt/svn/repo/format': Permission denied   
+解决：执行临时关闭 SELinux 命令 sudo setenforce 0  
+
+2、客户端检出：No repository found in 'svn://xx.xx.xx.xx'  
+解决：启动目录是配置的父级目录 svnserve -d -r /opt/svn  
+
+3、Error: Authorization failed
+解决：authz 需要配置具体项目权限，否则务必配置 [/]  
+
 ### svn 的常用命令
 ```bash
 # 检出仓库，需要输入账号密码
@@ -6,18 +95,29 @@ svn co [svn_url] / svn checkout [svn_url]
 
 # 查看状态
 svn st / svn status
+# ?：不在 svn 的控制中
+# M：内容被修改
+# C：发生冲突
+# A：预定加入到版本库
+# K：被锁定
 
 # 查看信息
 svn info
+# 查看指定文件的详细信息
+svn info [file_path]
 
 # 查看变动
 svn diff [file_path]
 
 # 添加未追踪文件
-svn add [file_path]
+svn add [file_path / dir_path]
 
 # 提交改动
 svn commit -m "[COMMENT]"
+
+# 删除文件
+svn delete [file_path]
+svn commit -m "delete file name"
 
 # 还原改动
 svn revert [file_path]
@@ -30,11 +130,26 @@ svn sw [svn_url] / svn switch [svn_url]
 
 # 建立分支
 svn copy [your_trunk_url] [your_feature_branch_url] -m "[COMMENT]"
+
+# 查看指定文件的日志
+svn log [file_path]
+
+# 锁定文件
+svn lock -m 'commit message' [file_path]
+# 解锁文件
+svn unlock [file_path]
+
+# 比较文件差异
+svn diff [file_path] 
+# 比较文件版本 1 和版本 2 的差异
+svn diff -r version1:version2 [file_path]  
 ```
 
 ### svn 常用链接
 [svn 使用文档](https://tortoisesvn.net/docs/release/TortoiseSVN_zh_CN/index.html)  
 [svn 版本控制](http://svnbook.red-bean.com/nightly/zh/svn-book.html)  
+
+[svn 客户端](https://tortoisesvn.net/downloads.zh.html)  
 
 
 ### svn 冲突解决
@@ -101,6 +216,11 @@ $ svn resolve --accept [base | working | mine-conflict | theirs-conflict | mine-
 | theirs-conflict | 将 [your_file].merge-right.[version] 做为最终结果 |
 | mine-full | 将所有 [your_file].working 做为最终结果 |
 | theirs-full | 将所有 [your_file].merge-right.[version] 做为最终结果 |
+
+或者手动解决冲突并执行如下命令
+```bash
+svn resolved
+```
 
 解决冲突后，文件状态变为 M，这时再向仓库提交代码即可。
 

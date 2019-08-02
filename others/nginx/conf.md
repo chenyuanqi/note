@@ -193,3 +193,251 @@ server {
     }
 }
 ```
+
+### 屏蔽 IP
+在 nginx 的配置文件 nginx.conf 中加入如下配置，也可以放到 http, server, location, limit_except 语句块，需要注意相对路径
+```
+include ip-black-list.conf;
+
+# ip-black-list.conf 内容如下
+deny 165.91.122.67;
+
+deny IP;   # 屏蔽单个 ip 访问
+allow IP;  # 允许单个 ip 访问
+deny all;  # 屏蔽所有 ip 访问
+allow all; # 允许所有 ip 访问
+deny 123.0.0.0/8   # 屏蔽整个段即从 123.0.0.1 到 123.255.255.254 访问的命令
+deny 124.45.0.0/16 # 屏蔽 IP 段即从 123.45.0.1 到 123.45.255.254 访问的命令
+deny 123.45.6.0/24 # 屏蔽 IP 段即从 123.45.6.1 到 123.45.6.254 访问的命令
+
+# 除了几个 IP 外，其他全部拒绝
+allow 1.1.1.1; 
+allow 1.1.1.2;
+deny all; 
+```
+
+### 屏蔽 .git 等文件
+```
+location ~ (.git|.gitattributes|.gitignore|.svn) {
+    deny all;
+}
+```
+
+### 防盗链
+```
+location ~* \.(gif|jpg|png|swf|flv)$ {
+   root html
+   valid_referers none blocked *.nginxcn.com;
+   if ($invalid_referer) {
+     rewrite ^/ www.nginx.cn
+     #return 404;
+   }
+}
+```
+
+### 防盗图
+```
+location ~ \/public\/(css|js|img)\/.*\.(js|css|gif|jpg|jpeg|png|bmp|swf) {
+    valid_referers none blocked *.jslite.io;
+    if ($invalid_referer) {
+        rewrite ^/  http://wangchujiang.com/piratesp.png;
+    }
+}
+```
+
+### 反爬虫
+根据 User-Agent 过滤请求，通过一个简单的正则表达式，就可以过滤不符合要求的爬虫请求 (初级爬虫)。
+```
+location / {
+    # ~* 表示不区分大小写的正则匹配
+    if ($http_user_agent ~* "python|curl|java|wget|httpclient|okhttp") {
+        return 503;
+    }
+    # 正常处理
+    # ...
+}
+```
+
+### 反向代理
+反向代理是一个 Web 服务器，它接受客户端的连接请求，然后将请求转发给上游服务器，并将从服务器得到的结果返回给连接的客户端。  
+```
+# 简单的配置
+server {  
+  listen       80;                                                        
+  server_name  localhost;                                              
+  client_max_body_size 1024M;  # 允许客户端请求的最大单文件字节数
+
+  location / {
+    proxy_pass                         http://localhost:8080;
+    proxy_set_header Host              $host:$server_port;
+    proxy_set_header X-Forwarded-For   $remote_addr; # HTTP的请求端真实的IP
+    proxy_set_header X-Forwarded-Proto $scheme;      # 为了正确地识别实际用户发出的协议是 http 还是 https
+  }
+}
+
+# 复杂一些的配置
+server {
+    #侦听的80端口
+    listen       80;
+    server_name  git.example.cn;
+    location / {
+        proxy_pass   http://localhost:3000;
+        #以下是一些反向代理的配置可删除
+        proxy_redirect             off;
+        #后端的Web服务器可以通过X-Forwarded-For获取用户真实IP
+        proxy_set_header           Host $host;
+        client_max_body_size       10m; #允许客户端请求的最大单文件字节数
+        client_body_buffer_size    128k; #缓冲区代理缓冲用户端请求的最大字节数
+        proxy_connect_timeout      300; #nginx跟后端服务器连接超时时间(代理连接超时)
+        proxy_send_timeout         300; #后端服务器数据回传时间(代理发送超时)
+        proxy_read_timeout         300; #连接成功后，后端服务器响应时间(代理接收超时)
+        proxy_buffer_size          4k; #设置代理服务器（nginx）保存用户头信息的缓冲区大小
+        proxy_buffers              4 32k; #proxy_buffers缓冲区，网页平均在32k以下的话，这样设置
+        proxy_busy_buffers_size    64k; #高负荷下缓冲大小（proxy_buffers*2）
+    }
+}
+```
+
+代理到上游服务器的配置中，最重要的是 proxy_pass 指令。  
+代理模块中的一些常用指令：  
+| 指令 | 说明 |
+| ---- | ---- |
+| proxy_connect_timeout  | Nginx从接受请求至连接到上游服务器的最长等待时间 |
+| proxy_send_timeout  | 后端服务器数据回传时间(代理发送超时) |
+| proxy_read_timeout  | 连接成功后，后端服务器响应时间(代理接收超时) |
+| proxy_cookie_domain | 替代从上游服务器来的Set-Cookie头的domain属性 |
+| proxy_cookie_path   | 替代从上游服务器来的Set-Cookie头的path属性 |
+| proxy_buffer_size   | 设置代理服务器（nginx）保存用户头信息的缓冲区大小 |
+| proxy_buffers       | proxy_buffers缓冲区，网页平均在多少k以下 |
+| proxy_set_header    | 重写发送到上游服务器头的内容，也可以通过将某个头部的值设置为空字符串，而不发送某个头部的方法实现 |
+| proxy_ignore_headers | 这个指令禁止处理来自代理服务器的应答。 | 
+| proxy_intercept_errors | 使nginx阻止HTTP应答代码为400或者更高的应答。 | 
+
+### 负载均衡
+upstream 指令启用一个新的配置区段，在该区段定义一组上游服务器。这些服务器可能被设置不同的权重，也可能出于对服务器进行维护，标记为 down。  
+```
+upstream gitlab {
+    ip_hash;
+    # upstream的负载均衡，weight 是权重，可以根据机器配置定义权重
+    # weigth 参数表示权值，权值越高被分配到的几率越大
+    server 192.168.122.11:8081 ;
+    server 127.0.0.1:82 weight=3;
+    server 127.0.0.1:83 weight=3 down;
+    server 127.0.0.1:84 weight=3; max_fails=3  fail_timeout=20s;
+    server 127.0.0.1:85 weight=4;;
+    keepalive 32;
+}
+
+server {
+    #侦听的80端口
+    listen       80;
+    server_name  git.example.cn;
+    location / {
+        proxy_pass   http://gitlab;    #在这里设置一个代理，和upstream的名字一样
+        #以下是一些反向代理的配置可删除
+        proxy_redirect             off;
+        #后端的Web服务器可以通过X-Forwarded-For获取用户真实IP
+        proxy_set_header           Host $host;
+        proxy_set_header           X-Real-IP $remote_addr;
+        proxy_set_header           X-Forwarded-For $proxy_add_x_forwarded_for;
+        client_max_body_size       10m;  #允许客户端请求的最大单文件字节数
+        client_body_buffer_size    128k; #缓冲区代理缓冲用户端请求的最大字节数
+        proxy_connect_timeout      300;  #nginx跟后端服务器连接超时时间(代理连接超时)
+        proxy_send_timeout         300;  #后端服务器数据回传时间(代理发送超时)
+        proxy_read_timeout         300;  #连接成功后，后端服务器响应时间(代理接收超时)
+        proxy_buffer_size          4k; #设置代理服务器（nginx）保存用户头信息的缓冲区大小
+        proxy_buffers              4 32k;# 缓冲区，网页平均在32k以下的话，这样设置
+        proxy_busy_buffers_size    64k; #高负荷下缓冲大小（proxy_buffers*2）
+        proxy_temp_file_write_size 64k; #设定缓存文件夹大小，大于这个值，将从upstream服务器传
+    }
+}
+```
+每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器 down 掉，能自动剔除。  
+
+upstream 模块能够使用 3 种负载均衡算法：轮询、IP 哈希、最少连接数。  
+RR 轮询： 默认情况下使用轮询算法，不需要配置指令来激活它，它是基于在队列中谁是下一个的原理确保访问均匀地分布到每个上游服务器；
+IP 哈希： 通过 ip_hash 指令来激活，Nginx 通过 IPv4 地址的前 3 个字节或者整个 IPv6 地址作为哈希键来实现，同一个 IP 地址总是能被映射到同一个上游服务器；
+最少连接数： 通过 least_conn 指令来激活，该算法通过选择一个活跃数最少的上游服务器进行连接。如果上游服务器处理能力不同，可以通过给 server 配置 weight 权重来说明，该算法将考虑到不同服务器的加权最少连接数。  
+
+Nginx 默认是 RR 策略，所以不需要其他更多的设置。  
+```
+# RR 核心配置
+upstream test {
+    server localhost:8080;
+    server localhost:8081;
+}
+
+server {
+    listen       81;
+    server_name  localhost;
+    client_max_body_size 1024M;
+ 
+    location / {
+        proxy_pass http://test;
+        proxy_set_header Host $host:$server_port;
+    }
+}
+```
+
+Nginx 权重策略，指定轮询几率，weight 和访问比率成正比，用于后端服务器性能不均的情况。
+```
+# 设置 10 次访问中一般只会有 1 次会访问到 8081，而有 9 次会访问到 8080
+upstream test {
+    server localhost:8080 weight=9;
+    server localhost:8081 weight=1;
+}
+```
+
+RR 和权重都存在一个问题：下一个请求来的时候请求可能分发到另外一个服务器，导致比如登陆信息等不一致。  
+iphash 的每个请求按访问 ip 的 hash 结果分配，这样每个访客固定访问一个后端服务器，可以解决如上问题。  
+```
+upstream test {
+    ip_hash;
+    server localhost:8080;
+    server localhost:8081;
+}
+```
+
+fair 是第三方模块，按后端服务器的响应时间来分配请求，响应时间短的优先分配。  
+```
+upstream backend {
+    fair;
+    server localhost:8080;
+    server localhost:8081;
+}
+```
+
+url_hash 也是第三方模块，按访问 url 的 hash 结果来分配请求，使每个 url 定向到同一个后端服务器，后端服务器为缓存时比较有效。 在 upstream 中加入 hash 语句，server 语句中不能写入 weight 等其他的参数，hash_method 是使用的 hash 算法
+```
+upstream backend {
+    hash $request_uri;
+    hash_method crc32;
+    server localhost:8080;
+    server localhost:8081;
+}
+```
+
+**server指令可选参数：**
+
+1. weight：设置一个服务器的访问权重，数值越高，收到的请求也越多；
+2. fail_timeout：在这个指定的时间内服务器必须提供响应，如果在这个时间内没有收到响应，那么服务器将会被标记为 down 状态；
+3. max_fails：设置在 fail_timeout 时间之内尝试对一个服务器连接的最大次数，如果超过这个次数，那么服务器将会被标记为 down;
+4. down：标记一个服务器不再接受任何请求；
+5. backup：一旦其他服务器宕机，那么有该标记的机器将会接收请求。
+
+keepalive 指令：Nginx 服务器将会为每一个 worker 进行保持同上游服务器的连接
+```
+upstream backend {
+    server 127.0.0.1:8080;
+    keepalive 32;
+}
+
+server {
+    ...
+    location /api/ {
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+    }
+}
+```
