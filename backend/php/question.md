@@ -57,7 +57,7 @@ function remove_utf8_bom($text){
 > 若变量存在且其值为 ""、0、"0"、NULL、、FALSE、array()、var $var; 以及没有任何属性的对象，则返回 TURE   
 > 若变量存在且值不为 ""、0、"0"、NULL、、FALSE、array()、var $var; 以及没有任何属性的对象，则返回 FALSE  
 
-- 打开php.ini中的 safe_mode，会影响哪些函数
+- 打开 php.ini 中的 safe_mode，会影响哪些函数
 > safe_mode，php 安全模式，它提供一个基本安全的共享环境，在一个有多个用户账户存在的php开发的web服务器上  
 > 当安全模式打开的时候，一些函数将被完全的禁止，而另一些函数的功能将会受到限制，  
 > 如：chdir,move_uploaded_file,chgrp,parse_ini_file,chown,rmdir,copy,rename,fopen,require,mkdir,unlink 等。  
@@ -69,6 +69,33 @@ function remove_utf8_bom($text){
 > PHP 使用了引用计数(reference counting)这种单纯的垃圾回收(garbage collection)机制，  
 > 每个对象都内含一个引用计数器，每个 reference 连接到对象，计数器加 1。当 reference 离开生存空间或被设为NULL，计数器减 1。  
 > 当某个对象的引用计数器为零时，PHP 知道你将不再需要使用这个对象，释放其所占的内存空间。
+
+- 浮点数运算存在什么问题？
+> 浮点数运算，特别是金融行业、电子商务订单管理、数据报表等相关业务，利用浮点数进行加减乘除时，稍不留神运算结果就会出现偏差，轻则损失几十万，重则会有信誉损失，甚至吃上官司，我们一定要引起高度重视！  
+> 所以，PHP 精度问题使用 [BCMath 函数](http://php.net/manual/zh/book.bc.php) ，Mysql 建议使用定点数（decimal）进行存储。  
+> 这里还引出一个问题 —— 银行家舍入法（四舍六入五考虑，五后非空就进一，五后为空看奇偶，五前为偶应舍去，五前为奇要进一），使用案例 round(1.2849, 2, PHP_ROUND_HALF_EVEN);
+```php
+// 浮点数精度问题，导致运算结果不遂人意
+$a = 0.1;
+$b = 0.7;
+$c = intval(($a + $b) * 10); // 7
+// 解决方法：$c = intval(bcadd($a, $b, 1) * 10);
+
+$a = 100;
+$b = 99.98;
+$c = $a - $b; // 0.019999999999996
+// 解决方法：$c = bcsub($a, $b, 2);
+
+$a = 0.58;
+$b = 100;
+$c = intval($a * $b); // 57
+// 解决方法：$c = intval(bcmul($a, $b));
+
+$a = 0.7;
+$b = 0.1;
+$c = intval($a / $b); // 6
+// 解决方法：$c = intval(bcdiv($a, $b));
+```
 
 - 论坛中无限分类的实现原理
 > 就像 windows 下新建一个文件夹，在新建的文件夹下又可以新建一个文件夹，这样无限循环下去，无限分类也是这样，父类可以分 出它子类，子类又可以分出它的子类，这样一直无限循环下去。  
