@@ -115,18 +115,18 @@ Java 提供了两种变量类型：基本类型和引用类型。
 
 基本类型是 CPU 可以直接进行运算的类型。 
 ```
-# 整数类型
+# 整数类型（没有无符号类型）
 byte：8 位，-128 ~ 127 (-2^7 ~ 2^7 - 1)，封装器类 Byte
 short: 16 位，-32768 ~ 32767 (-2^15 ~ 2^15-1)，封装器类 Short
 int（默认）: 32 位，-2147483648 ~ 2147483647 (-2^31 ~ 2^31-1)，封装器类 Integer
 long: 64 位，-9223372036854775808 ~ 9223372036854775807 (-2^63 ~ 2^63-1)，封装器类 Long
 
 # 浮点数类型
-float：32 位，-3.403E38 ~ 3.403E38（需要加上 f 后缀），封装器类 Float
+float：32 位，-3.403E38 ~ 3.403E38（需要加上 f 后缀，区分双精度），封装器类 Float
 double（默认）：64 位，-1.798E308 ~ 1.798E308，封装器类 Double
 
 # 字符类型
-# 存储 Unicode 码，使用单引号赋值（注意与双引号的字符串类型区分）
+# 存储 Unicode 码如 'A'，使用单引号赋值（注意与双引号的字符串类型区分）
 char: 16 位，1，封装器类 Character 
 
 # 布尔类型
@@ -159,8 +159,148 @@ Annotation
 ```
 
 ### Java 运算符
+Java 的运算符包括算术运算符、赋值运算符、比较运算符、逻辑运算符、位运算符、三目运算符。  
+```java
+int number1 = 2019;
+int number2 = 2020;
+int maxNumber = number1 > number2 ? number1 : number2;
+```
 
-运算符优先级  
+一些需要注意的地方
+> 1、整数由于存在范围限制，如果计算结果超出了范围，就会产生溢出；而溢出不会出错，却会得到一个奇怪的结果  
+> 2、浮点数运算在除数为 0 时，不会报错，但会返回几个特殊值：
+> NaN 表示 Not a Number
+> Infinity 表示无穷大
+> -Infinity 表示负无穷大
 
+![运算符优先级参考](./image/operator.png)  
+
+### Java 键盘操作
+键盘录入，提高程序的灵活性。
+```java 
+import java.util.Scanner;
+
+Scanner sc = new Scanner(System.in)
+int inputNumber = sc.nextInt();
+```
+
+### Java 控制结构
+```java
+// If 条件语句
+int number = 10;
+if (number == 10){
+    System.out.println("= 10");
+} else if (number > 10) {
+    System.out.println("> 10");
+} else {
+    System.out.println("< 10");
+}
+
+// While循环
+int counterWhile = 0;
+while(counterWhile < 100)
+{
+    System.out.println(counterWhile);
+    // 增加计数器 counterWhile 0->99
+    counterWhile++;
+}
+// 输出 100
+System.out.println(counterWhile);
+// Do While循环
+int counterDoWhile = 0;
+do
+{
+    System.out.println(counterDoWhile);
+    //增加计数器 counterDoWhile 0->99
+    counterDoWhile++;
+}while(counterDoWhile < 100);
+// 输出 100
+System.out.println(counterWhile);
+
+// For 循环
+int counterFor;
+//for 循环结构 => for(<起始语句>; <循环进行的条件>; <步长>)
+for(counterFor = 0; counterFor < 10; counterFor++){
+    // counterFor 0->9
+    System.out.println(counterFor);
+}
+
+// Switch Case 语句
+int month = 3;
+String monthString;
+switch (month){
+    case 1:
+            monthString = "January";
+            break;
+    case 2:
+            monthString = "February";
+            break;
+    case 3:
+            monthString = "March";
+            break;
+    default:
+            monthString = "Other month";
+            break;
+}
+```
+
+### Java 类与函数
+Java 中函数被称作方法。
+```java
+class Bicycle {
+    public int cadence; // Public: 任意位置均可访问
+    private int speed;  // Private: 只在同类中可以访问
+    protected int gear; // Protected: 可以在同类与子类中可以访问
+    String name; // Default public: 可以在包内中可以访问
+
+    // 默认构造函数（初始化一个对象的方式）
+    public Bicycle() {
+        gear = 1;
+        cadence = 50;
+        speed = 5;
+        name = "Bontrager";
+    }
+
+    // 含有参数的构造函数
+    public Bicycle(int startCadence, int startSpeed, int startGear, String name) {
+        this.gear = startGear;
+        this.cadence = startCadence;
+        this.speed = startSpeed;
+        this.name = name;
+    }
+
+    // 函数语法:
+    // <public/private/protected> <返回值类型> <函数名称>(<参数列表>)
+    public int getCadence() {
+        return cadence;
+    }
+
+    // void 说明函数没有返回值
+    public void setCadence(int newValue) {
+        cadence = newValue;
+    }
+
+    // @Override 表示需要重载的方法
+    // 返回对象属性的方法
+    @Override
+    public String toString() {
+        return " cadence: " + cadence;
+    }
+}
+
+// PennyFarthing 是 Bicycle 的子类
+class PennyFarthing extends Bicycle {
+    public PennyFarthing(int startCadence, int startSpeed){
+        // 通过 super 调用父类的构造函数
+        super(startCadence, startSpeed, 0, "PennyFarthing");
+    }
+
+    
+    @Override
+    public void setCadence(int newValue) {
+        setCadence = newValue + 1;
+    }
+}
+```
 
 
