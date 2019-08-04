@@ -2,7 +2,11 @@
 ### 设置
 设置 Git 以便准备开始工作
 ```bash
-# 设置用户名和邮箱
+# 设置用户名和邮箱（local>global>system）
+# 对当前仓库有效 --local（缺省）
+# 对登陆用户所有仓库有效 --global
+# 对系统所有用户有效 --system
+# 取消 --unset
 git config --global user.name "Your Name"
 git config --global user.email "your_email@whatever.com"
 
@@ -26,7 +30,7 @@ echo "this is a demo" > first.txt
 git init
 # 添加文件到暂存区
 git add first.txt
-# 提交文件到本地仓库
+# 提交文件到本地仓库，如果是空提交增加参数 --allow-empty
 git commit -m "First Commit"
 # 查看当前 git 状态
 git status
