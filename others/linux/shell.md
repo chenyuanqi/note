@@ -1,11 +1,18 @@
 
+### shell link
+[shell check](https://github.com/koalaman/shellcheck)  
+[shell awesome](https://github.com/alebcay/awesome-shell)  
+
 ### shell 脚本
 shell 脚本以.sh 结尾的或者不需要后缀都可以。
 ```sh
 #!/bin/bash
 # 文件名 hello.sh
 NUM=100
-echo "学习 shell $NUM 分"
+# 输出
+echo "学习 shell $NUM 分"  
+# 格式化输出
+printf "%d" $NUM
 ```
 运行 shell 脚本需要注意分配执行权限，注意头部的 bom 头和首行行尾多余的看不见的空格  
 ```bash
@@ -110,6 +117,8 @@ fi
 | `>` | 大于 (在双括号里使用) | `(("$a" > "$b"))` |
 | `>=` | 大于等于(在双括号里使用) | `(("$a" >= "$b"))` |
 
+`注意：> =号 < 号在双括号外使用必须转义，不然 shell 当作重定向符号`
+
 **字符串比较操作符**  
 | 比较操作符 | 描述 | 例子 |
 | ---- | ---- | ---- |
@@ -162,6 +171,50 @@ shell 变量的一些说明
 | `-f` | 函数 | `declare -f` 会列出所有在此脚本前面已定义的函数|
 | `-x export` | 函这样将声明一个变量作为脚本的环境变量而被导出。 | `declare -x var3` |
 | `-x var=$value` | declare命令允许在声明变量类型的时候同时给变量赋值。| `declare -x var3=373` |
+
+**内部变量说明**
+| 内部变量 | 说明 |
+| ---- | ---- |
+| $BASH | Bash二进制程序文件的路径 |
+| $BASH_ENV | 该环境变量保存一个Bash启动文件路径，当启动一个脚本程序时会去读该环境变量指定的文件。 |
+| $BASH_SUBSHELL | 一个指示子shell(subshell)等级的变量。它是Bash版本3新加入的。 |
+| $BASH_VERSINFO[n] | 这个数组含有6个元素，指示了安装的Bash版本的信息。它和$BASH_VERSION相似，但它们还是有一些小小的不同。|
+| $BASH_VERSION | 安装在系统里的Bash版本。|
+| $DIRSTACK | 在目录堆栈里面最顶端的值(它受pushd和popd的控制) |
+| $EDITOR | 由脚本调用的默认的编辑器，一般是vi或是emacs。 |
+| $EUID | 有效用户ID | 
+| $FUNCNAME | 当前函数的名字 |
+| $GLOBIGNORE | 由通配符(globbing)扩展的一列文件名模式。|
+| $GROUPS | 目前用户所属的组|
+| $HOME | 用户的家目录，通常是/home/username |
+| $HOSTNAME | 在系统启动时由一个初始化脚本中用hostname命令给系统指派一个名字。然而，gethostname()函数能设置Bash内部变量E$HOSTNAME。|
+| $HOSTTYPE | 机器类型，像$MACHTYPE一样标识系统硬件。|
+| $IFS | 内部字段分隔符 |
+| $IGNOREEOF | 忽略EOF：在退出控制台前有多少文件结尾标识（end-of-files,control-D）会被shell忽略。|
+| $LC_COLLATE | 它常常在.bashrc或/etc/profile文件里被设置，它控制文件名扩展和模式匹配的展开顺序。|
+| $LINENO | 这个变量表示在本shell脚本中该变量出现时所在的行数。它只在脚本中它出现时有意义，它一般可用于调试。|
+| $MACHTYPE | 机器类型，识别系统的硬件类型。|
+| $OLDPWD | 上一次工作的目录("OLD-print-working-directory",你上一次进入工作的目录)|
+| $TZ | 时区 |
+| $MAILCHECK | 每隔多少秒检查是否有新的信件 |
+| $OSTYPE | 操作系统类型 |
+| $MANPATH man | 指令的搜寻路径 |
+| $PATH | 可执行程序文件的搜索路径。一般有/usr/bin/, /usr/X11R6/bin/, /usr/local/bin,等等。|
+| $PIPESTATUS | 此数组变量保存了最后执行的前台管道的退出状态。相当有趣的是，它不一定和最后执行的命令的退出状态一样。|
+| $PPID | 一个进程的$PPID变量保存它的父进程的进程ID(pid)。用这个变量和pidof命令比较。|
+| $PROMPT_COMMAND | 这个变量在主提示符前($PS1显示之前)执行它的值里保存的命令。|
+| $PS1 | 这是主提示符（第一提示符），它能在命令行上看见。|
+| $PS2 | 副提示符（第二提示符），它在期望有附加的输入时能看见。它显示像">"的提示。|
+| $PS3 | 第三提示符。它在一个select循环里显示 (参考例子 10-29)。|
+| $PS4 | 第四提示符，它在用-x选项调用一个脚本时的输出的每一行开头显示。它通常显示像"+"的提示。|
+| $PWD | 工作目录(即你现在所处的目录) ，它类似于内建命令pwd。|
+| $REPLY | 没有变量提供给read命令时的默认变量．这也适用于select命令的目录，但只是提供被选择的变量项目编号而不是变量本身的值。 |
+| $SECONDS | 脚本已运行的秒数。|
+| $SHELLOPTS | 已经激活的shell选项列表，它是一个只读变量。|
+| $SHLVL | SHELL的嵌套级别．指示了Bash被嵌套了多深．在命令行里，$SHLVL是1，因此在一个脚本里，它是2 |
+| $TMOUT | 如果$TMOUT环境变量被设为非零值时间值time，那么经过time这么长的时间后，shell提示符会超时．这将使此shell退出登录 |
+| $USER | 用户名，这是当前用户的用户名称 |
+| $UID | 用户ID号，这是当前用户的用户标识号，它在 /etc/passwd 文件中记录 |
 
 **特殊变量说明**  
 | 参数处理 | 说明 |  
@@ -230,6 +283,15 @@ if [ "$string1" = "$string2" ]
 then
    # ...
 fi
+
+# 遍历字符串列表
+list="Alabama Alaska Arizona"
+list=$list" Connecticut"
+for state in $list
+do
+  echo "Have you ever visited $state"
+done
+
 ```
 
 ### shell 执行命令
@@ -246,12 +308,17 @@ rm `cat filePath` # "filePath" 包含了需要被删除的文件列表
 ### shell 运算
 ```sh
 # 自增运算 (( index++ ))
+# 自减运算 (( index-- ))
+
 index=1
+# 运算的各种姿势
 index=`expr $index + 1`   
 index=$(($index+1))
+index=$[$index+1]
 let "index+=1"
+index=`echo $index+1 | bc`
 
-# 自减运算 (( index-- ))
+
 ```
 
 ### shell if 语句
@@ -330,7 +397,7 @@ do
 done 
 
 # 循环内的控制
-# continue 跳出当前循环
+# continue 跳出当前循环，continue 2 跳出两层循环
 # break 跳出所有循环
 ```
 
@@ -346,3 +413,93 @@ function functionName {
 functionName()
 # 获取返回值 $?
 ```
+
+### shell 正则
+**正则表达式的基本组成部分**
+| 正则表达式 | 描述 | 示例 | Basic RegEx | Extended RegEx | Python RegEx | Perl regEx | 
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- | 
+| \ | 转义符，将特殊字符进行转义，忽略其特殊意义 | a\.b匹配a.b，但不能匹配ajb，.被转义为特殊意义 | \ | \ | \ | \ | 
+| ^ | 匹配行首，awk中，^则是匹配字符串的开始 | ^tux匹配以tux开头的行 | ^ | ^ | ^ | ^ |
+| $ | 匹配行尾，awk中，$则是匹配字符串的结尾 | tux$匹配以tux结尾的行 | $ | $ | $ | $ |
+| . | 匹配除换行符\n之外的任意单个字符，awk则中可以 | ab.匹配abc或bad，不可匹配abcd或abde，只能匹配单字符 | . | . | . | . |
+| [] | 匹配包含在[字符]之中的任意一个字符 | coo[kl]可以匹配cook或cool | [] | [] | [] | [] |
+| [^] | 匹配[^字符]之外的任意一个字符 | 123[^45]不可以匹配1234或1235，1236、1237都可以 | [^] | [^] | [^] | [^] |
+| [-] | 匹配[]中指定范围内的任意一个字符，要写成递增 | [0-9]可以匹配1、2或3等其中任意一个数字 | [-] | [-] | [-] | [-] |
+| ? | 匹配之前的项1次或者0次 | colou?r可以匹配color或者colour，不能匹配colouur | 不支持 | ? | ? | ? |
+| + | 匹配之前的项1次或者多次 | sa-6+匹配sa-6、sa-666，不能匹配sa- | 不支持 | + | + | + |
+| \* | 匹配之前的项0次或者多次 | co\*l匹配cl、col、cool、coool等 | \* | \* | \* | \* |
+| () | 匹配表达式，创建一个用于匹配的子串 | ma(tri)?匹配max或maxtrix | 不支持 | () | () | () |
+| {n} | 匹配之前的项n次，n是可以为0的正整数 | [0-9]{3}匹配任意一个三位数，可以扩展为[0-9][0-9][0-9] | 不支持 | {n} | {n} | {n} |
+| {n,} | 之前的项至少需要匹配n次 | [0-9]{2,}匹配任意一个两位数或更多位数 | 不支持 | {n,} | {n,} | {n,} |
+| {n,m} | 指定之前的项至少匹配n次，最多匹配m次，n&lt;=m | [0-9]{2,5}匹配从两位数到五位数之间的任意一个数字 | 不支持 | {n,m} | {n,m} | {n,m} |
+| `|` | 交替匹配|两边的任意一项 | `ab(c|d)`匹配abc或abd | 不支持 | `|` | `|` | `|` |
+
+POSIX 字符类是一个形如[:...:]的特殊元序列（meta sequence），他可以用于匹配特定的字符范围  
+**POSIX 字符类**
+| 正则表达式 | 描述 | 示例 | Basic RegEx | Extended RegEx | Python RegEx | Perl regEx |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- | 
+| [:alnum:] | 匹配任意一个字母或数字字符 | [[:alnum:]]+ | [:alnum:] | [:alnum:] | [:alnum:] | [:alnum:] |
+| [:alpha:] | 匹配任意一个字母字符（包括大小写字母） | [[:alpha:]]{4} | [:alpha:] | [:alpha:] | [:alpha:] | [:alpha:] |
+| [:blank:] | 空格与制表符（横向和纵向） | [[:blank:]]* | [:blank:] | [:blank:] | [:blank:] | [:blank:] |
+| [:digit:] | 匹配任意一个数字字符 | [[:digit:]]? | [:digit:] | [:digit:] | [:digit:] | [:digit:] |
+| [:lower:] | 匹配小写字母 | [[:lower:]]{5,} | [:lower:] | [:lower:] | [:lower:] | [:lower:] |
+| [:upper:] | 匹配大写字母 | ([[:upper:]]+)? | [:upper:] | [:upper:] | [:upper:] | [:upper:] |
+| [:punct:] | 匹配标点符号 | [[:punct:]] | [:punct:] | [:punct:] | [:punct:] | [:punct:] |
+| [:space:] | 匹配一个包括换行符、回车等在内的所有空白符 | [[:space:]]+ | [:space:] | [:space:] | [:space:] | [:space:] |
+| [:graph:] | 匹配任何一个可以看得见的且可以打印的字符 | [[:graph:]] | [:graph:] | [:graph:] | [:graph:] | [:graph:] |
+| [:xdigit:] | 任何一个十六进制数（即：0-9，a-f，A-F） | [[:xdigit:]]+ | [:xdigit:] | [:xdigit:] | [:xdigit:] | [:xdigit:] |
+| [:cntrl:] | 任何一个控制字符（[ASCII](http://zh.wikipedia.org/zh/ASCII)字符集中的前32个字符) | [[:cntrl:]] | [:cntrl:] | [:cntrl:] | [:cntrl:] | [:cntrl:] |
+| [:print:] | 任何一个可以打印的字符 | [[:print:]] | [:print:] | [:print:] | [:print:] | [:print:] |
+
+元字符（meta character）是一种Perl风格的正则表达式，只有一部分文本处理工具支持它，并不是所有的文本处理工具都支持  
+**元字符**
+| 正则表达式 | 描述 | 示例 | Basic RegEx | Extended RegEx | Python RegEx | Perl regEx |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- | 
+| \b | 单词边界 | \bcool\b 匹配cool，不匹配coolant | \b | \b | \b | \b |
+| \B | 非单词边界 | cool\B 匹配coolant，不匹配cool | \B | \B | \B | \B |
+| \d | 单个数字字符 | b\db 匹配b2b，不匹配bcb | 不支持 | 不支持 | \d | \d |
+| \D | 单个非数字字符 | b\Db 匹配bcb，不匹配b2b | 不支持 | 不支持 | \D | \D |
+| \w | 单个单词字符（字母、数字与_） | \w 匹配1或a，不匹配& | \w | \w | \w | \w |
+| \W | 单个非单词字符 | \W 匹配&，不匹配1或a | \W | \W | \W | \W |
+| \n | 换行符 | \n 匹配一个新行 | 不支持 | 不支持 | \n | \n |
+| \s | 单个空白字符 | x\sx 匹配x x，不匹配xx | 不支持 | 不支持 | \s | \s |
+| \S | 单个非空白字符 | x\S\x 匹配xkx，不匹配xx | 不支持 | 不支持 | \S | \S |
+| \r | 回车 | \r 匹配回车 | 不支持 | 不支持 | \r | \r |
+| \t | 横向制表符 | \t 匹配一个横向制表符 | 不支持 | 不支持 | \t | \t |
+| \v | 垂直制表符 | \v 匹配一个垂直制表符 | 不支持 | 不支持 | \v | \v |
+| \f | 换页符 | \f 匹配一个换页符 | 不支持 | 不支持 | \f | \f |
+
+### shell 其他
+```sh
+# 获取用户输入
+echo -n "Enter your name:"
+read name
+echo "Hello $name, welcome~"
+# 如果不指定变量，read 命令就会把它收到的任何数据都放到特殊环境变量 REPLY 中
+read -p "Enter a number:"
+echo $REPLY
+# 限时 5s，输入放到变量 number
+read -t 5 -p "Please enter the number again:" number
+# 隐形输入
+read -s -p "Please enter your password: " password
+
+# 定时执行脚本
+at -f at.sh 23:59
+
+# msgbox 部件 dialog 的使用
+dialog --title text --msgbox "This is a test" 10 20
+
+# 常用系统脚本
+# 
+# 查看僵尸进程
+ps -al | gawk '{print $2,$4}' | grep Z
+# 查看在线用户数
+uptime | sed 's/user.*$//' | gawk '{print $NF}'
+# 查看内存使用百分比
+free | sed -n '2p' | gawk 'x = int(( $3 / $2 ) * 100) {print x}' | sed 's/$/%/'
+# 查看磁盘使用百分比
+df -h /dev/sda1 | sed -n '/% \//p' | gawk '{ print $5 }'
+# 邮箱验证
+gawk --re-interval '/^([a-zA-Z0-9_\-\.\+]+)@([a-zA-Z0-9_\-\+]+)\.([a-zA-Z]{2,5})/{print $0}'
+```
+
