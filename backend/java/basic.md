@@ -90,6 +90,39 @@ HelloJava.java -> javac 编译(javac HelloJava.java) -> Java 字节码文件 Hel
 /** 文档注释文字 */
 ```
 
+### Java 输入输出
+Java 的输入，提高程序的灵活性。
+```java 
+import java.util.Scanner;
+
+Scanner sc = new Scanner(System.in); // 创建 Scanner 对象，System.in 表示标准输入流
+System.out.print("Input your name: "); // System.out 表示标准输出流
+String name = scanner.nextLine(); // 读取一行输入并获取字符串
+System.out.print("Input your age: ");
+int age = sc.nextInt(); // 读取一行输入并获取整数，如果转换为浮点数使用 nextDouble()...
+System.out.printf("Hi, %s, you are %d\n", name, age); // 格式化输出
+```
+
+Java 的输出主要时向屏幕输出一些内容。  
+Java 的输出格式化功能提供了多种占位符，可以把各种数据类型 “格式化” 成指定的字符串。  
+
+|占位符 | 说明 |
+| ----- | ----- |
+| %% | 字符 % |
+| %d | 格式化输出整数 |
+| %x | 格式化输出十六进制整数 |
+| %f | 格式化输出浮点数 |
+| %e | 格式化输出科学计数法表示的浮点数 |
+| %s | 格式化字符串 |
+
+```java
+System.out.print("打印输出");
+System.out.println("打印输出并换行");
+
+double d = 3.1415926;
+System.out.printf("格式化输出 %.2f\n", d); // 格式化输出 3.14
+```
+
 ### Java 常量与变量
 常量：在程序执行的过程中其值不可以发生改变，分为字面值常量和自定义常量（比如整数常量 1，布尔常量 true 和 false，空常量 null等）    
 变量：在程序执行的过程中，在某个范围内其值可以发生改变的量，类似数学中的未知数  
@@ -113,7 +146,7 @@ Java语言是强类型语言，对于每一种数据都定义了明确的具体�
 
 Java 提供了两种变量类型：基本类型和引用类型。  
 
-基本类型是 CPU 可以直接进行运算的类型。 
+基本类型是 CPU 可以直接进行运算的类型。  
 ```
 # 整数类型（没有无符号类型）
 byte：8 位，-128 ~ 127 (-2^7 ~ 2^7 - 1)，封装器类 Byte
@@ -140,6 +173,19 @@ false
 2、强制转换：变量名=(目标类型)(被转换的数据);  
 3、boolean 类型不能转换为其他的数据类型  
 
+Java 的装箱拆箱  
+自动装箱就是 Java 自动将原始类型值转换成对应的对象，比如将 int 的变量转换成 Integer 对象，这个过程叫做装箱，反之将 Integer 对象转换成 int 类型值，这个过程叫做拆箱。比如不同类型的比较就会触发自动装箱。  
+装箱过程是通过调用包装器的 valueOf 方法实现的，而拆箱过程是通过调用包装器的 xxxValue 方法实现的。  
+```java
+// 自动装箱
+int i = 10;
+Integer n = i; // <=> Integer n = Integer.valueOf(i);
+
+// 自动拆箱
+Integer i = 10; // <=> Integer i = Integer.valueOf(10);
+int n = i; // <=> int n = i.intValue();
+```
+
 引用类型底层结构和基本类型差别较大
 ```
 # 类
@@ -152,11 +198,192 @@ interface
 []
 
 # 枚举 
-enum
+# 枚举类型不能被继承  
+public enum t {
+    SPRING, SUMMER;
+}
 
 # 标注
 Annotation
 ```
+
+### Java 字符串 
+在 Java 中字符串属于对象，Java 提供了 String 类来创建和操作字符串。  
+
+和 char 类型不同，字符串 String 类型是引用类型，我们用双引号 "" 表示字符串，一个字符串可以存储 0 个到任意个字符。  
+
+```java
+// string 不可变
+String s = "hello";
+String t = s;
+s = "world"; // s 指向了 world，hello 依旧存在
+System.out.println(t); // hello
+
+// string 拼接
+// 用 + 连接字符串和其他数据类型，会将其他数据类型先自动转型为字符串再连接
+String s1 = "Hello";
+String s2 = "world";
+String s = s1 + " " + s2 + "!";
+System.out.println(s);
+
+// 字符串的比较，返回布尔类型
+s1.equals(s2);
+s1.equalsIgnoreCase(s2);
+
+// 单字节处理
+// 字符串长度 str.length();
+String str = "Something";
+for (int i=0;i<str.length();i++){
+    char s = str.charAt(i); // 返回指定索引处的字符
+}
+
+// 字符串反转
+String str = "Something";
+StringBuffer strBuff = new StringBuffer(str);
+String strRev = strBuff.reverse().toString(); // gnihtemoS
+
+// 字符串大小写转换
+String str = "Something";
+String strUpper = str.toUpperCase();
+String strLower = str.toLowerCase();
+
+// 空格移除
+String str = "     aaa   ";
+str.trim(); // aaa，首尾空格移除
+str.replace(" ",""); // aaa，字符串替换，移除所有空格
+
+// 分割字符串，返回一个分割后的字符串数组
+String str = "tim,kerry,timmy";
+String[] results = str.split(","); // {"tim", "kerry", "timmy"}
+
+// 搜索与截取
+String s = "String";
+s.indexOf('i'); // 3，返回指定字符或字符串首字符的索引，不存在时返回 -1
+s.indexOf('i', 5); // -1，从索引 5 开始查找
+s.substring(3); // ing，从索引 3 开始截取字符串
+
+// 格式化字符串
+float floatVar = 1.23f;
+int intVar = 4;
+String stringVar = "HaHaHa";
+String fs;
+fs = String.format(" 浮点型变量的值为 " +
+                   "% .2f, 整型变量的值为 " +
+                   " % d, 字符串变量的值为 " +
+                   " %s", floatVar, intVar, stringVar);
+//  浮点型变量的值为  1.23, 整型变量的值为   4, 字符串变量的值为  HaHaHa
+
+```
+
+### Java 空值 
+引用类型的变量可以指向一个空值 null，它表示不存在，即该变量不指向任何对象。  
+```java
+String s1 = null; // s1 是 null
+String s2; // 没有初始化，s2 也是 null
+String s3 = s1; // s3 也是 null
+```
+
+`注意：要区分空值 null 和空字符串 ""，空字符串是一个有效的字符串对象，它不等于 null`
+
+### Java 数组
+Java 语言中提供的数组是用来存储固定大小的同类型元素。  
+
+定义一个数组类型的变量，使用数组类型 “类型 []”，例如，int[]。和单个基本类型变量不同，数组变量初始化必须使用 new int[5] 表示创建一个可容纳 5 个 int 元素的数组。  
+
+Java 的数组有以下特点：  
+1、数组所有元素初始化为默认值，整型都是 0，浮点型是 0.0，布尔型是 false；  
+2、数组一旦创建后，大小就不可改变；  
+3、数组是引用类型，在使用索引访问数组元素时，如果索引超出范围，运行时将报错；  
+4、数组可以被重新赋值，指向新的数组，原数组依旧存在
+
+```java
+// 动态初始化：定义数组时未初始化元素时需要指定长度
+int[] arr1 = new int[5];
+System.out.println(arr1.length); // 数组的长度 5
+System.out.println(arr1[0]); // 默认 0
+
+// 静态初始化：定义数组时直接指定初始化的元素，不需要指定长度
+int[] arr2 = new int[] { 68, 79, 91, 85, 62 };
+// 简写为 int[] arr2 = { 68, 79, 91, 85, 62 };
+// System.out.println(arr2.length); // 5
+arr2 = new int[] { 1, 2, 3 };
+System.out.println(arr2.length); // 3
+
+// 字符串型的数组
+String[] strArr = { "aaa", "bbb", "ccc" };
+String str = strArr[0];
+strArr[0] = "test"; // 数组项的改变不影响引用字符串型的 str
+System.out.println(str); // aaa
+
+// 遍历数组（for each 方式，不能指定排序）
+// 遍历数组可以这样（能指定排序） for (int i=0; i < arr3.length; i++)
+// for-each 的实现原理其实就是使用了普通的 for 循环和迭代器
+int[] arr3 = { 1, 4, 19, 16, 25 };
+for (int item : arr3) {
+    System.out.println(item);
+}
+
+// 打印数组
+import java.util.Arrays;
+System.out.println(Arrays.toString(arr3));
+
+// 数组排序
+// 对数组排序会直接修改数组本身
+// Arrays.sort(int[] array, int fromIndex, int toIndex) 可以对部分排序，默认全排
+import java.util.Arrays;
+Arrays.sort(arr3); // 默认从小到大升序排序
+// 冒泡排序（从大到小排序）
+for (int i = 0; i < arr3.length - 1; i++) {
+    for (int j = 0; j < arr3.length - i - 1; j++) {
+        if (arr3[j] < arr3[j+1]) {
+            int tmp   = arr3[j];
+            arr3[j]   = arr3[j+1];
+            arr3[j+1] = tmp;
+        }
+    }
+}
+```
+
+Java 的多维数组  
+多维数组最常见的就是二维数组。  
+Java 动态创建二维数组的格式：  
+数据类型[][] 变量名 = new 数据类型[m][n];  
+`m 表示这个二维数组有多少个一维数组，n 表示每一个一维数组的元素个数（也可以不指定）`  
+Java 静态创建二维数组的格式：  
+数据类型[][] 变量名 = new 数据类型[][]{{元素…},{元素…},{元素…}};  
+数据类型[][] 变量名 = {{元素…},{元素…},{元素…}};  
+```java
+int[][] arr = {
+    { 1, 2, 3, 4 },
+    { 5, 6, 7, 8 },
+    { 9, 10, 11, 12 }
+};
+System.out.println(arr.length); // 3，即包含 3 个一维数组
+System.out.println(ns[1][2]); // 7
+
+// 遍历二维数组
+for (int[] item : arr) {
+    for (int i : item) {
+        System.out.print(i + ", ");
+    }
+    System.out.println();
+}
+// 1, 2, 3, 4, 
+// 5, 6, 7, 8, 
+// 9, 10, 11, 12, 
+
+// 打印二维数组
+System.out.println(Arrays.deepToString(arr)); // [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+
+```
+
+### Java 数据结构
+线性表（ArrayList）  
+链表（LinkedList）  
+栈（Stack）  
+队列（Queue）  
+图（Map）  
+树（Tree）  
 
 ### Java 运算符
 Java 的运算符包括算术运算符、赋值运算符、比较运算符、逻辑运算符、位运算符、三目运算符。  
@@ -175,18 +402,14 @@ int maxNumber = number1 > number2 ? number1 : number2;
 
 ![运算符优先级参考](./image/operator.png)  
 
-### Java 键盘操作
-键盘录入，提高程序的灵活性。
-```java 
-import java.util.Scanner;
-
-Scanner sc = new Scanner(System.in)
-int inputNumber = sc.nextInt();
-```
-
 ### Java 控制结构
 ```java
 // If 条件语句
+// 根据 if 判断条件的真假，编译器直接把分支为 false 的代码块消除  
+if (true) {
+    System.out.println("如果 if 内只有一行代码，可以省略 {}，但是不建议这样做");
+}
+
 int number = 10;
 if (number == 10){
     System.out.println("= 10");
@@ -195,8 +418,24 @@ if (number == 10){
 } else {
     System.out.println("< 10");
 }
+// 浮点数的对比，需要注意精度问题（利用差值小于某个临界值来判断）
+double x = 1 - 9.0 / 10;
+if (Math.abs(x - 0.1) < 0.00001) {
+    System.out.println("x is 0.1");
+}
+// 引用类型的相等判断，必须使用 equals()
+String s1 = "hello";
+String s2 = "HELLO".toLowerCase();
+System.out.println(s1);
+System.out.println(s2);
+// 如果 s1 = null，需要考虑 s1 避免空指针（NullPointerException）异常
+if (s1 != null && s1.equals(s2)) {
+    System.out.println("s1 equals s2");
+} else {
+    System.out.println("s1 not equals s2");
+}
 
-// While循环
+// While 循环
 int counterWhile = 0;
 while(counterWhile < 100)
 {
@@ -211,23 +450,29 @@ int counterDoWhile = 0;
 do
 {
     System.out.println(counterDoWhile);
-    //增加计数器 counterDoWhile 0->99
+    // 增加计数器 counterDoWhile 0->99
     counterDoWhile++;
 }while(counterDoWhile < 100);
 // 输出 100
 System.out.println(counterWhile);
 
 // For 循环
-int counterFor;
-//for 循环结构 => for(<起始语句>; <循环进行的条件>; <步长>)
-for(counterFor = 0; counterFor < 10; counterFor++){
+// for 循环结构 => for(<起始语句>; <循环进行的条件>; <步长>)
+// for 循环还可以缺少初始化语句、循环条件和每次循环更新语句
+for(int counterFor = 0; counterFor < 10; counterFor++){
     // counterFor 0->9
     System.out.println(counterFor);
 }
 
+// 循环的关键字
+// continue：继续下一轮的循环，continue label 即继续 label 下的下一轮循环
+// break：跳出当前循环，break label 即跳出 label 下的所有循环
+
 // Switch Case 语句
 int month = 3;
 String monthString;
+// 实际是 month.hashCode() == value.hashCode()
+// 同样适用于字符串、枚举，字符串不需要使用 equals()
 switch (month){
     case 1:
             monthString = "January";
@@ -238,9 +483,25 @@ switch (month){
     case 3:
             monthString = "March";
             break;
+    case 4:
+    case 5:
     default:
             monthString = "Other month";
             break;
+}
+
+// java12 的 switch 写法
+switch (month){
+    case 1 -> monthString = "January";
+    case 2 -> {
+        monthString = "February";
+        System.out.println(monthString);
+    }
+    case 3 -> {
+        monthString = "March";
+        System.out.println(monthString);
+    }
+    case 4, 5, default -> monthString = "Other month";
 }
 ```
 
@@ -303,4 +564,46 @@ class PennyFarthing extends Bicycle {
 }
 ```
 
+### Java 数学运算
+Java 的 Math 包含了用于执行基本数学运算的属性和方法，如初等指数、对数、平方根和三角函数。
 
+### Java 日期时间
+
+
+### Java 文件处理
+
+
+### Java 正则表达式
+
+
+### Java 内存分配
+Java 程序在运行时，需要在内存中的分配空间。为了提高运算效率，就对空间进行了不同区域的划分，因为每一片区域都有特定的处理数据方式和内存管理方式。  
+> 栈：用于存储局部变量  
+> 堆：用来存放动态产生的数据，比如存储 new 出来的东西  
+> 常量池：JVM 为每个已加载的类型维护一个常量池，它是这个类型用到的常量的一个有序集合  
+> 方法区：面向对象部分  
+> 本地方法区：和系统相关  
+> 寄存器：JVM 内部虚拟寄存器，存取速度非常快，程序不可控制，给 CPU 使用  
+
+### Java 垃圾回收
+Java 提供了一个系统级的线程来跟踪内存分配，不再使用的内存区将会自动回收。  
+
+Hotspot JVM 全局是采用的分代收集器：  
+1）分配新对象在新生代的 Eden 区  
+2）当达到回收条件的时候，未有引用的会受到，有引用的放到新生代的 Survivor Space 区  
+3）等几次回收之后，来回再 Survivor Space 复制几回，并且标记上对象的年龄  
+4）当我们设置 -xx：MaxTenuringThreshold=9 的时候。当年龄达到 9 的时候 copy 到老年代  
+5）然后循环此过程，当老年代达到一定值的时候触发老年 GC
+
+发生垃圾回收的时候会用到三种算法。  
+1、“标记 - 清除”（Mark-Sweep）算法  
+如它的名字一样，算法分为 “标记” 和 “清除” 两个阶段。首先标记出所有需要回收的对象，在标记完成后统一回收掉所有被标记的对象。之所以说它是最基础的收集算法，是因为后续的收集算法都是基于这种思路并对其缺点进行改进而得到的。  
+它的主要缺点有两个：一个是效率问题，标记和清除过程的效率都不高；另外一个是空间问题，标记清除之后会产生大量不连续的内存碎片，可能会导致太多空间碎片，当程序在以后的运行过程中需要分配较大对象时无法找到足够的连续内存而不得不提前触发另一次垃圾收集动作。  
+2、复制算法（Copying）  
+将现有的内存空间分为两快，每次只使用其中一块；当其中一块时候完的时候，就将还存活的对象复制到另外一块上去；再把已使用过的内存空间一次清理掉。  
+它的优点，由于是每次都对整个半区进行内存回收，内存分配时不必考虑内存碎片问题；只要移动堆顶指针，按顺序分配内存即可，实现简单，运行高效。  
+它的缺点，内存减少为原来的一半，太浪费了；对象存活率较高的时候就要执行较多的复制操作，效率变低；如果不使用 50% 的对分策略，老年代需要考虑的空间担保策略。  
+演进：并不需要根据 1:1 划分内存空间，而是将内存划分为一块较大的 Eden Space 和两块较小的 Survivor Space。  
+3、标记 - 整理算法（Mark-Compact）  
+复制收集算法在对象存活率较高时就要执行较多的复制操作，效率将会变低。更关键的是，如果不想浪费 50% 的空间，就需要有额外的空间进行分配担保，以应对被使用的内存中所有对象都 100% 存活的极端情况，所以在老年代一般不能直接选用这种算法。  
+根据老年代的特点，有人提出了另外一种 “标记 - 整理”（Mark-Compact）算法，标记过程仍然与 “标记 - 清除” 算法一样，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存（有点 copy 的意思，但是比 copy 省空间。比清理好的一点是没有碎片）。
