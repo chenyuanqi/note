@@ -171,3 +171,14 @@ git merge origin/new_branch
 # 仓库共享
 git daemon
 ```
+
+### git 一些命令的理解
+```bash
+#
+git cherry-pick
+
+git rebase
+
+
+```
+
