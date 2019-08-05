@@ -208,7 +208,7 @@ Annotation
 ```
 
 ### Java 字符串 
-在 Java 中字符串属于对象，Java 提供了 String 类来创建和操作字符串。  
+在 Java 中字符串属于对象，Java 提供了 String 类来创建和操作字符串，String 被声明为 final，不可被继承。  
 
 和 char 类型不同，字符串 String 类型是引用类型，我们用双引号 "" 表示字符串，一个字符串可以存储 0 个到任意个字符。  
 
