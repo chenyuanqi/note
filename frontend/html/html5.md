@@ -121,7 +121,7 @@ progress		定义任何类型的任务的进度，带 UI，不常用
 <script src="html5shiv.js"></script>
 <!--[if lte IE 9]>
 <script type="text/javascript" src="htmlshiv.js"></script>
-<![endif]--
+<![endif]-->
 ```
 
 ### 二 表单

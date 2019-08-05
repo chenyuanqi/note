@@ -201,11 +201,11 @@ npm install gulp-uglify gulp-watch-path stream-combiner2 gulp-sourcemaps gulp-mi
 ```
 
 设计目录结构  
-└── src/
-	├── less/    *.less 文件  
-	├── sass/    *.scss *.sass 文件  
-	├── css/     *.css  文件  
-	├── js/      *.js 文件  
+└── src/  
+	├── less/    \*.less 文件  
+	├── sass/    \*.scss \*.sass 文件   
+	├── css/     \*.css  文件  
+	├── js/      \*.js 文件  
 	├── fonts/   字体文件  
     └── images/   图片  
 └── dist/   

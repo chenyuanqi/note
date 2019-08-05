@@ -104,7 +104,7 @@ REST，即 Representational State Transfer 的缩写，意思是 " 表现层状�
 > 如果状态码是 4xx，就应该向用户返回出错信息。一般来说，返回的信息中将 error 作为键名，出错信息作为键值即可。
 ```json
 {
-　　"error":"Invalid API key"
+  "error":"Invalid API key"
 }
 ```
 
