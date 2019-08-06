@@ -9,7 +9,7 @@ J2EE(Java 2 Platform Enterprise Edition)企业版是为开发企业环境下的�
 Java SE 是整个 Java 平台的核心，而 Java EE 是进一步学习 Web 应用所必须的(Spring 等框架都是 Java EE 开源生态系统的一部分)。
 
 Java 语言特点：简单性、面向对象、健壮性、结构中立、高性能、多线程、动态、安全性、跨平台。  
-跨平台：只要在需要运行 java 应用程序的操作系统上，先安装一个 Java 虚拟机 JVM (Java Virtual Machine) 即可。由 JVM 来负责 Java 程序在该系统中的运行。  
+跨平台：只要在需要运行 java 应用程序的操作系统上，先安装一个 Java 虚拟机 JVM (Java Virtual Machine) 即可。由 JVM 来负责 Java 程序在该系统中的运行。（Write once, run anywhere）  
 ```
            --- jvm --- windows
 Java 语言 -|-- jvm --- linux
@@ -251,6 +251,14 @@ String strLower = str.toLowerCase();
 String str = "     aaa   ";
 str.trim(); // aaa，首尾空格移除
 str.replace(" ",""); // aaa，字符串替换，移除所有空格
+str.replaceAll("\\s*",""); // 可以替换大部分空白字符， 不限于空格
+// JDK 11 还引入了几种方法
+// isBlank() 指示 String 是否为空或仅包含空格字符
+// stripLeading() 从头部移除空白区域
+// stripTrailing() 从末尾移除空白区域
+// strip() 从字符串的开头和结尾移除空白区域
+// repeat(int) 重复 String 为 int 次
+// lines() 使用 Spliterator 从源字符串延迟提供行
 
 // 分割字符串，返回一个分割后的字符串数组
 String str = "tim,kerry,timmy";
@@ -571,7 +579,35 @@ Java 的 Math 包含了用于执行基本数学运算的属性和方法，如初
 
 
 ### Java 文件处理
-
+```java
+String path = "/temp/test.txt";
+File fileHandle = new File(path); // path 可以为目录或文件
+// 判断是文件还是目录
+if (fileHandle.isDirectory()){
+    // 如果是目录，创建目录
+    boolean result = fileHandle.mkdir();
+    // 如果是目录，获取目录下的文件
+    String[] fileList = fileHandle.list();
+}
+// 判断文件是否存在
+if (fileHandle.exists()){
+    // 创建文件
+    boolean result = fileHandle.createNewFile();
+}
+// 获取文件大小
+fileHandle.length();
+// 获取文件绝对路径
+fileHandle.getAbsoluteFile();
+// 文件重命名/移动文件
+String newPath = "/temp/test_new.txt";
+File newFileHandle = new File(newPath);
+boolean result = fileHandle.renameTo(newFileHandle);
+// 修改文件属性
+newFileHandle.setReadOnly();
+newFileHandle.setLastModified(desired time);
+// 删除文件
+newFileHandle.delete();
+```
 
 ### Java 正则表达式
 
