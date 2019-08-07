@@ -10,7 +10,17 @@
 
 面向对象是基于面向过程的编程思想。  
 面向对象更符合我们的思维习惯，可以把复杂的事情简单化，角色从执行者变成指挥者。  
-在 Java 中，创建一个类 Person，包含多个字段（field），初步认识 Java 的面向对象。
+在 Java 中，创建一个类 Person，包含多个字段（field），初步认识 Java 的面向对象。  
+
+Java 内建的访问权限包括 public、protected、private 和 package 权限；  
+在方法内部定义的变量是局部变量，局部变量的作用域从变量声明开始，到一个块结束；  
+final 修饰符不是访问权限，它可以修饰 class、field 和 method。  
+> public: 字段属性和方法可以被其他包、实例和子类访问，以及子类的子类  
+> protected: 字段属性和方法可以被实例和子类访问，以及子类的子类，不能被其他包访问  
+> private: 字段属性和方法不可以被实例或子类访问，只能被类自己访问，可以用在 static 方法上  
+> package: 一个类允许访问同一个 package 的没有 public、private 修饰的 class，以及没有 public、protected、private 修饰的字段和方法；在同一个包，就可以访问 package 权限的 class、field 和 method；包没有父子关系；使用它有助于测试
+
+一个 .java 文件只能包含一个 public 类，但可以包含多个非 public 类；如果有 public 类，文件名必须和 public 类的名字相同。  
 ```java
 import java.io.*;
 import java.util.*;
@@ -278,7 +288,50 @@ super 关键字：子类调用父类的属性或方法。
 final 关键字：一个父类不允许子类对它的某个方法进行覆写，如果类声明 final 则表示断子绝孙。  
 final 的特点是修饰的类不能被继承，修饰的方法不能被 Override，修饰的字段属性在初始化后不能被修改。
 
-static 关键字：静态修饰，可以修饰成员变量和成员方法。  
+static 关键字：静态修饰，可以修饰成员变量和成员方法，经常用于工具类和辅助方法。  
 static 的特点是随着类的加载而加载，优先于对象存在，被类的所有对象共享，可以通过类名调用也可以通过对象调用。  
-`注意：在静态方法中是没有 this 关键字的；静态方法只能访问静态的成员变量和静态的成员方法`
+`注意：在静态方法中是没有 this 关键字的；静态方法只能访问静态的成员变量和静态的成员方法；不推荐使用实例访问类的静态属性或方法，即便可以这么做`
+
+### Java 包
+在 Java 中，使用 package 来解决名字冲突。  
+Java 定义了一种名字空间，称之为包（package）。一个类总是属于某个包，类名（比如 Person）只是一个简写，真正的完整类名是"包名.类名"。没有定义包名的 class 使用默认包，不推荐这样做！推荐所有 Java 文件对应的目录层次要和包的层次一致。    
+
+包作用域：位于同一个包的类，可以访问包作用域的字段和方法，不用 public、protected、private 修饰的字段和方法就是包作用域。
+```java
+package qi;
+
+public class Person
+{
+    void sayHello() 
+    {
+        System.out.println("Hello");
+    }
+}
+
+public class Main 
+{
+    public static void main(String[] args) 
+    {
+        Person p = new Person();
+        p.hello(); // Main 和 Person 在同一个包，可以直接调用
+    }
+}
+```
+
+包的导入（import）  
+在 class 中引用其他 class，需要使用包的导入。
+```java
+// 方式一：完整类名
+qi.Person p = new qi.Person();
+// 方式二：import（推荐使用）
+import qi.Person; // 如果是导入完整的包 qi.Person.* 但是不建议使用
+Person p = new Person();
+// 方式三：import static（很少使用）
+```
+
+在编写 class 的时候，编译器会自动帮我们做两个 import 动作：  
+1、默认自动 import 当前 package 的其他 class  
+2、默认自动 import java.lang.\*   
+
+所以，要注意不要和 java.lang 包的类重名（如 String、System、Runtime...)，也不要和 JDK 常用类重名（如 java.util.List, java.text.Format, java.math.BigInteger...）。  
 

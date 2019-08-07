@@ -260,7 +260,7 @@ class ValidateAuth implements Milldeware
 {
     public static function handle(Closure $next)
     {
-        echo 'validate auth';
+        echo 'validate auth' . PHP_EOL;
 
         $next();
     }
@@ -270,20 +270,22 @@ class ValidateCsrfToken implements Milldeware
 {
     public static function handle(Closure $next)
     {
-        echo 'validate csrf Token';
+        echo 'validate csrf Token' . PHP_EOL;
 
         $next();
     }
 }
 
 $handle = function() {
-    echo 'do something';
+    echo 'do something' . PHP_EOL;
 };
 
 $pipes = [
     "ValidateAuth",
     "ValidateCsrfToken"
 ];
+// 由于栈的先进后出特性，正常顺序需要反转一下
+$pipes = array_reverse($pipes);
 // array_reduce 用回调函数迭代地将数组简化单一值，返回 closure
 $callback = array_reduce($pipes, function($stack, $pipe) {
     return function() use($stack, $pipe){
@@ -291,10 +293,15 @@ $callback = array_reduce($pipes, function($stack, $pipe) {
     };
 },$handle);
 call_user_func($callback);
+// 返回结果
+// validate auth
+// validate csrf Token
+// do something
 ```
 
 在 Laravel 中，中间件的实现其实是依赖于 Illuminate\Pipeline\Pipeline 实现，它的调用在 Illuminate\Routing\Router 中。
 ```php
+// 实例化管道（客户端发过来的请求被一个又一个的中间件处理，前一个中间件处理往之后的结果交给了下一个中间件）
 return (new Pipeline($this->container))
     ->send($request)
     ->through($middleware)
@@ -318,7 +325,7 @@ public function through($pipes){
     $this->pipes = is_array($pipes) ? $pipes :func_get_args();
     return $this;
 }
-// then 方法接收一个闭包作为参数
+// then 方法接收一个闭包作为参数，输出请求向路由传递，返回相应的函数
 public function then(Closure $destination){
     // 经过 getInitialSlice 包装（也是一个闭包）
    $firstSlice = $this->getInitialSlice($destination);
@@ -330,16 +337,30 @@ public function then(Closure $destination){
        array_reduce($pipes, $this->getSlice(), $firstSlice), $this->passable
    );
 }
-
+// getInitialSlice 方法主要是对原有的 destination 添加了一个 $passable 的参数
+protected function getInitialSlice(Closure $destination)
+{
+    return function ($passable) use ($destination) {
+        return call_user_func($destination, $passable);
+    };
+}
+// getSlice 方法实例化每个要执行的中间件
+// 处理中间件的过程比作剥洋葱，一个中间件的执行过程就是剥一片洋葱
 protected function getSlice(){
     return function ($stack, $pipe) {
         return function ($passable) use ($stack, $pipe) {
             if ($pipe instanceof Closure) {
                 return call_user_func($pipe, $passable, $stack);
             } else {
+                // 根据中间件的类名去分离出要实例化的中间件类，和实例化中间件可能需要的参数
                 list($name, $parameters) = $this->parsePipeString($pipe);
                 return call_user_func_array(
+                    // 调用某个类中方法的写法
+                    // 其中 $this->container->make($name) 是使用服务容器去实例化要调用的中间件对象
+                    // $this->method 就是 handle 函数
                     [$this->container->make($name), $this->method],
+                    // 用中间件所需要的参数
+                    // $passable(请求实例 $request) 和下一个中间件的回调函数 $stack
                     array_merge([$passable, $stack],
                     $parameters)
                 );
