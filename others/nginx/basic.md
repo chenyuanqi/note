@@ -6,6 +6,11 @@
 4、热部署（这个功能对于 Nginx 来说特别重要，热部署指可以在不停止 Nginx 服务的情况下升级 Nginx）  
 5、BSD 许可证（意味着我们可以将源代码下载下来进行修改然后使用自己的版本）  
 
+[Nginx 官网](https://nginx.org/)  
+[Ngins Github](https://github.com/nginx/nginx)  
+[Nginx 文档](https://docshome.gitbooks.io/nginx-docs/content/)  
+[Nginx Cookbook](https://huliuqing.gitbooks.io/complete-nginx-cookbook-zh/content/)  
+
 ### 主要组成
 Nginx 二进制可执行文件：由各模块源码编译出一个文件  
 Nginx.conf 配置文件：控制 Nginx 行为  
@@ -141,6 +146,60 @@ Nginx 安装参数说明
 
 ### Nginx 配置基础
 nginx.conf 是主配置文件，由若干个部分组成，每个大括号`{}`表示一个部分。每一行指令都由分号结束 `;`，标志着一行的结束。  
+```
+# nginx -t -c /etc/nginx/nginx.conf 配置语法检查
+# nginx -s reload -c /etc/nginx/nginx.conf 不重启的方式加载配置
+# rpm -ql nginx 查看安装到了哪些目录  
+
+# Nginx使用用logrotate服务对日志进行切割的配置文件（eg：按天切割）
+/etc/logrotate.d/nginx
+# Nginx的核心目录
+/etc/nginx
+# 主要配置文件，Nginx启动的时候会读取
+/etc/nginx/nginx.conf
+/etc/nginx/conf.d
+# nginx.conf没变更久读default.conf（默认Server加载的文件）
+/etc/nginx/conf.d/default.conf
+# Nginx对Python的wsgi配置
+/etc/nginx/uwsgi_params
+# fastcgi配置
+/etc/nginx/fastcgi_params
+# scgi配置
+/etc/nginx/scgi_params
+# Nginx缓存目录
+/var/cache/nginx
+# Nginx日志目录
+/var/log/nginx
+# Nginx默认网站存放的路径
+/usr/share/nginx/html
+/usr/share/nginx/html/50x.html
+/usr/share/nginx/html/index.html
+# 设置http的Content-Type与扩展名对应关系的配置文件
+/etc/nginx/mime.types
+# Nginx模块所在目录
+/usr/lib64/nginx/modules
+/etc/nginx/modules
+# 二进制执行文件
+/usr/sbin/nginx
+/usr/sbin/nginx-debug
+# 编码转换的映射文件
+/etc/nginx/koi-utf
+/etc/nginx/koi-win
+/etc/nginx/win-utf
+# 配置CentOS守护进程对Nginx的管理方式
+/usr/lib/systemd/system/nginx-debug.service
+/usr/lib/systemd/system/nginx.service
+/etc/sysconfig/nginx
+/etc/sysconfig/nginx-debug
+# Nginx的文档
+/usr/share/doc/nginx-1.16.0
+/usr/share/doc/nginx-1.16.0/COPYRIGHT
+/usr/share/man/man8/nginx.8.gz
+# Nginx检测更新命令
+/usr/libexec/initscripts/legacy-actions/nginx
+/usr/libexec/initscripts/legacy-actions/nginx/check-reload
+/usr/libexec/initscripts/legacy-actions/nginx/upgrade
+```
 
 #### 常用正则
 
@@ -181,6 +240,79 @@ $request_filename：/var/www/html/test1/test2/test.php
 ### Nginx 第三方模块安装方法
 ```bash
 ./configure --prefix=/nginx 安装目录  --add-module=/第三方模块目录
+```
+比如 Nginx 默认是不支持 Lua 的，所以需要自己编译安装下
+```bash
+# 先安装 lua 库
+yum install lua lua-devel-y
+
+wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz
+tar -xzvf LuaJIT-2.0.5.tar.gz
+cd LuaJIT-2.0.5
+# 编译安装
+make install PREFIX=/usr/local/LuaJIT
+# 导入环境变量
+export LUAJIT_LIB=/usr/local/LuaJIT/lib
+export LUAJIT_INC=/usr/local/LuaJIT/include/luajit-2.0
+# 安装 lua 模块到 nginx
+./configure --prefix=/etc/nginx  --add-module=./ngx_devel_kit-0.3.1
+./configure --prefix=/etc/nginx  --add-module=./lua-nginx-module-0.10.15
+
+# 加载 lua 库到 ld.so.conf 文件
+echo"/usr/local/LuaJIT/lib">>/etc/ld.so.conf
+# 让动态函式库加载到缓存中
+ldconfig
+
+# 测试 lua
+vi /etc/nginx/nginx.conf
+# location /hello {
+#        default_type 'text/plain';
+#        content_by_lua 'ngx.say("welcome，lua comming~")';
+# }
+
+```
+
+### Nginx 配置 waf 防火墙
+waf 防火墙主要功能：  
+> 拦截 Cookie 类型工具  
+> 拦截异常 post 请求  
+> 拦截 CC 洪水攻击  
+> 拦截 URL  
+> 拦截 arg（提交的参数）  
+
+```bash
+git clone https://github.com/loveshell/ngx_lua_waf
+cd ngx_lua_waf
+ls -alF 
+# args 里面的规则 get 参数进行过滤的
+# url 是只在 get 请求 url 过滤的规则
+# post 是只在 post 请求过滤的规则
+# whitelist 是白名单，里面的 url 匹配到不做过滤
+# user-agent 是对 user-agent 的过滤规则
+mkdir -p /etc/nginx/waf
+mv * /etc/nginx/waf
+
+# nginx http 模块添加如下配置
+# server_tokens off; # 隐藏 nginx 版本信息
+# lua_package_path "/etc/nginx/waf/?.lua";
+# lua_shared_dict limit 10m;
+# init_by_lua_file /etc/nginx/waf/init.lua;
+# access_by_lua_file /etc/nginx/waf/waf.lua;
+
+vim /etc/nginx/waf/config.lua
+# RulePath 设置规则所在目录 /etc/nginx/waf/wafconf/
+# attacklog 开启日志记录 on
+# logdir 日志存放地址（不存在需要手动创建一下） /var/log/nginx/hack
+# UrlDeny url防护
+# CookieMatch 匹配 cookie
+# postMatch 匹配 post
+# whiteModule 开启白名单
+# black_fileExt 不允许上传的后缀
+# ipWhitelist ip白名单列表 {"xxx", "xxx"}
+# ipBlocklist ip黑名单列表 {"xxx", "xxx"}
+# CCDeny cc防护
+# CCrate="100/60" 访问频率 60s 内访问 100 次
+# html=[[...]] 拦截后显示的 html，可自定义
 ```
 
 ### Nginx 监控
