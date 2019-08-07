@@ -136,15 +136,216 @@ $user = make('User');
 $user->login()
 ```
 
-### Laravel Ios 容器
+### Laravel 容器和服务提供者
+Ioc 容器的实现思路：  
+1、Ioc 容器维护 binding 数组记录 bind 方法传入的键值对，如 log => FileLog  
+2、在 ioc->make ('user') 的时候，通过反射得到 User 的构造函数及其参数，发现参数 log 通过反射得到 FileLog 的构造函数及其参数，以此类推...  
+3、通过反射机制创建 user 的依赖 $log = new FileLog ();...  
+4、通过 newInstanceArgs 再去创建 User 的对象 new User($log);  
+```php
+class Ioc
+{
+    public $binding = [];
 
+    public function bind($abstract, $concrete)
+    {
+        // 使用 closure 目的是延迟对象实例化
+        $this->binding[$abstract]['concrete'] = function($ioc) use ($concrete){
+            return $ioc->build($concrete);
+        };
+    }
 
-### Laravel 服务提供者
+    public function make($abstract)
+    {
+        $concrete = $this->binding[$abstract]['concrete'];
 
+        return $concrete($this);
+    }
+
+    public function build($concrete)
+    {
+        $reflector = new ReflectionClass($concrete);
+        $constructor = $reflector->getConstructor();
+        if(null === $constructor) {
+            return $reflector->newInstance();
+        }
+
+        $dependencies = $constructor->getParameters();
+        $instances = $this->getAllDependencies($dependencies);
+
+        return $reflector->newInstanceArgs($instances);
+    }
+
+    public function getAllDependencies($paramters) 
+    {
+        $dependencies = [];
+        foreach ($paramters as $paramter) {
+            $dependencies[] = $this->make($paramter->getClass()->name);
+        }
+
+        return $dependencies;
+    }
+}
+
+// 创建 Ioc 容器实例
+$ioc = new Ioc();
+$ioc->bind('log', 'FileLog');
+$ioc->bind('user', 'User');
+// user 是服务提供者
+$user = $ioc->make('user');
+$user->login();
+```
+
+在 laravel 的 config 目录找到 app.php 中 providers 定义的就是已经写好的服务提供者，服务提供者都是通过调用 register 方法注册到 ioc 中（其中的 app 就是 Ioc 容器，singleton 则可以理解成上面的 bind 方法 + 单例模式）。  
+register 的执行时机是在 Laravel Kernel 的内核绑定。    
 
 ### Laravel 契约
+契约就是所谓的面向接口编程。  
+契约定义了 class 必须要实现的方法，统一对外接口，进而使用依赖注入解耦应用。  
 
+在 Laravel 中，定义的契约规范在 Illuminate\Contracts 中。比如 Cache 的契约规范就在 Illuminate\Contracts\Cache\Repository 文件中，我们可以写多种缓存方式如 file,redis,memcached 以实现这个契约中的 set,get,remove 等方法，然后在使用的时候就可以随意切换了。  
 
 ### Laravel Facade
+Facade 核心实现原理就是提前把 Facade 注入到 Ioc 容器。  
+1、定义一个服务提供者的外观类，定义静态方法 getFacadeAccessor 返回 ioc 容器绑定的 key  
+2、绑定 ioc 容器    
+3、通过静态魔术方法 __callStatic 获取当前调用的方法  
+```php
+class UserFacade
+{
+    protected static function getFacadeAccessor()
+    {
+        return 'user';
+    }
 
+    protected static $ioc;
+
+    public static function setFacadeIoc($ioc)
+    {
+        static::$ioc = $ioc;
+    }
+
+    public static function __callStatic($method, $args)
+    {
+        $instance = static::$ioc->make(static::getFacadeAccessor());
+
+        return $instance->$method(...$args);
+    }
+}
+
+// 创建 Ioc 容器实例
+$ioc = new Ioc();
+$ioc->bind('log', 'FileLog');
+$ioc->bind('user', 'User');
+// 绑定 Ioc 容器
+UserFacade::setFacadeIoc($ioc);
+UserFacade::login();
+```
+
+在 laravel 的 config 目录找到 app.php 中 aliases 定义的就是 Facade。  
+laravel Facade 的提前注入 ioc 时机也是在 Laravel Kernel 的内核绑定。  
+
+Facade 主要是提供了简单，易记的语法，从而无需手动注入或配置长长的类名；并且由于 Facade 对 PHP 静态方法的独特调用，使得测试起来更加容易。  
+
+### Laravel 中间件与管道
+Laravel 中间件提供了一种方便的机制来过滤进入应用的 HTTP 请求，通过中间件扩展或处理一些功能。  
+
+```php
+interface Milldeware 
+{
+    public static function handle(Closure $next);
+}
+
+class ValidateAuth implements Milldeware 
+{
+    public static function handle(Closure $next)
+    {
+        echo 'validate auth';
+
+        $next();
+    }
+}
+
+class ValidateCsrfToken implements Milldeware 
+{
+    public static function handle(Closure $next)
+    {
+        echo 'validate csrf Token';
+
+        $next();
+    }
+}
+
+$handle = function() {
+    echo 'do something';
+};
+
+$pipes = [
+    "ValidateAuth",
+    "ValidateCsrfToken"
+];
+// array_reduce 用回调函数迭代地将数组简化单一值，返回 closure
+$callback = array_reduce($pipes, function($stack, $pipe) {
+    return function() use($stack, $pipe){
+        return $pipe::handle($stack);
+    };
+},$handle);
+call_user_func($callback);
+```
+
+在 Laravel 中，中间件的实现其实是依赖于 Illuminate\Pipeline\Pipeline 实现，它的调用在 Illuminate\Routing\Router 中。
+```php
+return (new Pipeline($this->container))
+    ->send($request)
+    ->through($middleware)
+    ->then(function ($request) use ($route) {
+        return $this->prepareResponse(
+            $request,
+            $route->run($request)
+        );
+});
+
+// 中间件执行过程调用了三个方法
+// 
+// send 方法设置了需要在中间件中流水处理的对象，在这里就是 HTTP 请求实例
+public function send($passable){
+    $this->passable = $passable;
+
+    return $this;
+}
+// through 方法设置需要经过哪些中间件处理
+public function through($pipes){
+    $this->pipes = is_array($pipes) ? $pipes :func_get_args();
+    return $this;
+}
+// then 方法接收一个闭包作为参数
+public function then(Closure $destination){
+    // 经过 getInitialSlice 包装（也是一个闭包）
+   $firstSlice = $this->getInitialSlice($destination);
+   // 反转中间件数组，主要是利用了栈的特性
+   $pipes = array_reverse($this->pipes);
+   // call_user_func 执行了一个 array_reduce 返回的闭包
+   return call_user_func(
+       //array_reduce 用来包装回调函数处理的数组
+       array_reduce($pipes, $this->getSlice(), $firstSlice), $this->passable
+   );
+}
+
+protected function getSlice(){
+    return function ($stack, $pipe) {
+        return function ($passable) use ($stack, $pipe) {
+            if ($pipe instanceof Closure) {
+                return call_user_func($pipe, $passable, $stack);
+            } else {
+                list($name, $parameters) = $this->parsePipeString($pipe);
+                return call_user_func_array(
+                    [$this->container->make($name), $this->method],
+                    array_merge([$passable, $stack],
+                    $parameters)
+                );
+            }
+        };
+    };
+}
+```
 

@@ -1,6 +1,7 @@
 
 ### PHP 源码分析
 获取源码：http://php.net/git.php  
+解读参考：https://github.com/laruence/php7-internal  
 
 - PHP 源码结构  
 > 只关注两个目录：ext 和 Zend，其他的文件和目录对于 PHP 扩展和开发来说很重要。  
@@ -61,7 +62,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystac
 struct _zval_struct {
     /* Variable information */
     zvalue_value value; /* value */
-    zend_uint refcount__gc; // 指向 PHP 变量容器的指针的计数器
+    zend_uint refcount__gc; // 指向 PHP 变量容器的指针的计数器，表示这个 zval 的引用数目
     zend_uchar type; /* active type，比如使用 zval.type = IS_LONG 来定义整型数据 */
     zend_uchar is_ref__gc; // 标识变量是否为引用
 };
