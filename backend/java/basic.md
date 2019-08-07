@@ -573,10 +573,55 @@ class PennyFarthing extends Bicycle {
 ```
 
 ### Java 数学运算
-Java 的 Math 包含了用于执行基本数学运算的属性和方法，如初等指数、对数、平方根和三角函数。
+Java 的 Math 包含了用于执行基本数学运算的属性和方法，如初等指数、对数、平方根和三角函数。  
+```java
+System.out.println("π：" + Math.PI);  
+System.out.println("90 度的正弦值：" + Math.sin(Math.PI/2));  
+System.out.println("0 度的余弦值：" + Math.cos(0));  
+System.out.println("60 度的正切值：" + Math.tan(Math.PI/3));  
+System.out.println("1 的反正切值： " + Math.atan(1));  
+System.out.println("π/2 的角度值：" + Math.toDegrees(Math.PI/2));  
+
+double num = 1.234;
+System.out.println("舍去法求整 Math.floor(" + num + ")=" + Math.floor(num));   
+System.out.println("四舍五入求整 Math.round(" + num + ")=" + Math.round(num));   
+System.out.println("进一法求整 Math.ceil(" + num + ")=" + Math.ceil(num));  
+// 如果是小数点保留几位，可以使用 String.format 或 (float)(Math.round(totalPrice*100)/100)
+
+// 获取随机小数
+System.out.println(Math.random());
+
+```
 
 ### Java 日期时间
+```java
+import java.util.Calendar;
+import java.util.Date;
+import java.text.*;
 
+// 获取当前时间戳（精确到毫秒）
+System.out.println(System.currentTimeMillis());
+System.out.println(Calendar.getInstance().getTimeInMillis());
+System.out.println(new Date().getTime());
+// 获取当前时间戳（精确到秒）
+System.out.println(System.currentTimeMillis() / 1000);
+System.out.println(Calendar.getInstance().getTimeInMillis() / 1000);
+System.out.println(new Date().getTime() / 1000);
+
+// 初始化 Date 对象
+Date date = new Date();
+
+// 使用 toString () 函数显示日期时间
+System.out.println(date.toString()); // Wed Aug 07 02:56:28 UTC 2019
+
+// 指定格式输出
+SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
+System.out.println(" 当前时间为: " + ft.format(date));
+// 或者这样
+System.out.printf("%tF", date);
+System.out.printf("%tT", date);
+
+```
 
 ### Java 文件处理
 ```java
@@ -610,7 +655,23 @@ newFileHandle.delete();
 ```
 
 ### Java 正则表达式
+```java
+import java.util.regex.*;
 
+// 寻找匹配字符串
+String text = "This is Jim and that's Tim";
+String pattern = "[TJ]im";
+Pattern reg = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+Matcher matcher = reg.matcher(text);
+if (matcher.find()){
+   String matchedText = matcher.group();
+   System.out.println(matchedText); // Jim
+}
+
+// 匹配替换字符串
+String text2 = matcher.replaceAll("Tom");
+System.out.println(text2); // This is Tom and that's Tom
+```
 
 ### Java 内存分配
 Java 程序在运行时，需要在内存中的分配空间。为了提高运算效率，就对空间进行了不同区域的划分，因为每一片区域都有特定的处理数据方式和内存管理方式。  

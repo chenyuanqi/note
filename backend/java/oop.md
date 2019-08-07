@@ -206,7 +206,10 @@ Woman wm2 = (Woman)ps2;
 System.out.println(wm2 instanceof Woman); // true
 ```
 
-### Java 抽象
+### Java 抽象类
+通过 abstract 定义的方法是抽象方法，它只有定义，没有实现。抽象方法定义了子类必须实现的接口规范；定义了抽象方法的 class 必须被定义为抽象类，从抽象类继承的子类必须实现抽象方法（如果不实现抽象方法，则该子类仍是一个抽象类）。  
+面向抽象编程使得调用者只关心抽象方法的定义，不关心子类的具体实现。  
+
 Java 抽象的特点：  
 抽象类和抽象方法必须用 abstract 关键字修饰；  
 抽象类不一定有抽象方法，有抽象方法的类一定是抽象类；   
@@ -214,8 +217,24 @@ Java 抽象的特点：
 抽象类的子类要么是抽象类，要么重写抽象类中的所有抽象方法；    
 抽象类可以有构造方法，用于子类访问父类数据的初始化；  
 抽象方法用于限定子类必须完成某些动作，非抽象方法用于提高代码复用性（共性）。  
+```java
+abstract class Animal 
+{
+    public abstract void run();
+}
+
+class Person extends Animal 
+{
+    public void run()
+    {
+        System.out.println("I am a person who can run.");
+    }
+}
+```
 
 ### Java 接口
+所谓接口（interface），就是比抽象类还要抽象的纯抽象接口，因为它连字段都不能有。
+
 Java 接口的特点：  
 接口用关键字 interface 表示，类实现接口用 implements 表示；  
 接口不能实例化（按照多态的方式，由具体的子类实例化，简称接口多态）；  
@@ -223,7 +242,35 @@ Java 接口的特点：
 接口的成员方法只能是抽象方法，默认修饰符 public abstract；  
 接口没有构造方法，因为接口主要是扩展功能的，而没有具体存在；  
 类和接口可以单实现，也可以多实现，还可以在继承一个类的同时实现多个接口（扩展）；  
-接口和接口可以存在继承关系，既可以单继承也可以多继承。  
+接口和接口可以存在继承关系，既可以单继承也可以多继承；  
+接口可以定义 default 方法，目的是子类覆写即可全部子类使用。  
+```java
+interface God
+{
+    String getName();
+    default void run() {
+        System.out.println(getName() + " run");
+    }
+}
+
+class Person implements God 
+{
+    private String name;
+
+    public Person(String name)
+    {
+        this.name = name;
+    }
+
+    public String getName()
+    {
+        return this.name;
+    }
+}
+
+God qi = new Person("Xiaoqi");
+qi.run(); // Xiaoqi run
+```
 
 ### Java 面向对象的一些关键字
 super 关键字：子类调用父类的属性或方法。
