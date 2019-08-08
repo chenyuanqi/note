@@ -14,10 +14,11 @@ Application 初始化：
 ![Application 初始化流程](../image/app_start.png)  
 
 Kernel 流程：  
-初始化 Kernel（设置中间件）  
+初始化 Kernel（设置中间件：给路由设置中间件固定优先级列表，设置中间件分组和路由中间件）  
 -> 捕获请求（路由调度，中间件栈，自定义异常处理）  
 -> 处理请求（绑定 request），启动 Application（加载 .env 配置，加载 config 目录配置，设置错误和异常的 handler，设置 Facade 别名自动加载，注册服务提供者，启动服务提供者），使用管道和路由调度把请求通过中间件和路由  
--> 发送响应 -> Kernel 终止  
+-> 发送响应  
+-> Kernel 终止  
 
 ### Laravel 源码解读基础
 
@@ -249,14 +250,15 @@ Facade 主要是提供了简单，易记的语法，从而无需手动注入或�
 
 ### Laravel 中间件与管道
 Laravel 中间件提供了一种方便的机制来过滤进入应用的 HTTP 请求，通过中间件扩展或处理一些功能。  
+![laravel-middleware](../image/laravel-middleware.png)  
 
 ```php
-interface Milldeware 
+interface Middleware 
 {
     public static function handle(Closure $next);
 }
 
-class ValidateAuth implements Milldeware 
+class ValidateAuth implements Middleware 
 {
     public static function handle(Closure $next)
     {
@@ -266,7 +268,7 @@ class ValidateAuth implements Milldeware
     }
 }
 
-class ValidateCsrfToken implements Milldeware 
+class ValidateCsrfToken implements Middleware 
 {
     public static function handle(Closure $next)
     {
