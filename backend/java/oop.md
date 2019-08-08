@@ -15,8 +15,9 @@
 Java 内建的访问权限包括 public、protected、private 和 package 权限；  
 在方法内部定义的变量是局部变量，局部变量的作用域从变量声明开始，到一个块结束；  
 final 修饰符不是访问权限，它可以修饰 class、field 和 method。  
-> public: 字段属性和方法可以被其他包、实例和子类访问，以及子类的子类  
-> protected: 字段属性和方法可以被实例和子类访问，以及子类的子类，不能被其他包访问  
+> 默认： 字段属性和方法只能被当前类和同一个包下的方法  
+> public: 字段属性和方法可以被当前类和同一包、其他包、实例和子类访问，以及子类的子类  
+> protected: 字段属性和方法可以被当前类和同一包、实例和子类访问，以及子类的子类，不能被其他包访问  
 > private: 字段属性和方法不可以被实例或子类访问，只能被类自己访问，可以用在 static 方法上  
 > package: 一个类允许访问同一个 package 的没有 public、private 修饰的 class，以及没有 public、protected、private 修饰的字段和方法；在同一个包，就可以访问 package 权限的 class、field 和 method；包没有父子关系；使用它有助于测试
 
@@ -282,6 +283,8 @@ God qi = new Person("Xiaoqi");
 qi.run(); // Xiaoqi run
 ```
 
+### Java 匿名类
+
 ### Java 面向对象的一些关键字
 super 关键字：子类调用父类的属性或方法。
 
@@ -335,42 +338,97 @@ Person p = new Person();
 
 所以，要注意不要和 java.lang 包的类重名（如 String、System、Runtime...)，也不要和 JDK 常用类重名（如 java.util.List, java.text.Format, java.math.BigInteger...）。  
 
+### jar 包
+jar 包能把目录打一个 jar 包，变成一个文件以便管理。  
+jar 包实际上就是一个 zip 格式的压缩文件，而 jar 包相当于目录。  
+```bash
+# 执行一个 jar 包的 class，把 jar 包放到 classpath 即可
+# JVM 会自动在 hello.jar 文件里去搜索 abc.xyz.Hello
+java -cp ./hello.jar abc.xyz.Hello
+```
 
-### Java 反射
-Java 反射（Reflection）是指程序在运行期可以拿到一个对象的所有信息。反射是为了解决在运行期，对某个实例一无所知的情况下，如何调用其方法。  
+jar 包的创建，可以使用 zip 的压缩方式，将 src 目录（不包含 bin 目录）打包即可。  
+jar 包可以包含一个特殊的纯文本文件 /META-INF/MANIFEST.MF，可以指定 Main-Class 和其它信息。  
+```bash
+# JVM 会自动读取 MANIFEST.MF 文件
+# 如果存在 Main-Class，我们就不必在命令行指定启动的类名
+java -jar hello.jar
+```
 
-除了 int 等基本类型外，Java 的其他类型全部都是 class。class 是由 JVM 在执行过程中动态加载的，JVM 在第一次读取到一种 class 类型时，将其加载进内存；每加载一种 class，JVM 就为其创建一个 Class 类型的实例（一个名叫 Class 的 class），并关联起来，该 Class 实例包含了该 class 的所有完整信息。  
+jar 包还可以包含其它 jar 包，需要在 MANIFEST.MF 文件里配置 classpath。  
+在大型项目中，不可能手动编写 MANIFEST.MF 文件再手动创建 zip 包，Java 社区提供了大量的开源构建工具，比如 Maven 就可以非常方便地创建 jar 包。  
 
-JVM 动态加载 class 的特性：JVM 在执行 Java 程序的时候，并不是一次性把所有用到的 class 全部加载到内存，而是第一次需要用到 class 时才加载。  
-利用 JVM 动态加载 class 的特性，我们才能在运行期根据条件加载不同的实现类。  
-```java
-// 获取一个 class 的 Class 实例
-// 1、直接通过一个 class 的静态变量 class 获取
-Class cls = Person.class;
-// 2、通过该实例变量提供的 getClass() 方法获取
-Person p = new Person();
-Class cls = p.getClass();
-// 3、通过静态方法 Class.forName(class 的完整类名) 获取 
-Class cls = Class.forName("qi.Person");
+### Java 模块
+jar 包只是用于存放 class 的容器，它并不关心 class 之间的依赖。  
+为了解决依赖问题，自带 “依赖关系” 的 class 容器 ———— 模块诞生了。  
 
-//  Class 实例比较和 instanceof 的差别
-// == 判断 class 实例可以精确地判断数据类型，但不能作子类型比较
-Integer n = new Integer(123);
-boolean b1 = n.getClass() == Integer.class; // true
-boolean b2 = n.getClass() == Number.class; // false
-// instanceof 不但匹配当前类型，还匹配当前类型的子类
-boolean b3 = n instanceof Integer; // true
-boolean b4 = n instanceof Number; // true
+为了表明 Java 模块化的决心，从 Java 9 开始，原有的 Java 标准库已经由一个单一巨大的 rt.jar 分拆成了几十个模块，这些模块以 .jmod 扩展名标识，可以在 $JAVA_HOME/jmods 目录下找到它们（java.base.jmod java.compiler.jmod ...）。  
 
+模块之间的依赖关系被写入到模块内的 module-info.class 文件。所有的模块都直接或间接地依赖 java.base 模块，只有 java.base 模块不依赖任何模块，它可以被看作是 “根模块”，好比所有的类都是从 Object 直接或间接继承而来。  
+把一堆 class 封装为 jar 仅仅是一个打包的过程，而把一堆 class 封装为模块则不但需要打包，还需要写入依赖关系，并且还可以包含二进制代码（通常是 JNI 扩展）。而且，模块还支持多版本，即在同一个模块中可以为不同的 JVM 提供不同的版本。  
+```
+# bin 目录存放编译后的 class 文件
+# src 目录存放源码
+# module-info.java 模块的描述文件
+demo-module
+|- bin
+|- build.sh
+|- src
+----|- com
+----|---|- demo
+----|---|----|- Main.java
+----|- module-info.java
 
-// 通过反射获取实例的 class 信息
-System.out.println("Class name: " + cls.getName());
-System.out.println("Simple name: " + cls.getSimpleName());
-if (cls.getPackage() != null) {
-    System.out.println("Package name: " + cls.getPackage().getName());
+# module-info.java
+module demo.person {
+    requires java.base; // 可以省略，任何模块都会自动引入
+    requires java.xml; // 引入 xml 模块
 }
-System.out.println("is interface: " + cls.isInterface());
-System.out.println("is enum: " + cls.isEnum());
-System.out.println("is array: " + cls.isArray());
-System.out.println("is primitive: " + cls.isPrimitive());
+
+# Main.java
+package com.demo;
+
+import javax.xml.XMLConstants;
+
+public class Main 
+{
+    public static void main(String[] args) 
+    {
+        System.out.println(XMLConstants.XML_NS_PREFIX);
+    }
+}
+
+# 在 demo-module 目录下编译所有的 .java 文件并存放到 bin 目录
+javac -d bin src/module-info.java src/com/demo/*.java
+# 把 bin 目录下的所有 class 文件先打包成 jar
+jar --create --file demo.jar --main-class com.demo.Main -C bin .
+# 继续使用 JDK 自带的 jmod 命令把一个 jar 包转换成模块
+jmod create --class-path demo.jar demo.jmod
+
+# 上面，我们已经成功得到一个模块
+# 运行模块，使用 jar 包
+java --module-path demo.jar --module demo.person
+# jmod 可以用来打包 JRE
+```
+
+打包 JRE  
+过去发布一个 Java 应用程序，要运行它必须下载一个完整的 JRE，再运行 jar 包。而完整的 JRE 块头很大，大约有 100 多 M。  
+现在，JRE 自身的标准库已经分拆成了模块，只需要带上程序用到的模块（“复制” 一份 JRE，只带上用到的模块），其他的模块就可以被裁剪掉。  
+```bash
+jlink --module-path demo.jmod --add-modules java.base,java.xml,demo.person --output jre/
+# 运行 jre
+jre/bin/java --module demo.person
+```
+
+其他说明  
+模块进一步隔离了代码的访问权限。  
+比如模块 java.xml 的一个类 javax.xml.XMLConstants，我们之所以能直接使用这个类，是因为模块 java.xml 的 module-info.java 中声明了若干导出。  
+比如外部代码需要访问 demo.person 中 com.demo.Main，我们就需要把它在自己的 module-info.java 文件中声明 `exports com.demo`。
+```java
+module java.xml {
+    exports java.xml;
+    exports javax.xml.catalog;
+    exports javax.xml.datatype;
+    ...
+}
 ```

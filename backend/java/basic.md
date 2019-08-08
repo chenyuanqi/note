@@ -35,8 +35,12 @@ Java 的学习曲线：
 ### Java 安装
 JDK 的下载：http://www.oracle.com  
 
-Java 环境变量配置：添加变量 JAVAHOME(java/jdk-xx)，添加 path 环境变量(%JAVA_HOME%\bin;)，添加 CLASSPATH 环境变量(.;%JAVA_HOME%\lib\tools.jar;%JAVA_HOME%\lib\dt.jar)  
-`添加环境变量 path 的意义是 javac 和 java 命令可以在任意目录下使用；classpath 环境变量则是让 class 文件在任意目录运行`
+Java 环境变量配置：  
+添加变量 JAVAHOME(java/jdk-xx)，  
+添加 path 环境变量(%JAVA_HOME%\bin;)，  
+!不建议添加 CLASSPATH 环境变量(.;%JAVA_HOME%\lib)，推荐在启动 JVM 时设置 class 变量（java -classpath ".;%JAVA_HOME%\lib" 或 java -cp ".;%JAVA_HOME%\lib"）  
+`添加环境变量 path 的意义是 javac 和 java 命令可以在任意目录下使用；classpath 环境变量则是让 class 文件在任意目录运行，在 IDE 中运行 Java 程序，IDE 自动传入的 -cp 参数是当前工程的 bin 目录和引入的 jar 包；另外，不要把任何 Java 核心库添加到 classpath 中，JVM 根本不依赖 classpath 加载核心库`  
+
 ```bash
 # ubuntu 下安装 java
 sudo apt update
@@ -53,7 +57,7 @@ sudo vim /etc/profile.d/jdk.sh
 source /etc/profile.d/jdk.sh
 ```
 
-IDE：https://www.jetbrains.com/idea/
+IDE-Idea：https://www.jetbrains.com/idea/
 
 ### Hello, java
 ```java
