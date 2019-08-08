@@ -335,3 +335,42 @@ Person p = new Person();
 
 所以，要注意不要和 java.lang 包的类重名（如 String、System、Runtime...)，也不要和 JDK 常用类重名（如 java.util.List, java.text.Format, java.math.BigInteger...）。  
 
+
+### Java 反射
+Java 反射（Reflection）是指程序在运行期可以拿到一个对象的所有信息。反射是为了解决在运行期，对某个实例一无所知的情况下，如何调用其方法。  
+
+除了 int 等基本类型外，Java 的其他类型全部都是 class。class 是由 JVM 在执行过程中动态加载的，JVM 在第一次读取到一种 class 类型时，将其加载进内存；每加载一种 class，JVM 就为其创建一个 Class 类型的实例（一个名叫 Class 的 class），并关联起来，该 Class 实例包含了该 class 的所有完整信息。  
+
+JVM 动态加载 class 的特性：JVM 在执行 Java 程序的时候，并不是一次性把所有用到的 class 全部加载到内存，而是第一次需要用到 class 时才加载。  
+利用 JVM 动态加载 class 的特性，我们才能在运行期根据条件加载不同的实现类。  
+```java
+// 获取一个 class 的 Class 实例
+// 1、直接通过一个 class 的静态变量 class 获取
+Class cls = Person.class;
+// 2、通过该实例变量提供的 getClass() 方法获取
+Person p = new Person();
+Class cls = p.getClass();
+// 3、通过静态方法 Class.forName(class 的完整类名) 获取 
+Class cls = Class.forName("qi.Person");
+
+//  Class 实例比较和 instanceof 的差别
+// == 判断 class 实例可以精确地判断数据类型，但不能作子类型比较
+Integer n = new Integer(123);
+boolean b1 = n.getClass() == Integer.class; // true
+boolean b2 = n.getClass() == Number.class; // false
+// instanceof 不但匹配当前类型，还匹配当前类型的子类
+boolean b3 = n instanceof Integer; // true
+boolean b4 = n instanceof Number; // true
+
+
+// 通过反射获取实例的 class 信息
+System.out.println("Class name: " + cls.getName());
+System.out.println("Simple name: " + cls.getSimpleName());
+if (cls.getPackage() != null) {
+    System.out.println("Package name: " + cls.getPackage().getName());
+}
+System.out.println("is interface: " + cls.isInterface());
+System.out.println("is enum: " + cls.isEnum());
+System.out.println("is array: " + cls.isArray());
+System.out.println("is primitive: " + cls.isPrimitive());
+```
