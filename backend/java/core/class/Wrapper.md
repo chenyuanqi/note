@@ -89,6 +89,15 @@ byte x = -1;
 byte y = 127;
 System.out.println(Byte.toUnsignedInt(x)); // 255
 System.out.println(Byte.toUnsignedInt(y)); // 127
+
+// 使用 Character
+Character ch = new Character('a');
+Character.isUpperCase('c'); // 判断字符是否是大写字母
+Character.isLowerCase('c'); // 判断字符是否是小写字母
+Character.isLetter('c'); // 判断字符是否是字母
+Character.isDigit('c'); // 判断字符是否是数字字符
+Character.toUpperCase('c'); // 把字符转成大写
+Character.toLowerCase('c'); // 把字符转成小写
 ```
 Java 编译器可以帮助我们自动在 int 和 Integer 之间转型。  
 这种直接把 int 变为 Integer 的赋值写法，称为自动装箱（Auto Boxing）；把 Integer 变为 int 的赋值写法，称为自动拆箱（Auto Unboxing）。  
