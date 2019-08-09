@@ -3,7 +3,7 @@
 使用任何技术手段，批量获取网站信息的一种方式。  
 
 一般的爬虫过程：  
-1、分析页面请求格式  
+1、抓取和分析网页请求  
 2、创建合适的 http 请求  
 3、批量发送 http 请求，获取数据  
 
@@ -100,7 +100,11 @@ from bs4 import BeautifulSoup
 import pandas
 
 # 使用 requests 获得数据
-r = requests.get('https://book.douban.com/subject/1084336/comments/').text
+headers = {
+   'authorization':'', #填上你的 authorization
+   'User-Agent':'', #填上你的 User-Agent
+}
+r = requests.get('https://book.douban.com/subject/1084336/comments/', headers = headers).text
 
 # 使用 BeautifulSoup4 解析数据
 soup = BeautifulSoup(r,'lxml')
