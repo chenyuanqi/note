@@ -386,7 +386,6 @@ for (int[] item : arr) {
 
 // 打印二维数组
 System.out.println(Arrays.deepToString(arr)); // [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
-
 ```
 
 ### Java 数据结构
