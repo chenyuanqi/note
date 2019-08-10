@@ -121,6 +121,73 @@ df = pandas.DataFrame(comments)
 df.to_csv('comments.csv')
 ```
 
+### 多线程爬虫
+线程指的是应用程序工作的最小单元。  
+多线程即并发地执行线程，把所有事情在一个进程里跑起来。  
+
+```python
+import thread
+
+def test1():
+    startTime = time.ctime()
+    print("启动 test1 任务：{}".format(startTime))
+    # 爬虫逻辑
+
+def test2():
+    startTime = time.ctime()
+    print("启动 test2 任务：{}".format(startTime))
+    # 爬虫逻辑
+
+
+def main():
+    print("启动主任务")
+    # 没有参数，args默认为空
+    t1 = threading.Thread(target=test1,args=())
+    # 守护线程需要在start之前设置，否则无效
+    t1.setDaemon(True)
+    # t1.daemon = True
+    t1.setName("TH-1")
+    t1.start()
+
+    t2 = threading.Thread(target=test2,args=("TWO",))
+    t2.setName("TH-2")
+    t2.start()
+
+    # enumerate 得到正在运行的进程
+    for i in threading.enumerate():
+        # getName 获取线程名
+        name = i.getName()
+        print("正在运行的进程：{}".format(name))
+
+    print("结束主任务")
+
+
+if __name__ == '__main__':
+    main()
+```
+
+### Pyton 多进程爬虫
+多进程，顾名思义，多个进程并发执行，可以有效提高程序的执行效率，优点是非常稳定，即使有子进程崩溃了，主进程和其他进程依然可以继续执行。  
+
+```python
+from multiprocessing import Pool
+import os
+
+def test(name):
+    print('Run child process %s (%s)...' % (name, os.getpid()))
+    # 爬虫逻辑
+
+def main():
+	p = Pool(2)
+    for i in range(2):
+        p.apply_async(test, args=(i,))
+    p.close()
+    p.join()
+
+if __name__=='__main__':
+    main()
+```
+
 ### 反爬虫
 使用任何技术手段，阻止别人批量获取自己网站信息的一种方式。  
 
