@@ -1,5 +1,8 @@
 
 ### Java 异常
+异常是指程序在运行过程中由于外部问题（如硬件错误、输入错误）等导致的程序异常事件。  
+异常处理是编程语言或计算机硬件里的一种机制，用于处理软件或信息系统中出现的异常状况（即超出程序正常执行流程的某些特殊的情况）。
+
 Java 内置了一套异常处理机制，总是使用异常来表示错误。  
 Java 异常是一种 class，因此它本身带有类型信息。异常可以在任何地方抛出，但只需要在上层捕获，这样就和方法调用实现分离了。  
 ![java-exception-extends](./image/java-exception-extends.png)  
@@ -38,6 +41,8 @@ Java 规定：
 2、不需要捕获的异常，包括 Error 及其子类，RuntimeException 及其子类  
 
 只要是方法声明的 Checked Exception，不在调用层捕获，也必须在更高的调用层捕获。所有未捕获的异常，最终也必须在 main() 方法中捕获，不会出现漏写 try 的情况，这是由编译器保证的。main() 方法也是最后捕获 Exception 的机会（如果不想写任何 try 代码，可以直接把 main() 方法定义为 throws Exception，但是一旦代码异常就会退出程序）。
+![java-exception-keywords](./image/java-exception-keywords.png)  
+
 ```java
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;

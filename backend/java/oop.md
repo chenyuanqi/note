@@ -372,7 +372,9 @@ qi.Person p = new qi.Person();
 // 方式二：import（推荐使用）
 import qi.Person; // 如果是导入完整的包 qi.Person.* 但是不建议使用
 Person p = new Person();
-// 方式三：import static（很少使用）
+// 方式三：import static（包的静态导入，很少使用）
+import static java.lang.Math.abs;
+System.out.println(abs(-12));
 ```
 
 在编写 class 的时候，编译器会自动帮我们做两个 import 动作：  
