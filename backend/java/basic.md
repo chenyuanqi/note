@@ -97,6 +97,7 @@ HelloJava.java -> javac 编译(javac HelloJava.java) -> Java 字节码文件 Hel
 ### Java 输入输出
 Java 的输入，提高程序的灵活性。
 ```java 
+// 通过 Scanner
 import java.util.Scanner;
 
 Scanner sc = new Scanner(System.in); // 创建 Scanner 对象，System.in 表示标准输入流
@@ -105,6 +106,10 @@ String name = scanner.nextLine(); // 读取一行输入并获取字符串
 System.out.print("Input your age: ");
 int age = sc.nextInt(); // 读取一行输入并获取整数，如果转换为浮点数使用 nextDouble()...
 System.out.printf("Hi, %s, you are %d\n", name, age); // 格式化输出
+
+// 通过 BufferedReader
+BufferedReader input = new BufferedReader(new InputStreamReader(System.in)); 
+String s = input.readLine(); 
 ```
 
 Java 的输出主要时向屏幕输出一些内容。  

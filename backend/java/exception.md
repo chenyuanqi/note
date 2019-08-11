@@ -74,6 +74,7 @@ System.out.println(Arrays.toString(bs));
 // 使用多个 catch 语句
 // 多个 catch 语句只有一个能被执行（即 JVM 在捕获到异常后，会从上到下匹配 catch 语句，匹配到某个 catch 后，执行 catch 代码块，然后不再继续匹配）  
 // 存在多个 catch 的时候，catch 的顺序非常重要：子类必须写在前面，否则永远不被捕获
+// finally 不会执行的原因可能有两个：本身代码块存在异常+程序线程断开
 try {
     process1();
     process2();
