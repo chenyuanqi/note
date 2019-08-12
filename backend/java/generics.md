@@ -1,5 +1,7 @@
 
 ### Java 泛型
+早期的 Object 类型可以接收任意的对象类型，但是在实际的使用中，会有类型转换的问题。  
+
 泛型是一种 “代码模板”，可以用一套代码套用各种类型。  
 泛型的好处是使用时不必对类型进行强制转换，它通过编译器对类型进行检查。  
 
@@ -89,3 +91,19 @@ Java 的泛型是由编译器在编译时实行的，编译器内部永远把所
 2、无法取得带泛型的 Class  
 3、无法判断带泛型的 Class  
 4、不能实例化 T 类型  
+
+泛型的应用
+```java
+// 实现最小值函数
+private static <T extends Number & Comparable<? super T>> T min(T[] values) {
+    if (values == null || values.length == 0) return null;
+    T min = values[0];
+    for (int i = 1; i < values.length; i++) {
+        if (min.compareTo(values[i]) > 0) min = values[i];
+    }
+    return min;
+}
+
+int minInteger = min(new Integer[]{1, 2, 3}); // 1
+double minDouble = min(new Double[]{1.2, 2.2, -1d}); // -1d
+```

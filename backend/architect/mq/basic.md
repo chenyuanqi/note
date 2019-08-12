@@ -76,44 +76,6 @@ Kafka 的消息模式和 RocketMQ 完全一样，区别在于队列在 Kafka 中
       ---------------确认/失败响应--------------- -------------消费确认--------------
 ```
 
-### Rabbitmq 安装
-```bash
-#centeros7 安装 erlang
-yum install erlang
-#启动扩展源
-yum install epel-release
-#下载rabbitmq源文件
-wget http://www.rabbitmq.com/releases/rabbitmq-server/v3.6.6/rabbitmq-server-3.6.6-1.el7.noarch.rpm
-#安装
-yum install rabbitmq-server-3.6.6-1.el7.noarch.rpm 
-#尝试执行
-yum install socat
-# 添加开机启动RabbitMQ服务
-chkconfig rabbitmq-server on
-# 启动服务
-/sbin/service rabbitmq-server start
-# 查看服务状态
-/sbin/service rabbitmq-server status 
-# 停止服务
- /sbin/service rabbitmq-server stop
-# 查看当前所有用户
- rabbitmqctl list_users
-# 查看默认guest用户的权限
- rabbitmqctl list_user_permissions guest
-由于RabbitMQ默认的账号用户名和密码都是guest。为了安全起见, 先删掉默认用户
-rabbitmqctl delete_user guest
-# 添加新用户
-rabbitmqctl add_user username password
-# 设置用户
-rabbitmqctl set_user_tags username administrator
-# 赋予用户默认vhost的全部操作权限
-rabbitmqctl set_permissions -p / username ".*" ".*" ".*"
-# 查看用户的权限
-rabbitmqctl list_user_permissions username
-#这是打开管理插件的命令.
-rabbitmq-plugins enable rabbitmq_management
-```
-
 ### 消息队列的实现
 消息队列的实现包括消息的推送，接收处理。  
 消息队列框架是本地应用程序（命令行程序），为了让他在后台运行，需要实现守护进程。  

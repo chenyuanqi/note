@@ -4,6 +4,7 @@
 > toString() 把 instance 输出为 String  
 > equals() 判断两个 instance 是否逻辑相等  
 > hashCode() 计算一个 instance 的哈希值  
+> finalize() GC 在回收对象之前不确定性的调用  
 
 ### Java 面向对象
 世间万物都可以看成一个对象，每个物体包括动态的行为和静态的属性，这些就构成了一个对象。类是对象的抽象，对象是类的具体，类是对象的模板，对象是类的实例。  
@@ -284,16 +285,60 @@ qi.run(); // Xiaoqi run
 ```
 
 ### Java 匿名类
+Java 匿名类相当于在定义类的同时再新建这个类的实例，既是匿名，自然无法在别的地方使用这个类。  
+Java 匿名类放在 class 中使用叫做匿名内部类，它能访问外层 Class 里面的字段，但是不能访问外层方法中的本地变量（除非该变量是 final 声明），内部类的名称和外面能访问的名称相同，则会把外部名称覆盖。  
+Java 匿名类不能定义静态初始化代码块，也不能定义接口甚至定义构造方法。  
+```java
+// Runnable 是一个接口，没有构造函数
+Runnable demo = new Runnable() 
+{  
+    @Override
+    public void run() 
+    {  
+        System.out.println("this is a anonymous class");  
+    }  
+}; 
+```
 
-### Java 面向对象的一些关键字
+内部类其实是一种语法糖，可以让你更优雅地设计你的程序结构。
+```java
+public class Outer 
+{  
+  public class Inner 
+  {
+
+  }  
+} 
+
+// 编译之后
+public class Outer 
+{  
+  public static class Inner 
+  {  
+    private final Outer parent; 
+
+    public Inner(Outer parent) 
+    {  
+      this.parent = parent;  
+    }  
+  }  
+} 
+```
+
+### Java 面向对象的一些关键字及方法
 super 关键字：子类调用父类的属性或方法。
 
 final 关键字：一个父类不允许子类对它的某个方法进行覆写，如果类声明 final 则表示断子绝孙。  
-final 的特点是修饰的类不能被继承，修饰的方法不能被 Override，修饰的字段属性在初始化后不能被修改。
+final 的特点是修饰的类不能被继承，修饰的方法不能被 Override，修饰的字段属性在初始化后不能被修改。  
+对于一个 final 变量，如果是基本数据类型的变量，则其数值一旦在初始化之后便不能更改；如果是引用类型的变量，则在对其初始化之后便不能再让其指向另一个对象。  
+使用 final 方法的原因有两个。第一个原因是把方法锁定，以防任何继承类修改它的含义；第二个原因是效率。在早期的 Java 实现版本中，会将 final 方法转为内嵌调用。但是如果方法过于庞大，可能看不到内嵌调用带来的任何性能提升（现在的 Java 版本已经不需要使用 final 方法进行这些优化了），类中所有的 private 方法都隐式地指定为 final。
 
 static 关键字：静态修饰，可以修饰成员变量和成员方法，经常用于工具类和辅助方法。  
 static 的特点是随着类的加载而加载，优先于对象存在，被类的所有对象共享，可以通过类名调用也可以通过对象调用。  
 `注意：在静态方法中是没有 this 关键字的；静态方法只能访问静态的成员变量和静态的成员方法；不推荐使用实例访问类的静态属性或方法，即便可以这么做`
+
+finalize() 是 Object 的 protected 方法，子类可以覆盖该方法以实现资源清理工作，GC 在回收对象之前调用该方法。不建议用 finalize 方法完成 “非内存资源” 的清理工作，但建议用于清理本地对象（通过 JNI 创建的对象）、作为确保某些非内存资源（如 Socket、文件等）释放的一个补充。  
+finalize() 的执行过程：当对象变成 (GC Roots) 不可达时，GC 会判断该对象是否覆盖了 finalize 方法，若未覆盖则直接将其回收。否则，若对象未执行过 finalize 方法，将其放入 F-Queue 队列，由一个低优先级线程执行该队列中对象的 finalize 方法。执行 finalize 方法完毕后，GC 会再次判断该对象是否可达，若不可达，则进行回收，否则对象 “复活”。
 
 ### Java 包
 在 Java 中，使用 package 来解决名字冲突。  
@@ -329,7 +374,9 @@ qi.Person p = new qi.Person();
 // 方式二：import（推荐使用）
 import qi.Person; // 如果是导入完整的包 qi.Person.* 但是不建议使用
 Person p = new Person();
-// 方式三：import static（很少使用）
+// 方式三：import static（包的静态导入，很少使用）
+import static java.lang.Math.abs;
+System.out.println(abs(-12));
 ```
 
 在编写 class 的时候，编译器会自动帮我们做两个 import 动作：  
