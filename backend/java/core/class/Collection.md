@@ -47,7 +47,8 @@ retainAll(Collection c)
 toArray()
 ```
 
-Collection 是最基本的集合接口，一个 Collection 代表一组 Object 的集合，这些 Object 被称作 Collection 的元素。Collection 是一个接口，用以提供规范定义，不能被实例化使用。
+Collection 是最基本的集合接口，一个 Collection 代表一组 Object 的集合，这些 Object 被称作 Collection 的元素。Collection 是一个接口，用以提供规范定义，不能被实例化使用。  
+Collections 则是包含各种有关集合操作的多态化静态方法，是工具类。
 
 ### 迭代器
 迭代器是集合的特有遍历方式，依赖于集合而存在的。  
@@ -73,6 +74,50 @@ ArrayList 底层数据结构是数组，查询快，增删慢；线程不安全�
 Vector 底层数据结构是数组，查询快，增删慢；线程安全，效率低。  
 LinkedList 底层数据结构是链表，查询慢，增删快；线程不安全，效率高。  
 ```java
+// ArrayList 的使用
+// 斗地主
+// 造一个牌盒(集合)
+ArrayList<String> array = new ArrayList<String>();
+// 定义花色数组
+String[] colors = { "♠", "♥", "♣", "♦" };
+// 定义点数数组
+String[] numbers = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" };
+// 纸牌构建
+for (String color : colors) {
+	for (String number : numbers) {
+		array.add(color.concat(number));
+	}
+}
+array.add("小王");
+array.add("大王");
+// 洗牌
+Collections.shuffle(array);
+// 发牌（三个选手）
+ArrayList<String> linQingXia = new ArrayList<String>();
+ArrayList<String> fengQingYang = new ArrayList<String>();
+ArrayList<String> liuYi = new ArrayList<String>();
+for (int x = 0; x < array.size(); x++) {
+	if (x % 3 == 0) {
+		linQingXia.add(array.get(x));
+	} else if (x % 3 == 1) {
+		fengQingYang.add(array.get(x));
+	} else if (x % 3 == 2) {
+		liuYi.add(array.get(x));
+	}
+}
+// 看牌
+lookPoker("林青霞", linQingXia);
+lookPoker("风清扬", fengQingYang);
+lookPoker("刘意", liuYi);
+// 遍历
+public static void lookPoker(String name, ArrayList<String> array) {
+	System.out.print(name + "的牌是：");
+	for (String s : array) {
+		System.out.print(s + " ");
+	}
+	System.out.println();
+}
+
 // Vector 的使用
 Vector v = new Vector();
 v.addElement("php");
@@ -99,4 +144,28 @@ HashSet 底层数据结构是哈希表(元素是链表的数组)，哈希表依�
 LinkedHashSet 元素有序唯一（由链表保证元素有序，哈希表保证元素唯一），LinkedHashSet 集合也是根据元素的 hashCode 值来决定元素的存储位置，但和 HashSet 不同的是，它同时使用链表维护元素的次序，这样使得元素看起来是以插入的顺序保存的。  
 TreeSet 底层数据结构是红黑树(红黑树是一种自平衡的二叉树)，使用元素的自然顺序对元素进行排序或者根据创建 set 时提供的 Comparator 进行排序（具体取决于使用的构造方法）。  
 EnumSet 是一个专门为枚举类设计的集合类，所有元素都必须是指定枚举类型的枚举值，该枚举类型在创建 EnumSet 时显式、或隐式地指定；EnumSet 的集合元素也是有序的，它们以枚举值在 Enum 类内的定义顺序来决定集合元素的顺序。  
+
+```java
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Iterator;
+
+Set<String> set = new HashSet<String>();
+
+set.add("hello");
+set.add("world");
+
+// 迭代器的遍历方式
+Iterator<String> it = set.iterator();
+while(it.hasNext()) {
+	String s = it.next();
+	System.out.println(s);
+}
+
+// foreach 的遍历方式
+for(String s : set) {
+	System.out.println(s);
+}
+System.out.println("set:" + set);
+```
 

@@ -335,10 +335,85 @@ final 的特点是修饰的类不能被继承，修饰的方法不能被 Overrid
 
 static 关键字：静态修饰，可以修饰成员变量和成员方法，经常用于工具类和辅助方法。  
 static 的特点是随着类的加载而加载，优先于对象存在，被类的所有对象共享，可以通过类名调用也可以通过对象调用。  
-`注意：在静态方法中是没有 this 关键字的；静态方法只能访问静态的成员变量和静态的成员方法；不推荐使用实例访问类的静态属性或方法，即便可以这么做`
+`注意：在静态方法中是没有 this 关键字的；静态方法只能访问静态的成员变量和静态的成员方法(其他属性和方法可以通过实例获得)；不推荐使用实例访问类的静态属性或方法，即便可以这么做`
 
 finalize() 是 Object 的 protected 方法，子类可以覆盖该方法以实现资源清理工作，GC 在回收对象之前调用该方法。不建议用 finalize 方法完成 “非内存资源” 的清理工作，但建议用于清理本地对象（通过 JNI 创建的对象）、作为确保某些非内存资源（如 Socket、文件等）释放的一个补充。  
 finalize() 的执行过程：当对象变成 (GC Roots) 不可达时，GC 会判断该对象是否覆盖了 finalize 方法，若未覆盖则直接将其回收。否则，若对象未执行过 finalize 方法，将其放入 F-Queue 队列，由一个低优先级线程执行该队列中对象的 finalize 方法。执行 finalize 方法完毕后，GC 会再次判断该对象是否可达，若不可达，则进行回收，否则对象 “复活”。
+
+### Java 序列化与反序列化
+序列化是一种对象持久化的手段，普遍应用在网络传输、RMI 等场景中。  
+Java 对象序列化，在保存对象时会把其状态保存为一组字节，反序列化时再将这些字节组装成对象。  
+```java
+import java.io.Serializable;
+import java.io.ObjectInputStream;
+import java.io.IOException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
+// Person 类实现 java.io.Serializable 接口，它可以被序列化
+class Person implements Serializable
+{
+    private String name;
+    private transient String gender; // transient 阻止该变量被序列化
+
+    public String getName() 
+    {
+        return name;
+    }
+
+    public void setName(String name) 
+    {
+        this.name = name;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Person name：" + this.name;
+    }
+
+    // 自定义序列化策略
+    // @Override
+    // private void readObject(java.io.ObjectInputStream s)
+    // @Override
+    // private void writeObject(java.io.ObjectOutputStream s)
+}
+
+Person p = new Person();
+p.setName("vikey");
+System.out.println(p);
+
+// 通过 ObjectOutputStream  进行序列化
+ObjectOutputStream oos = null;
+try {
+    oos = new ObjectOutputStream(new FileOutputStream("tempFile"));
+    oos.writeObject(p);
+} catch (IOException e) {
+    e.printStackTrace();
+} finally {
+    IOUtils.closeQuietly(oos);
+}
+
+// 通过 ObjectInputStream 进行反序列化
+File file = new File("tempFile");
+ObjectInputStream ois = null;
+try {
+    ois = new ObjectInputStream(new FileInputStream(file));
+    Person newPerson = (Person)ois.readObject();
+    System.out.println(newPerson);
+} catch (IOException e) {
+    e.printStackTrace();
+} catch (ClassNotFoundException e) {
+    e.printStackTrace();
+} finally {
+    IOUtils.closeQuietly(ois);
+    try {
+        FileUtils.forceDelete(file);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
 
 ### Java 包
 在 Java 中，使用 package 来解决名字冲突。  

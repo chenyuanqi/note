@@ -68,6 +68,7 @@ if (day.dayValue == 6 || day.dayValue == 0) {
 }
 
 // 枚举类天生具有类型信息和有限个枚举常量，更适合用在 switch 语句中
+// 实际上，枚举在 switch 会转换成类似 day.ordinal() 形式，本质还是 int 参数类型
 switch(day) {
     case MON:
     case TUE:
@@ -83,4 +84,15 @@ switch(day) {
     default:
         throw new RuntimeException("cannot process " + day);
 }
+```
+
+### 枚举与单例模式
+单例模式的最好实现方式是用枚举，足够简单且自动处理序列化、保证线程安全。  
+```java
+public enum EasySingleton{
+    INSTANCE;
+}
+
+// 访问实例
+EasySingleton.INSTANCE
 ```

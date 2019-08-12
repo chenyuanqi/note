@@ -221,7 +221,14 @@ Annotation
 
 和 char 类型不同，字符串 String 类型是引用类型，我们用双引号 "" 表示字符串，一个字符串可以存储 0 个到任意个字符。  
 
+字符串的不可变，下图展示 String s = "abcd"; s = s.concat ("ef"); 执行过程：
+![java-string-concat](./image/java-string-concat.jpeg)  
+
 ```java
+// 创建 string
+String s1 = "abc"; // 字符串驻留：当相同的字符串常量被多次创建时，只会保存字符串常量的一份副本
+String s2 = new String("abc"); // 相同的字符串指向堆中不同的对象（不同的内存引用）
+
 // string 不可变
 String s = "hello";
 String t = s;
@@ -232,12 +239,21 @@ System.out.println(t); // hello
 // 用 + 连接字符串和其他数据类型，会将其他数据类型先自动转型为字符串再连接
 String s1 = "Hello";
 String s2 = "world";
-String s = s1 + " " + s2 + "!";
+String s = s1 + " " + s2 + "!"; // s1.concat(" ").concat(s2).concat("!");
 System.out.println(s);
 
 // 字符串的比较，返回布尔类型
 s1.equals(s2);
 s1.equalsIgnoreCase(s2);
+// hashCode() 方法被设计用来提高性能  
+// 如果对象 equals，那它们一定又相同的 hash 值
+// 反之，如果对象的 hash 值相同，但是它们未必 equals
+
+// 整形转字符串
+int i = 5;
+String i1 = "" + i; // 实际是 (new StringBuilder ()).append (i).toString ();
+String i2 = Integer.toString(i);
+String i3 = String.valueOf(i); // 实际也是调用 Integer.toString(i) 来实现
 
 // 单字节处理
 // 字符串长度 str.length();
@@ -278,6 +294,8 @@ String s = "String";
 s.indexOf('i'); // 3，返回指定字符或字符串首字符的索引，不存在时返回 -1
 s.indexOf('i', 5); // -1，从索引 5 开始查找
 s.substring(3); // ing，从索引 3 开始截取字符串
+s.startsWith("Str", 0); // true，从 0 开始找是否以 Str 开头
+s.endsWith("ing"); // true，判断是否以 ing 结尾
 
 // 格式化字符串
 float floatVar = 1.23f;
@@ -407,6 +425,12 @@ Java 的运算符包括算术运算符、赋值运算符、比较运算符、逻
 int number1 = 2019;
 int number2 = 2020;
 int maxNumber = number1 > number2 ? number1 : number2;
+
+// 三目运算存在自动拆箱
+boolean flag = true;
+Integer i = 0;
+int j = 1;
+int k = flag ? i : j; // 编译时这样的 flag ? i.intValue() : j;
 ```
 
 一些需要注意的地方
@@ -632,6 +656,56 @@ System.out.printf("%tT", date);
 ```
 
 ### Java 文件处理
+Java File 类是用于表示文件或者文件夹的类，它的 API 如下：
+```java
+// 构造方法
+public File(String pathname)
+public File(String parent, String filename)
+public File(File file, String name)
+public File(URI uri) // 统一资源定位符，可以从通过网络路径创建文件或者文件夹对象
+
+// 创建功能
+public boolean createNewFile() // 创建新文件
+public boolean mkdir() // 创建单个目录
+public boolean mkdirs() // 创建一个路径下的多层目录
+
+// 删除功能
+public boolean delete() // 删除执行文件或文件夹
+// 删除的特点：删除不进回收站，直接删除
+
+// 判断功能
+public boolean isDirectory() // 判断是否为文件夹
+public boolean isFile() // 判断是否为文件
+public boolean exists() // 判断是否存在
+public boolean canWrite() // 是否可写
+public boolean canRead() // 是否可读
+public boolean isHidden() // 是否隐藏
+
+// 重命名功能（路径相同重命名，路径不同剪切后重命名）
+public boolean rename(String dest)
+public boolean renameTo(File dest)
+
+// 获取功能
+public String getAbsolutePath() // 获取绝对路径
+public String getName() // 获取文件名、文件夹名
+public String getPath() // 获取路径
+public int length() // 获取文件大小
+public long lastModified() // 最近修改时间的毫秒值
+
+// 返回给定目录下的所有文件或者文件夹的名称数组
+String[] strArray = file.list();
+for (String str : strArray) {
+    System.out.println(str);
+}
+// 返回给定目录下的所有文件或者文件夹的 File 数组
+File[] fileArray = file.listFiles();
+for (File f : fileArray) {
+    // System.out.println(f);
+    System.out.println(f.getName());
+}
+```
+
+文件操作简单使用
 ```java
 String path = "/temp/test.txt";
 File fileHandle = new File(path); // path 可以为目录或文件
