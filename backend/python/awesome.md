@@ -71,6 +71,7 @@
 [Python 之禅](https://foofish.net/)  
 [Python 茶馆](https://pythoncaff.com/)  
 [爱湃森 2017 榜单](https://annual2017.pycourses.com/)  
+[爱湃森 2018 榜单](https://annual2018.pycourses.com/)  
 
 ------
 [廖雪峰 Python](http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000)  
