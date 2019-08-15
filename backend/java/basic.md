@@ -8,6 +8,25 @@ J2ME(Java 2 Platform Micro Edition)小型版是为开发电子消费产品和嵌
 J2EE(Java 2 Platform Enterprise Edition)企业版是为开发企业环境下的应用程序提供的一套解决方案，该技术体系中包含的技术如 Servlet、Jsp 等，主要针对于 Web 应用程序、开发数据库、消息服务等。  
 Java SE 是整个 Java 平台的核心，而 Java EE 是进一步学习 Web 应用所必须的(Spring 等框架都是 Java EE 开源生态系统的一部分)。
 
+Java 发展历程：  
+1990，Sun 成立了 “Green Team” 项目小组  
+1991，Java 语言前身 Oak（橡树）诞生  
+1995，Oak 语言更名为 Java  
+1996，Java 1.0 发布  
+1997，Java 1.1 发布  
+1998，Java 1.2 发布  
+2000，Java 1.3 发布  
+2000，Java 1.4 发布  
+2004，Java 5 发布  
+2006，Java 6 发布  
+2011，Java 7 发布  
+2014，Java 8 发布  
+2017，Java 9（非长期支持版）发布  
+2018.03，Java 10（非长期支持版） 发布  
+2018.09，Java 11（长期支持版）发布  
+2019.03, Java 12（非长期支持版） 发布  
+`注意：长期支持版指的是官方发布版本后的一段时间内，通常以 “年” 为计数单位，会对此版本进行持续维护和升级；版本发布时间 Java 10 之后，官方表示每半年推出一个大版本，长期支持版本（LTS）每三年发布一次。`
+
 Java 语言特点：简单性、面向对象、健壮性、结构中立、高性能、多线程、动态、安全性、跨平台。  
 跨平台：只要在需要运行 java 应用程序的操作系统上，先安装一个 Java 虚拟机 JVM (Java Virtual Machine) 即可。由 JVM 来负责 Java 程序在该系统中的运行。（Write once, run anywhere）  
 ```

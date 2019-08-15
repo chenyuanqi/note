@@ -1,6 +1,7 @@
 
 ### Spring boot
-从本质上来说，Spring Boot 就是 Spring, 它做了那些没有它你也会去做的 Spring Bean 配置。
+从本质上来说，Spring Boot 就是 Spring, 它做了那些没有它你也会去做的 Spring Bean 配置。  
+Spring Boot 是 Spring 官方发展十几年后推出的重量级产品，具有快速开发、快速部署、方便配置、便于监控等特性，这些特性将会重构整个研发流程、提升研发效率，达到快速开发、交付的目的，同时也让 Spring Boot 成为 Java 领域最佳微服务架构落地技术。  
 
 Spring 将很多魔法带入了 Spring 应用程序的开发之中:  
 1、自动配置：针对很多 Spring 应用程序常见的应用功能，Spring Boot 能自动提供相关配置  
@@ -406,4 +407,20 @@ public class UserController
 ```
 3、如果需要使用事务，使用注解 \@Transactional 即可  
 
-
+### Spring boot 配合 Nginx
+Spring 应用作为服务运行，NGINX 代理允许将应用部署到非特权端口。  
+```
+server {        
+   listen 80;        
+   listen [::]:80;  
+           
+   server_name example.com;    
+         
+   location / {             
+           proxy_pass http://localhost:8080/;              
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;              
+           proxy_set_header X-Forwarded-Proto $scheme;              
+           proxy_set_header X-Forwarded-Port $server_port;         
+   } 
+}
+```
