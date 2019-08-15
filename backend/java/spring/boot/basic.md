@@ -39,6 +39,17 @@ mvn install # 生成 jar_path
 mvn -jar jar_path
 ```
 
+**spring loaded 实现热部署**  
+在 pom.xml 添加依赖
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>springloaded</artifactId>
+    <version>1.2.5.RELEASE</version>
+</dependency>
+```
+之后通过 mvn spring-boot:run 启动就支持热部署了。  
+
 ### Spring boot 项目配置
 项目配置在 src/main/resources/application.properties，可以添加属性及自定义属性
 ```
