@@ -44,12 +44,30 @@ mvn -jar jar_path
 在 pom.xml 添加依赖
 ```xml
 <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>springloaded</artifactId>
-    <version>1.2.5.RELEASE</version>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-Devtools</artifactId>
+  <optional>true</optional>
 </dependency>
+
+<!-- plugin 配置 fork 属性-->
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <fork>true</fork>
+            </configuration>
+        </plugin>
+</plugins>
+</build>
 ```
 之后通过 mvn spring-boot:run 启动就支持热部署了。  
+`注意：IDE 配置 Build > Compiler > Build project automatically，ctrl+shift+a 后输入 registry 选择 Compiler 勾选 compiler.automake.allow.when.app.running。`
+
+IDE 建议还是使用手动触发部署的方式：  
+Run > Edit Configurations > On 'Update' action 和 On frame deactivation 选择 Update classes and resources；  
+需要部署变更的话，Ctrl+f9 即可。  
 
 ### Spring boot 项目配置
 项目配置在 src/main/resources/application.properties，可以添加属性及自定义属性

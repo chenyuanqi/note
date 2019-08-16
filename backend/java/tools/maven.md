@@ -17,7 +17,10 @@ sudo apt -y install maven
 2、artifactId 标识项目中的模块，格式建议使用【项目名称-模块名称】  
 3、version 版本号，快照版本是一种特殊的版本  
 4、modelVersion 固定值 4.0.0  
-5、maven 路径约定：java 文件放在 src/main/java 目录，test 文件放在 src/test/java 目录  
+5、packaging 一般有两个值：jar、war，表示使用 Maven 打包时构建成 Jar 包还是 War 包  
+6、name 项目名称  
+7、description 项目描述  
+8、maven 路径约定：java 文件放在 src/main/java 目录，test 文件放在 src/test/java 目录  
 ```
 <!---pom.xml 示例--->
 <modelVersion>4.0.0</modelVersion>  
