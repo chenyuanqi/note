@@ -645,12 +645,13 @@ System.out.println(Math.random());
 ```
 
 ### Java 日期时间
+在 JDK 8 之前，Java 语言为我们提供了两个类用于操作时间，它们分别是：java.util.Date 和 java.util.Calendar，但在 JDK 8 的时候为了解决旧时间操作类的一些缺陷，提供了几个新的类，用于操作时间和人气，它们分别是：LocalTime、LocalDateTime、Instant，都位于 java.time 包下。
 ```java
 import java.util.Calendar;
 import java.util.Date;
 import java.text.*;
 
-// 获取当前时间戳（精确到毫秒）
+// 获取当前时间戳（精确到毫秒）jdk8 之前
 System.out.println(System.currentTimeMillis());
 System.out.println(Calendar.getInstance().getTimeInMillis());
 System.out.println(new Date().getTime());
@@ -658,6 +659,9 @@ System.out.println(new Date().getTime());
 System.out.println(System.currentTimeMillis() / 1000);
 System.out.println(Calendar.getInstance().getTimeInMillis() / 1000);
 System.out.println(new Date().getTime() / 1000);
+// 获取当前时间戳（精确到毫秒）jdk8 之后
+long milli = Instant.now().toEpochMilli(); // 获取当前时间戳（精确到毫秒）
+long second = Instant.now().getEpochSecond(); // 获取当前时间戳（精确到秒）
 
 // 初始化 Date 对象
 Date date = new Date();
@@ -665,12 +669,60 @@ Date date = new Date();
 // 使用 toString () 函数显示日期时间
 System.out.println(date.toString()); // Wed Aug 07 02:56:28 UTC 2019
 
-// 指定格式输出
+// 指定格式输出，SimpleDateFormat 是非线程安全的
 SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
 System.out.println(" 当前时间为: " + ft.format(date));
 // 或者这样
 System.out.printf("%tF", date);
 System.out.printf("%tT", date);
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+// 获取日期
+LocalDate localDate = LocalDate.now();
+System.out.println(localDate);    // output:2019-08-16
+// 获取时间
+LocalTime localTime = LocalTime.now();
+System.out.println(localTime);    // output:21:09:13.708
+// 获取日期和时间
+LocalDateTime localDateTime = LocalDateTime.now();
+System.out.println(localDateTime);    // output:2019-08-16T21:09:13.708
+// 时间格式化①
+DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+String timeFormat = dateTimeFormatter.format(LocalDateTime.now());
+System.out.println(timeFormat);  // output:2019-08-16 21:15:43
+// 时间格式化②
+String timeFormat2 = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+System.out.println(timeFormat2);    // output:2019-08-16 21:17:48
+// 时间转换
+String timeStr = "2019-10-10 06:06:06";
+LocalDateTime dateTime = LocalDateTime.parse(timeStr,DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+System.out.println(dateTime); // 2019-10-10T06:06:06
+
+// 获取昨天此刻的时间（JDK 8 以前）
+Calendar c = Calendar.getInstance();
+c.add(Calendar.DATE,-1);
+System.out.println(c.getTime());
+// 获取昨天此刻的时间（JDK 8）
+LocalDateTime todayTime = Loca
+LocalDateTime today = LocalDateTime.now();
+LocalDateTime yesterday = today.plusDays(-1);
+System.out.println(yesterday); // 2019-08-15T23:03:06.697
+
+// 获取本月的最后一天（JDK 8 以前）
+Calendar ca = Calendar.getInstance();
+ca.set(Calendar.DAY_OF_MONTH, ca.getActualMaximum(Calendar.DAY_OF_MONTH));
+System.out.println(ca.getTime());
+// 获取本月的最后一天（JDK 8）
+LocalDate today = LocalDate.now();
+System.out.println(today.with(TemporalAdjusters.lastDayOfMonth()));
+
+// 计算时间间隔
+LocalDateTime dt1 = LocalDateTime.now();
+LocalDateTime dt2 = dt1.plusSeconds(60);
+Duration duration = Duration.between(dt1, dt2);
+System.out.println(duration.getSeconds());  // output:60
 
 ```
 
