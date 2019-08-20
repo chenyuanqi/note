@@ -58,7 +58,7 @@ public static long factorial(int number)
         return 1;
     }
 
-    return number * factorial(n - 1);
+    return number * factorial(number - 1);
 }
 ```
 
@@ -123,8 +123,173 @@ private static int[] mergeTwoArray(int[] arr1, int[] arr2) {
 > 为了提升洗牌阶段的效率，可以选择减少发送到归约阶段的键 - 值配对。具体做法是在数 据映射和洗牌之间，加入合并的过程，在每个 Mapper 节点上先进行一次本地的归约。然后只将合并的结果发送到洗牌和归约阶段。
 
 ### 排列   
+从 n 个不同的元素中取出 m（1<=m<=n）个不同的元素，按照一定的顺序排成一列，这个过程就叫排列。当 m = n 的时候，这就是全排列。  
 
+排列的公式 n(n-1)(n-2)...(n-m+1) = n!/(n-m)!  
+```java
+import java.util.Arrays;
+
+public class Range
+{
+    public static void main(String[] args)
+    {
+        arrangementSelect(new String[]{"1","2","3"}, 3);
+    }
+
+    /**
+     * 排列选择（从列表中选择 n 个排列）
+     *
+     * @param dataList 待选列表
+     * @param n 选择个数
+     */
+    public static void arrangementSelect(String[] dataList, int n)
+    {
+        System.out.println(String.format("A(%d, %d) = %d", dataList.length, n, arrangement(dataList.length, n)));
+
+        arrangementSelect(dataList, new String[n], 0);
+    }
+
+    /**
+     * 排列选择
+     *
+     * @param dataList 待选列表
+     * @param resultList 前面（resultIndex-1）个的排列结果
+     * @param resultIndex 选择索引，从 0 开始
+     */
+    private static void arrangementSelect(String[] dataList, String[] resultList, int resultIndex)
+    {
+        int resultLen = resultList.length;
+
+        // 全部选择完时，输出排列结果
+        if (resultIndex >= resultLen) {
+            System.out.println(Arrays.asList(resultList));
+            return ;
+        }
+
+        // 递归选择下一个
+        for (int i = 0; i < dataList.length; i++) {
+            // 判断待选项是否存在于排列结果中
+            boolean isExists = false;
+            for (int j = 0; j < resultIndex; j++) {
+                if (dataList[i].equals(resultList[j])) {
+                    isExists = true;
+                    break;
+                }
+            }
+
+            // 排列结果不存在该项，才可选择
+            if (!isExists) {
+                resultList[resultIndex] = dataList[i];
+                arrangementSelect(dataList, resultList, resultIndex + 1);
+            }
+        }
+    }
+
+    /**
+     * 计算阶乘数，即 n! = n * (n-1) * ... * 2 * 1
+     *
+     * @param n
+     * @return
+     */
+    public static long factorial(int n)
+    {
+        return (n > 1) ? n * factorial(n - 1) : 1;
+    }
+
+    /**
+     * 计算排列数，即 A(n, m) = n! / (n-m)!
+     *
+     * @param n 所有排列数
+     * @param m 抽取排列数
+     * @return
+     */
+    public static long arrangement(int n, int m)
+    {
+        return (n >= m) ? factorial(n) / factorial(n - m) : 0;
+    }
+}
+```
+
+排列可以帮助我们生成很多可能性，鉴于此，排列最多的用途就是穷举法，也就是，列出所有可能的情况，一个一个验证，然后看每种情况是否符合条件的解。  
+比如田忌赛马所使用的出战顺序，黑客们的暴力破解密码（鉴于存在暴力破解，通常程序也会加上每天尝试密码的次数限制，所以足够长度的多类型字符密码相对安全）。
 
 ### 组合
+组合是指，从 n 个不同元素中取出 m（1≤m≤n）个不同的元素。对于所有 m 取值的组合之全集合，我们可以叫作全组合（All Combination）。例如对于集合 {1, 2, 3} 而言，全组合就是 {空集, {1}, {2}, {3}, {1, 2}, {1,3} {2, 3}, {1, 2, 3}}。  
 
+组合的公式 总排列/m! = n!/(m! * (n-m)!)  
+```java
+import java.util.Arrays;
 
+public class Combination
+{
+    public static void main(String[] args)
+    {
+        combinationSelect(new String[]{"1","2","3"}, 2);
+    }
+
+    /**
+     * 组合选择（从列表中选择 n 个组合）
+     *
+     * @param dataList 待选列表
+     * @param n 选择个数
+     */
+    public static void combinationSelect(String[] dataList, int n)
+    {
+        System.out.println(String.format("C(%d, %d) = %d", dataList.length, n, combination(dataList.length, n)));
+
+        combinationSelect(dataList, 0, new String[n], 0);
+    }
+
+    /**
+     * 组合选择
+     *
+     * @param dataList 待选列表
+     * @param dataIndex 待选开始索引
+     * @param resultList 前面（resultIndex-1）个的组合结果
+     * @param resultIndex 选择索引，从 0 开始
+     */
+    private static void combinationSelect(String[] dataList, int dataIndex, String[] resultList, int resultIndex)
+    {
+        int resultLen = resultList.length;
+        int resultCount = resultIndex + 1;
+        // 全部选择完时，输出组合结果
+        if (resultCount > resultLen) {
+            System.out.println(Arrays.asList(resultList));
+            return ;
+        }
+
+        // 递归选择下一个
+        for (int i = dataIndex; i < dataList.length + resultCount - resultLen; i++) {
+            resultList[resultIndex] = dataList[i];
+            combinationSelect(dataList, i + 1, resultList, resultIndex + 1);
+        }
+    }
+
+    /**
+     * 计算阶乘数，即 n! = n * (n-1) * ... * 2 * 1
+     *
+     * @param n
+     * @return
+     */
+    public static long factorial(int n)
+    {
+        return (n > 1) ? n * factorial(n - 1) : 1;
+    }
+
+    /**
+     * 计算组合数，即 C (n, m) = n!/((n-m)! * m!)
+     *
+     * @param n
+     * @param m
+     * @return
+     */
+    public static long combination(int n, int m) {
+        return (n >= m) ? factorial(n) / factorial(n - m) / factorial(m) : 0;
+    }
+}
+```
+
+组合可以说是排列的兄弟，两者类似但又有所不同，这两者的区别：排列考虑了取出的元 素它们之间的顺序，而组合无需考虑这种顺序（在递归的时候，传入下一个嵌套调用函数的剩余元素，只需 要包含当前被选元素之后的那些，以避免重复的组合）。  
+
+在自然语言处理中，我们需要用多元文法把临近的几个单词合并起来，组合成一个新的词组。  
+普通的多元文法定死了每个元组内单词出现的顺序，但是事实上，多个单词出现时，我们可以不用关心它们的顺序，而只关心它们的组合。这样，我们就可以对多元组内的单词进行某种形式的标准化，即使原来的单词出现顺序有所不同，经过这个标准化过程之后，都会变成唯一的顺序。
