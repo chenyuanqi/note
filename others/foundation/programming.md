@@ -468,6 +468,34 @@ public class Dfs
 ```
 
 ### 树的广度优先搜索
+树是二维的，朝着纵向进行的是深度优先搜索，朝着横向进行的就是广度优先搜索。  
+
+广度优先搜索（Breadth First Search），也叫宽度优先搜索，是指从图中的某个结点出发，沿着和这个点相连的边向前走，去寻找和这个点距离为 1 的所有其他点。只有当和起 始点距离为 1 的所有点都被搜索完毕，才开始搜索和起始点距离为 2 的点。当所有和起始 点距离为 2 的点都被搜索完了，才开始搜索和起始点距离为 3 的点，如此类推。  
+广度优先搜索，相对于深度优先搜索，没有函数的嵌套调用和回溯操作，所以运行速度比 较快。但是，随着搜索过程的进行，广度优先需要在队列中存放新遇到的所有结点，因此 占用的存储空间通常比深度优先搜索多。
+
+寻找两个人之间的最短通路，或者说找出两人是几度好友，在社交中有不少应用。例如，向你推荐新的好友、找出两人之间的关系的紧密程度、职场背景调查等等。  
+基于树的广度优先搜索，社交关系的六度理论说明地球上任何两个人之间的社交关系不会超过六度，因为社会关系会随着关系的度数增加，而呈指数级的膨胀。所以，如果我们可以控制这种指数级别的增长，就可以控制潜在好友的数量，达到提升效率的目的。双向广度优先搜索巧妙的运用了两个方向的广度优先搜索，大幅降低搜索的度数。  
+
+利用双向队列的数据结构进行广度优先的搜索。  
+```java
+public void Bfs() 
+{
+    Deque<Map<String, Object>> nodeDeque = new ArrayDeque<Map<String, Object>>();
+    Map<String, Object> node = new HashMap<String, Object>();
+    nodeDeque.add(node);
+    while (!nodeDeque.isEmpty()) {
+        node = nodeDeque.peekFirst();
+        System.out.println(node);
+        // 获得节点的子节点，对于二叉树就是获得节点的左子结点和右子节点
+        List<Map<String, Object>> children = getChildren(node);
+        if (children != null && !children.isEmpty()) {
+            for (Map child : children) {
+                nodeDeque.add(child);
+            }
+        }
+    }
+}
+```
 
 
 
