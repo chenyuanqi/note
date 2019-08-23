@@ -20,7 +20,7 @@
 #### rpc 选型之语言平台绑定的开源 RPC 框架
 **Dubbo**  
 Dubbo 可以说是国内开源最早的 RPC 框架了，目前只支持 Java 语言，它的架构如图所示  
-![Dubbo 架构](../images/dubbo-architecture.png)  
+![Dubbo 架构](../../images/dubbo-architecture.png)  
 
 Dubbo 的架构主要包含四个角色，其中 Consumer 是服务消费者，Provider 是服务提供者，Registry 是注册中心，Monitor 是监控系统。  
 
@@ -35,7 +35,7 @@ Dubbo 的调用框架实现：
 
 **Motan**  
 Motan 是国内另外一个比较有名的开源的 RPC 框架，同样也只支持 Java 语言实现，它的架构如图所示  
-![Motan 架构](../images/motan-architecture.jpg)  
+![Motan 架构](../../images/motan-architecture.jpg)  
 
 Motan 与 Dubbo 的架构类似，都需要在 Client 端（服务消费者）和 Server 端（服务提供者）引入 SDK，其中 Motan 框架主要包含下面几个功能模块。  
 
@@ -47,7 +47,7 @@ Motan 与 Dubbo 的架构类似，都需要在 Client 端（服务消费者）�
 
 **Tars**  
 Tars 是腾讯根据内部多年使用微服务架构的实践，总结而成的开源项目，仅支持 C++ 语言，它的架构图如下
-![Tars 架构](../images/tars-architecture.png)  
+![Tars 架构](../../images/tars-architecture.png)  
 
 Tars 的架构交互主要包括以下几个流程：  
 
@@ -60,7 +60,7 @@ Tars 的架构交互主要包括以下几个流程：
 **Spring Cloud 全家桶**  
 Spring Cloud 是为了解决微服务架构中服务治理而提供的一系列功能的开发框架，它是完全基于 Spring Boot 进行开发的，Spring Cloud 利用 Spring Boot 特性整合了开源行业中优秀的组件，整体对外提供了一套在微服务架构中服务治理的解决方案。  
 Spring Cloud 微服务架构如图所示  
-![Spring Cloud 架构](../images/spring-cloud-architecture.png)  
+![Spring Cloud 架构](../../images/spring-cloud-architecture.png)  
 
 Spring Cloud 微服务架构是由多个组件一起组成的，各个组件的交互流程：  
 
@@ -74,7 +74,7 @@ Spring Cloud 微服务架构是由多个组件一起组成的，各个组件的�
 #### rpc 选型之跨语言平台的开源 RPC 框架
 **gRPC**  
 gRPC 的原理是通过 IDL（Interface Definition Language）文件定义服务接口的参数和返回值类型，然后通过代码生成程序生成服务端和客户端的具体实现代码，这样在 gRPC 里，客户端应用可以像调用本地对象一样调用另一台服务器上对应的方法。  
-![gRPC 架构](../images/grpc-architecture.png)  
+![gRPC 架构](../../images/grpc-architecture.png)  
 
 gRPC 的主要特性包括三方面：  
 
@@ -86,7 +86,7 @@ gRPC 作为后起之秀，因为采用了 HTTP/2 作为通信协议、ProtoBuf �
 
 **Thrift**  
 Thrift 是一种轻量级的跨语言 RPC 通信方案，支持多达 25 种编程语言。为了支持多种语言，跟 gRPC 一样，Thrift 也有一套自己的接口定义语言 IDL，可以通过代码生成器，生成各种编程语言的 Client 端和 Server 端的 SDK 代码，这样就保证了不同语言之间可以相互通信。  
-![Thrift 架构](../images/thrift-architecture.png)  
+![Thrift 架构](../../images/thrift-architecture.png)  
 
 Thrift RPC 框架的特性：  
 

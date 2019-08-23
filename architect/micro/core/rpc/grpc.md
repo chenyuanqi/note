@@ -3,7 +3,7 @@
 RPC 框架的目标就是让远程服务调用更加简单、透明，RPC 框架负责屏蔽底层的传输方式（TCP 或者 UDP）、序列化方式（XML/Json/ 二进制）和通信细节。服务调用者可以像调用本地接口一样调用远程的服务提供者，而不需要关心底层通信细节和调用过程。  
 
 RPC 框架的调用原理图:  
-![rpc-principle](./images/grpc-01.png)  
+![rpc-principle](../../images/grpc-01.png)  
 
 业界主流的 RPC 框架：  
 > 1、支持多语言的 RPC 框架，比较成熟的有 Google 的 gRPC、Apache（Facebook）的 Thrift；  
@@ -19,7 +19,7 @@ gRPC 是由 Google 开发并开源的一种语言中立的 RPC 框架，当前�
 [gRPC 官网](https://grpc.io/)  
 
 gRPC 的调用示例：  
-![grpc-example](./images/grpc-02.png)  
+![grpc-example](../../images/grpc-02.png)  
 
 gRPC 特点:  
 > 1、语言中立，支持多种语言；  
@@ -71,7 +71,7 @@ gRPC 服务端创建采用 Build 模式，对底层服务绑定、transportServe
 > 2、将需要调用的服务端接口实现类注册到内部的 Registry 中，RPC 调用时，可以根据 RPC 请求消息中的服务定义信息查询到服务接口实现类；  
 > 3、创建 gRPC Server，它是 gRPC 服务端的抽象，聚合了各种 Listener，用于 RPC 消息的统一调度和处理。  
 
-![grpc-server-creat](./images/grpc-03.png)  
+![grpc-server-creat](../../images/grpc-03.png)  
 
 gRPC 服务端创建关键流程分析：  
 > 1、NettyServer 实例创建：gRPC 服务端创建，首先需要初始化 NettyServer，它是 gRPC 基于 Netty 4.1 HTTP/2 协议栈之上封装的 HTTP/2 服务端。NettyServer 实例由 NettyServerBuilder 的 buildTransportServer 方法构建，NettyServer 构建完成之后，监听指定的 Socket 地址，即可实现基于 HTTP/2 协议的请求消息接入。  
@@ -97,7 +97,7 @@ gRPC 请求消息接入流程：
 > 在实践中独占模式普遍会存在线程资源占用过载问题，很容易出现句柄等资源泄漏。  
 > 在 gRPC 中，为了避免该问题，默认采用共享池模式创建 NioEventLoopGroup，所有的 gRPC 服务端实例，都统一从 SharedResourceHolder 分配 NioEventLoopGroup 资源，实现 NioEventLoopGroup 的共享。  
 
-![grpc-request](./images/grpc-04.png)   
+![grpc-request](../../images/grpc-04.png)   
 
 gRPC 消息头的处理入口是 NettyServerHandler 的 onHeadersRead()，处理流程如下：  
 > 1、对 HTTP Header 的 Content-Type 校验，此处必须是 "application/grpc"；  
@@ -109,20 +109,20 @@ gRPC 消息头的处理入口是 NettyServerHandler 的 onHeadersRead()，处理
 > 7、JumpToApplicationThreadServerStreamListener 的创建：它是 ServerImpl 的内部类，从命名上基本可以看出它的用途，即从 ServerStream 跳转到应用线程中进行服务调用，gRPC 服务端的接口调用主要通过 JumpToApplicationThreadServerStreamListener 的 messageRead 和 halfClosed 方法完成；  
 > 8、将 NettyServerStream 的 TransportState 缓存到 Netty 的 Http2Stream 中，当处理请求消息体时，可以根据 streamId 获取到 Http2Stream，进而根据“streamKey”还原 NettyServerStream 的 TransportState，进行后续处理。  
 
-![grpc-request-header](./images/grpc-05.png) 
+![grpc-request-header](../../images/grpc-05.png) 
 
 gRPC 消息体的处理入口是 NettyServerHandler 的 onDataRead()，实际上它们是并行 + 交叉串行实行的，处理流程如下:  
 > 1、因为 Netty HTTP/2 协议 Http2FrameListener 分别提供了 onDataRead 和 onHeadersRead 回调方法，所以 gRPC NettyServerHandler 在处理完消息头之后需要缓存上下文，以便后续处理消息体时使用；  
 > 2、onDataRead 和 onHeadersRead 方法都是由 Netty 的 NIO 线程负责调度，但是在执行 onDataRead 的过程中发生了线程切换  
 
-![grpc-header-body](./images/grpc-06.png)  
+![grpc-header-body](../../images/grpc-06.png)  
 
 内部的服务路由和调用，主要包括如下几个步骤：  
 > 1、将请求消息体反序列为 Java 的 POJO 对象，即 IDL 中定义的请求参数对象；  
 > 2、根据请求消息头中的方法名到注册中心查询到对应的服务定义信息；  
 > 3、通过 Java 本地接口调用方式，调用服务端启动时注册的 IDL 接口实现类。
 
-![grpc-router](./images/grpc-07.png)  
+![grpc-router](../../images/grpc-07.png)  
 
 中间的交互流程比较复杂，涉及的类较多，但是关键步骤主要有三个：  
 > 1、解码：对 HTTP/2 Body 进行应用层解码，转换成服务端接口的请求参数，解码的关键就是调用 requestMarshaller.parse(input)，将 PB 码流转换成 Java 对象；  
@@ -134,7 +134,7 @@ gRPC 消息体的处理入口是 NettyServerHandler 的 onDataRead()，实际上
 > 2、WriteQueue 通过 Netty 的 NioEventLoop 线程进行消息处理，NioEventLoop 将 SendResponseHeadersCommand 和 SendGrpcFrameCommand 写入到 Netty 的 Channel 中，进而触发 DefaultChannelPipeline 的 write(Object msg, ChannelPromise promise) 操作；  
 > 3、响应消息通过 ChannelPipeline 职责链进行调度，触发 NettyServerHandler 的 sendResponseHeaders 和 sendGrpcFrame 方法，调用 Http2ConnectionEncoder 的 writeHeaders 和 writeData 方法，将响应消息通过 Netty 的 HTTP/2 协议栈发送给客户端。  
 
-![grpc-response](./images/grpc-08.png)  
+![grpc-response](../../images/grpc-08.png)  
 
 需要指出的是，请求消息的接收、服务调用以及响应消息发送，多次发生 NIO 线程和应用线程之间的互相切换，以及并行处理。  
 
