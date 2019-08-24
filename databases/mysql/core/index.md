@@ -121,9 +121,22 @@ change buffer 用的是 buffer pool 里的内存，因此不能无限增大。ch
 > 比如两个关联表的字符集一个是 utf8，一个是 utf8mb4，它们的关联查询也回导致全表扫描。实际上，字符集不同，utf8mb4 是 utf8 的超集，就会发生这样的转换 CONVERT(field USING utf8mb4)="xxx"。这个时候，要么修改表的字符集保持一致，要么保证条件语句的字段值进行相关字符集转换操作。  
 > 
 
+6、导致慢查询性能的问题？  
+a、索引没设计好  
+一般通过紧急创建索引来解决，MySQL 5.6 版本以后，创建索引都支持 Online DDL 了，对于那种高峰期数据库已经被这个语句打挂了的情况，最高效的做法就是直接执行 alter table 语句。  
+主从数据库中，比较理想的是能够在备库先执行，如不紧急就考虑类似 gh-ost 这样的方案更加稳妥  
+> 1、在备库B上执行 set sql_log_bin=off，也就是不写 binlog，然后执行 alter table 语句加上索引；  
+> 2、执行主备切换；  
+> 3、这时候，主库是 B，备库是 A。在 A 上执行 set sql_log_bin=off，然后执行 alter table 语句加上索引。
 
+b、语句没写好  
+MySQL 5.7 提供了query_rewrite 功能，可以把输入的一种语句改写成另外一种模式。  
+call query_rewrite.flush_rewrite_rules() 这个存储过程，是让插入的新规则生效，也就是我们说的“查询重写”。  
+> 比如，增加一个语句改写规则：  
+> insert into query_rewrite.rewrite_rules(pattern, replacement, pattern_database) values ("select * from t where id + 1 = ?", "select * from t where id = ? - 1", "db1");
 
-
+c、mysql 选错了索引  
+参考问题 3。  
 
 
 
