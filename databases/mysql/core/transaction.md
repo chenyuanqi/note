@@ -49,7 +49,7 @@ T1 读取某个范围的数据，T2 在这个范围内插入新的数据，T1 �
 ### 事务的隔离性与隔离级别
 当数据库上有多个事务同时执行的时候，就可能出现脏读（dirty read）、不可重复读 （non-repeatable read）、幻读（phantom read）的问题，为了解决这些问题，就有 了“隔离级别”的概念。  
 
-SQL 标准的事务隔离级别包括：读未提交（read uncommitted）、读提交（read committed）、可重复读（repeatable read）和串行 化（serializable ）。  
+SQL 标准的事务隔离级别包括：读未提交（read uncommitted）、读提交（read committed）、可重复读（repeatable read）和串行化（serializable ）。  
 > 读未提交是指一个事务还没提交时，它做的变更就能被别的事务看到。  
 > 读提交是指一个事务提交之后，它做的变更才会被其他事务看到。  
 > 可重复读是指一个事务执行过程中看到的数据，总是跟这个事务在启动时看到的数据 是一致的（当然在可重复读隔离级别下，未提交变更对其他事务也是不可见的）。  
