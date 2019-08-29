@@ -11,6 +11,75 @@ Docker 镜像解决了 DevOps 中微服务运行的环境难以在本地环境�
 
 [Docker 镜像仓库](https://hub.docker.com/)  
 
+### Docker 安装
+[windows](https://docs.docker.com/docker-for-windows/install/) 和 [macos](https://docs.docker.com/docker-for-mac/install/) 的安装比较简单，只要下载对应的软件，一直 Next 即可。  
+```bash
+# ubuntu
+# 
+# 卸载已经安装的 docker
+sudo apt-get remove docker docker-engine docker.io
+# 设置镜像仓库
+sudo apt-get update
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu/gpg | sudo apt-key add - 
+sudo add-apt-repository 
+"deb [arch=amd64] https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update 
+# 安装 docker-ce【社区版】
+sudo apt install docker-ce
+# 验证
+docker run helloworld
+docker --version
+```
+
+**设置国内镜像**  
+docker 默认的配置文件在 /etc/docker/daemon.json，选择网易、科大的镜像。   
+```json
+{
+  "registry-mirrors": ["https://docker.mirrors.ustc.edu.cn","http://hub-mirror.c.163.com"]
+}
+```
+
+**设置免 sudo**  
+默认安装完 docker 后，每次执行 docker 都需要运行 sudo 命令。
+```bash
+sudo groupadd docker
+sudo gpasswd -a ${USER} docker
+sudo service docker restart
+newgrp - docker
+```
+
+**docker 端口和本地宿主机器端口映射**  
+假设容器的名字叫 ubuntu。  
+1、对容器暴露所有的端口，随机映射宿主机端口
+```bash
+docker run -P -it ubuntu /bin/bash
+```
+2、映射宿主机随机端口到容器指定的端口
+```bash
+docker run -p 80 -it ubuntu /bin/bash
+```
+3、映射宿主机的指定端口到容器指定端口 1 对 1
+```bash
+docker run -p 8080:8080 -it ubuntu /bin/bash  
+```
+4、指定容器 ip 和容器端口，宿主机端口随机映射
+```bash
+docker run -p 127.0.0.1::80 -it ubuntu /bin/bash  
+```
+
+### Docker 基本操作
+```bash
+# 查看运行的容器
+docker ps
+# 停止容器
+docker stop container-id
+# 进入容器
+docker exec -it [CONTAINER-ID] /bin/sh
+# 退出
+exit
+```
+
 
 
 
