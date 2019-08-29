@@ -51,7 +51,14 @@ composer global require "hirak/prestissimo"
 
 3、使用中国全量镜像
 ```bash
-composer config -g repo.packagist composer https://packagist.laravel-china.org
+# 停止使用 laravel-china 镜像
+# composer config -g repo.packagist composer https://packagist.laravel-china.org
+
+# 使用阿里云 https://developer.aliyun.com/composer
+composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+
+# 使用安畅网络 https://php.cnpkg.org/
+composer config -g repos.packagist composer https://php.cnpkg.org
 ```
 
 ### Composer 的使用
