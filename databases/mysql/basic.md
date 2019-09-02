@@ -77,8 +77,20 @@ mysql 事务主要用于处理操作量大，复杂度高的数据。比如说�
 # 连接 mysql
 mysql [-h host] -u user -p [database]
 
+# 添加具有本地 (localhost/127.0.0.1) 访问权限的用户
+create user 'newuser'@'localhost' identified by 'password';
+# 创建具有远程访问权限的用户 
+create user 'newuser'@'%' identified by 'password';
+
 # 分配用户权限
 GRANT ALL ON menagerie.* TO 'your_mysql_name'@'your_client_host';
+# 为新用户分配本地权限，可以指定数据库 dbname 和表名，可以用 * 替指所有
+grant all privileges on `dbname`.* to 'newuser'@'localhost' identified by 'password';
+# 为新用户分配远程权限，可以指定数据库 dbname 和表名，可以用 * 替指所有
+grant all privileges on `dbname`.* to 'newuser'@'%' identified by 'password';
+
+# 更新权限
+flush privileges;
 
 # 创建数据库
 create database test charset=utf8;
