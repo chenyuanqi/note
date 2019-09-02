@@ -1,5 +1,8 @@
 
 ### Linux 文件系统
+Linux 文件系统的结构层次鲜明，就像一棵倒立的树，最顶层是其根目录：  
+![Linux 文件系统](./images/linux-filesystem.jpg)  
+
 ```html
 根文件系统(rootfs)：
     root filesystem

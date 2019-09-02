@@ -87,6 +87,10 @@ cd 或 cd ~
 cd ~USERNAME
 # 在上一个目录和当前目录之间来回切换
 cd -
+# 切换到系统根目录
+cd /
+# 切换到上一层目录
+cd ..
 
 # 创建目录
 mkdir [options] /path/to/somewhere
