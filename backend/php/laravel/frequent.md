@@ -106,6 +106,46 @@ dd(DB::getQueryLog());
 $builder->toSql();
 ```
 
+**签名设计**  
+```php
+/**
+ * 校验签名
+ *
+ * @param Request $request
+ *
+ * @return bool
+ */
+public static function validateSignature(Request $request)
+{
+    $signature = $request->header('XXX-Signature', '');
+
+    return $signature === static::generateSignature($request);
+}
+
+/**
+ * 生成签名
+ *
+ * @param Request $request
+ *
+ * @return string
+ */
+public static function generateSignature(Request $request)
+{
+    $method      = strtoupper($request->method());
+    $path        = "/" . $request->path();
+    $queryString = $request->getQueryString();
+    $body        = $request->getContent();
+    $accessToken = $request->header('Authorization', '');
+    $timestamp   = $request->header('XXX-Timestamp', '');
+
+    $bodyHash     = base64_encode(hash('sha256', $body, true));
+    $stringToSign = "{$method}#{$path}#{$accessToken}#{$timestamp}}#{$queryString}#{$bodyHash}";
+    $signature    = base64_encode(hash('sha256', $stringToSign, true));
+
+    return $signature;
+}
+```
+
 ### 常用命令
 
 
