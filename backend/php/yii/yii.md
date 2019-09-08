@@ -57,6 +57,7 @@
 > 别名的设置可以这样 Yii::setAlias('@foo', '/path/to')  
 > 别名的获取相应的 Yii::getAlias('@foo'), 或在路径中直接使用 new FileCache(['cachePath' => '@foo/cache'])  
 
+`注意：当别名以 \ 号结束的时候，会自动被处理掉的`  
 
 ### Yii 的跨域问题
 ```php
