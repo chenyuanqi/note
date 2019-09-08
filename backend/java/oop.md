@@ -284,6 +284,147 @@ God qi = new Person("Xiaoqi");
 qi.run(); // Xiaoqi run
 ```
 
+### Java 内部类
+在一个类中定义了另一个类，则将定义在类中的那个类称之为成员内部类，成员内部类也是最普通的内部类。  
+```java
+class InnerTest {
+    public static void main(String[] args) {
+        Outer out = new Outer();
+        // 创建成员内部类：Outer.Inner inner = new Outer().new Inner();
+        Outer.Inner inner = out.new Inner();
+        inner.sayHi();
+    }
+}
+
+class Outer {
+    private String name = "OuterClass";
+    
+    public Outer() {
+        System.out.println("Outer Class.");
+        // 外部类访问内部类
+        System.out.println(new Inner().name);
+    }
+
+    public void sayHi() {
+        System.out.println("Hi, Outer.");
+    }
+
+    class Inner {
+        String name = "InnerClass";
+
+        public void sayHi() {
+            System.out.println("Hi, Inner.");
+            // 内部类访问外部类
+            Outer.this.sayHi();
+        }
+    }
+}
+```
+
+在一个类中定义了另一个 static 类，则将定义在类中的那个 static 类称之为静态成员内部类。  
+静态成员内部类也就是给内部成员类加上 static 修饰符。  
+使用静态内部类的好处是作用域不会扩散到包外（可以通过 “外部类.内部类” 的方式直接访问，内部类可以访问外部类中的所有静态属性和方法）。  
+```java
+class OuterClass {
+    public OuterClass() {
+        System.out.println("OuterClass Init.");
+    }
+    protected static class InnerClass {
+        public void sayHi() {
+            System.out.println("Hi, InnerClass.");
+        }
+    }
+}
+class InnerClassTest {
+    public static void main(String[] args) {
+        // 与内部成员类的创建方式 new Outer().new Inner() 不同，静态成员内部类使用 new OuterClass.InnerClass() 
+        // 注意：不能从静态成员内部类中访问非静态外部类对象
+        OuterClass.InnerClass innerClass = new OuterClass.InnerClass();
+        innerClass.sayHi();
+    }
+}
+```
+
+一个类定义在另一个类的局部（方法或者任意作用域），这个类就称之为局部内部类。  
+局部内部类特点：  
+
+- 局部内部类不能使用任何访问修饰符；
+- 局部类如果在方法中，可以直接使用方法中的变量，不需要通过 OutClass.this.xxx 的方式获得。
+
+```java
+class OutClass {
+    public void sayHi() {
+        class InnerClass {
+            InnerClass(String name) {
+                System.out.println("InnerClass:" + name);
+            }
+        }
+        System.out.println(new InnerClass("Three"));
+        System.out.println("Hi, OutClass");
+    }
+}
+class OutTest {
+    public static void main(String[] args) {
+        new OutClass().sayHi();
+    }
+}
+```
+
+没有名字的内部类就叫做匿名内部类。  
+匿名内部类特点：  
+
+- 匿名内部类必须继承一个父类或者实现一个接口
+- 匿名内部类不能定义任何静态成员和方法
+- 匿名内部类中的方法不能是抽象的
+
+```java
+interface AnonymityOuter {
+    void hi();
+}
+class AnonymityTest {
+    public static void main(String[] args) {
+        AnonymityOuter anonymityOuter = new AnonymityOuter() {
+            @Override
+            public void hi() {
+                System.out.println("Hi, AnonymityOuter.");
+            }
+        };
+        anonymityOuter.hi();
+    }
+}
+```
+
+枚举类是 JDK 1.5 引入的新特性，使用关键字 “enum” 声明。枚举功能虽小，却非常实用，大大方便了程序的开发者。  
+```java
+enum ColorEnum {
+    RED,
+    BLUE,
+    YELLOW,
+    GREEN
+}
+class EnumTest {
+    public static void main(String[] args) {
+        ColorEnum color = ColorEnum.GREEN;
+        switch (color) {
+            case RED:
+                System.out.println("Red");
+                break;
+            case BLUE:
+                System.out.println("Blue");
+                break;
+            case YELLOW:
+                System.out.println("Yellow");
+                break;
+            case GREEN:
+                System.out.println("Green");
+                break;
+            default:
+                break;
+        }
+    }
+}
+```
+
 ### Java 匿名类
 Java 匿名类相当于在定义类的同时再新建这个类的实例，既是匿名，自然无法在别的地方使用这个类。  
 Java 匿名类放在 class 中使用叫做匿名内部类，它能访问外层 Class 里面的字段，但是不能访问外层方法中的本地变量（除非该变量是 final 声明），内部类的名称和外面能访问的名称相同，则会把外部名称覆盖。  
