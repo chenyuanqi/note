@@ -222,12 +222,15 @@ System.out.println(wm2 instanceof Woman); // true
 通过 abstract 定义的方法是抽象方法，它只有定义，没有实现。抽象方法定义了子类必须实现的接口规范；定义了抽象方法的 class 必须被定义为抽象类，从抽象类继承的子类必须实现抽象方法（如果不实现抽象方法，则该子类仍是一个抽象类）。  
 面向抽象编程使得调用者只关心抽象方法的定义，不关心子类的具体实现。  
 
+使用 abstract 关键字修饰的方法叫做抽象方法，抽象方法仅有声明没有方法体。  
+
 Java 抽象的特点：  
 抽象类和抽象方法必须用 abstract 关键字修饰；  
 抽象类不一定有抽象方法，有抽象方法的类一定是抽象类；   
 抽象类不能实例化（按照多态的方式，由具体的子类实例化，简称抽象类多态）；  
 抽象类的子类要么是抽象类，要么重写抽象类中的所有抽象方法；    
 抽象类可以有构造方法，用于子类访问父类数据的初始化；  
+抽象方法不能为 private、static、final 等关键字修饰；  
 抽象方法用于限定子类必须完成某些动作，非抽象方法用于提高代码复用性（共性）。  
 ```java
 abstract class Animal 
@@ -245,7 +248,8 @@ class Person extends Animal
 ```
 
 ### Java 接口
-所谓接口（interface），就是比抽象类还要抽象的纯抽象接口，因为它连字段都不能有。
+所谓接口（interface），就是比抽象类还要抽象的纯抽象接口，因为它连字段都不能有。  
+在 Java 语言设计中，接口不是类，而是对类的一组需求描述，这些类必须要遵循接口描述的统一格式进行定义。  
 
 Java 接口的特点：  
 接口用关键字 interface 表示，类实现接口用 implements 表示；  
@@ -283,6 +287,47 @@ class Person implements God
 God qi = new Person("Xiaoqi");
 qi.run(); // Xiaoqi run
 ```
+
+Java 8 中接口的改动：  
+1、JDK 8 之前接口不能有方法体，JDK 8 之后接口中增加了 default 方法和 static 方法，可以有方法体  
+```java
+interface IAnimal {
+    static void printSex() {
+        System.out.println("Male Dog");
+    }
+    default void printAge() {
+        System.out.println("18");
+    }
+}
+```
+2、接口中的静态变量会被继承  
+3、新增函数式接口  
+函数式接口（Function Interface）是一个特殊的接口，使用 \@FunctionInterface 注解声明，定义这种接口可以使用 Lambda 表达式直接调用。  
+```java
+@FunctionalInterface
+interface IAnimal {
+    static String animalName = "Animal Name";
+
+    static void printSex() {
+        System.out.println("Male Dog");
+    }
+
+    default void printAge() {
+        System.out.println("18");
+    }
+
+    void sayHi(String name);
+}
+
+class FunctionInterfaceTest {
+    public static void main(String[] args) {
+        IAnimal animal = name -> System.out.println(name);
+        animal.sayHi("WangWang");
+    }
+}
+```
+
+`注意：使用 @FunctionInterface 声明的函数式接口，抽象方法必须有且仅有一个，但可以包含其他非抽象方法。`
 
 ### Java 内部类
 在一个类中定义了另一个类，则将定义在类中的那个类称之为成员内部类，成员内部类也是最普通的内部类。  
