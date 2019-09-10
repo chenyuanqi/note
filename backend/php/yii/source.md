@@ -1,8 +1,19 @@
 
-### Yii 生命周期
+### Yii2 生命周期
+1、用户向入口脚本 web/index.php 发起请求  
+2、入口脚本加载应用配置并创建一个应用实例去处理请求  
+3、应用通过请求组件解析请求的路由  
+4、应用创建一个控制器实例去处理请求  
+5、控制器创建一个动作实例并针对操作执行过滤器  
+6、如果任何一个过滤器返回失败，则动作取消  
+7、如果所有过滤器都通过，动作将被执行  
+8、动作会加载一个数据模型，或许是来自数据库  
+9、动作会渲染一个视图，把数据模型提供给它  
+10、渲染结果返回给响应组件  
+11、响应组件发送渲染结果给用户浏览器  
+![Yii2 生命周期](../image/yii-framework-flow.png)
 
-
-**Yii 一次请求的完整过程**
+**Yii2 一次请求的完整过程**  
 从 yii\web\UrlManager 开始，最终回到 yii\web\Application。  
 
 1、Yii2.0 框架使用了统一的入口脚本：index.php  
@@ -127,6 +138,97 @@ $response->send();
 return $response->exitStatus;
 ```
 
-### Yii 源码解读基础 —— 组件
+### Yii 源码解读基础
+**__get 和 __set**  
+魔术方法 \_\_get、\_\_set 是针对类而存在的。  
+> \_\_get: 读取类不存在或者不可访问的属性时会被自动调用  
+> \_\_set: 给类不存在或者不可访问的属性赋值时会被自动调用  
+
+```php
+class Configure
+{
+    public $name;
+
+    private $_definitions = [];
+
+    public function __get($name)
+    {
+        return isset($this->_definitions[$name]) ? $this->_definitions[$name] : null;
+    }
+
+    public function __set($name, $value)
+    {
+        $this->_definitions[$name] = $value;
+    }
+}
+
+$config = [
+    'class' => 'Test',
+    'name' => 'vikey',
+    'age' => 20,
+];
+
+$class = $config['class'];
+unset($config['class']);
+$object = new $class;
+
+foreach ($config as $k => $v) {
+    $object->$k = $v;
+}
+
+var_dump($object->name);
+var_dump($object->age);
+```
+
+**控制反转和依赖注入、依赖倒置**  
+“高内聚，低耦合”即类的内聚性是不是很高、耦合度是不是很低（简单来说，需要尽量让写出的程序易于维护，减少程序与程序之间的复杂性、耦合度），这一原则可以作为评判软件设计的好坏标准。  
+
+控制反转（Inversion of Control，简称 IOC），字面上可以理解为对 xx 的控制进行了一个反转，即对 xx 的控制的另一种实现，是一种思路，一种逻辑思想。  
+依赖注入（Dependency Injection，简称 DI），是 IOC 的一种典型实现。依赖注入就是把对象 A 所依赖的其他对象 B 或 C 或其他，以属性或者构造函数的方式传递到对象 A 的内部，而不是直接在对象 A 内实例化。其目的就是为了让对象 A 和其依赖的其他对象解耦，减少二者的依赖，即通过 “注入” 的方式去解决依赖问题。  
+
+依赖倒置原则（Dependence Inversion Principle, DIP），是一种软件设计思想。  
+传统软件设计中，上层代码依赖于下层代码，当下层出现变动时， 上层代码也要相应变化，维护成本较高。但是，DIP 的核心思想是上层定义接口，下层实现这个接口， 从而使得下层依赖于上层，降低耦合度，提高整个系统的弹性，这是一种经过实践证明的有效策略。  
+```php
+interface EmailSender
+{
+    public function send();
+}
+
+class EmailSenderByQq implements EmailSender
+{
+    public function send()
+    {
+    }
+}
+
+class EmailSenderBy163 implements EmailSender
+{
+    public function send()
+    {
+    }
+}
+
+class User
+{
+    public $emailSenderClass;
+
+    public function __construct(EmailSender $emailSenderObject)
+    {
+        $this->emailSenderClass = $emailSenderObject;
+    }
+
+    public function register()
+    {
+        // other code
+        $this->emailSenderClass->send();
+    }
+}
+
+$user = new User(new EmailSenderBy163);
+$user->register();
+```
+
+**反射**  
 
 
+### Yii2 源码解读
