@@ -16,6 +16,12 @@ firewall-cmd --add-service=http --permanent
 firewall-cmd --zone=public --add-port=80/tcp --permanent
 firewall-cmd --zone=public --add-port=22/tcp --permanent
 firewall-cmd --reload
+# 查看端口状态
+firewall-cmd --zone=public --query-port=80/tcp
+# 查看端口访问权限
+firewall-cmd --query-port=80/tcp
+# 添加端口外部访问
+firewall-cmd --add-port=80/tcp
 # 查看配置
 firewall-cmd --zone=public --list-all
 # 启动防火墙
