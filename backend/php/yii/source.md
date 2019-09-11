@@ -229,6 +229,142 @@ $user->register();
 ```
 
 **反射**  
+反射，是 php5 增加的功能。  
+通过反射，可以提取出关于类、方法、属性、参数等的详细信息，即可以利用反射相关的一系列 API，来分析类所依赖的对象，并做自动实例化处理。
+```php
+// 简单版 Ioc 容器实现存储类及实例化类
+Class Container
+{
+    private $_definitions;
+
+    public function set($class, $definition)
+    {
+        $this->_definitions[$class] = $definition;
+    }
+
+    public function get($class, $params = [])
+    {
+        $definition = $this->_definitions[$class];
+        return call_user_func($definition, $params);
+    }
+}
+
+// 使用反射增强 Ioc 容器
+Class Container
+{
+    public function get($class, $params = [])
+    {
+        return $this->build($class, $params);
+    }
+
+    public function build($class, $params)
+    {
+        $dependencies = [];
+
+        $reflection = new ReflectionClass($class);
+        $constructor = $reflection->getConstructor();
+        if ($constructor !== null) {
+            foreach ($constructor->getParameters() as $param) {
+                $c = $param->getClass();
+                if ($c !== null) {
+                    $dependencies[] = $this->get($c->getName());
+                }
+            }
+        }
+
+        foreach ($params as $index => $param) {
+            $dependencies[$index] = $param;
+        }
+
+        return $reflection->newInstanceArgs($dependencies);
+    }
+}
+```
 
 
 ### Yii2 源码解读
+yii2 的核心源码，位于 vendor/yiisoft/yii2 目录。
+
+**入口文件**  
+入口文件 web/index.php。按照 web server 的配置，入口文件是应用的开始，有且只有一个。  
+入口文件加载 composer 的 autoload 文件，凡是通过 composer 安装的第三方库，都可以直接调用。
+```php
+// 定义当前应用是否处于 debug 模式，即调试模式
+defined('YII_DEBUG') or define('YII_DEBUG', true);
+// 定义当前应用的运行环境，比如开发环境，测试环境和生产环境等
+defined('YII_ENV') or define('YII_ENV', 'dev');
+
+// 加载 composer 的 autoload 文件
+require(__DIR__ . '/../../vendor/autoload.php');
+
+// 加载基础类文件 
+require(__DIR__ . '/../../vendor/yiisoft/yii2/Yii.php');
+
+// 在项目启动之前，加载一些全局的配置
+require(__DIR__ . '/../../common/config/bootstrap.php');
+require(__DIR__ . '/../config/bootstrap.php');
+
+// 加载应用配置，并通过 yii\helpers\ArrayHelper::merge 方法合并处理
+$config = yii\helpers\ArrayHelper::merge(
+    require(__DIR__ . '/../../common/config/main.php'),
+    require(__DIR__ . '/../../common/config/main-local.php'),
+    require(__DIR__ . '/../config/main.php'),
+    require(__DIR__ . '/../config/main-local.php')
+);
+
+// 实例化 yii\web\Application，并调用 run 方法运行
+(new yii\web\Application($config))->run();
+```
+
+引入的 vendor/yiisoft/yii2/Yii.php，是一个继承 \yii\BaseYii 类的子类。  
+Yii 类继承 \yii\BaseYii 之后，啥也没做，是个空类。尽管如此，在引用 BaseYii 的属性和方法时，最好还是用 Yii 来引用（比如用 Yii::getVersion() 获取当前 yii2 的版本号）。  
+```php
+require(__DIR__ . '/BaseYii.php');
+
+class Yii extends \yii\BaseYii
+{
+}
+
+spl_autoload_register(['Yii', 'autoload'], true, true);
+// classes.php 保存 yii2 核心类和其类文件所属路径的映射关系（比如 'yii\base\Action' => YII2_PATH . '/base/Action.php'，其中 YII2_PATH 在 BaseYii.php 中的定义是 defined('YII2_PATH') or define('YII2_PATH', __DIR__);）
+Yii::$classMap = require(__DIR__ . '/classes.php');
+// 实例化一个全局的依赖注入容器
+Yii::$container = new yii\di\Container();
+```
+
+**自动加载机制**  
+上面 Yii.php 的 spl_autoload_register 函数定义了 Yii::autoload 为自动加载方法，即 yii\BaseYii::autoload 方法。这个方法是 yii2 内置的自动加载器，当 new 一个找不到的类的时候，这个方法就会被自动调用，这是 spl_autoload_register 函数的作用。  
+```php
+public static function autoload($className)
+{
+    if (isset(static::$classMap[$className])) {
+    	// 加载核心类逻辑
+        $classFile = static::$classMap[$className];
+        if ($classFile[0] === '@') {
+            $classFile = static::getAlias($classFile);
+        }
+    } elseif (strpos($className, '\\') !== false) {
+    	// 加载非核心类逻辑
+        $classFile = static::getAlias('@' . str_replace('\\', '/', $className) . '.php', false);
+        if ($classFile === false || !is_file($classFile)) {
+            return;
+        }
+    } else {
+        return;
+    }
+
+    include($classFile);
+
+    // ...
+}
+```
+
+**别名 Alias**  
+通过 Yii::setAlias 方法定义别名，定义的别名保存在 Yii::$aliases 属性上。  
+通常，在入口文件中，require 的两个文件就引入了框架中一些的别名定义：  
+```php
+require(__DIR__ . '/../../common/config/bootstrap.php');
+require(__DIR__ . '/../config/bootstrap.php');
+```
+
+**容器**
