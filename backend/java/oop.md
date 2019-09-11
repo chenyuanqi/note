@@ -526,6 +526,146 @@ static 的特点是随着类的加载而加载，优先于对象存在，被类�
 finalize() 是 Object 的 protected 方法，子类可以覆盖该方法以实现资源清理工作，GC 在回收对象之前调用该方法。不建议用 finalize 方法完成 “非内存资源” 的清理工作，但建议用于清理本地对象（通过 JNI 创建的对象）、作为确保某些非内存资源（如 Socket、文件等）释放的一个补充。  
 finalize() 的执行过程：当对象变成 (GC Roots) 不可达时，GC 会判断该对象是否覆盖了 finalize 方法，若未覆盖则直接将其回收。否则，若对象未执行过 finalize 方法，将其放入 F-Queue 队列，由一个低优先级线程执行该队列中对象的 finalize 方法。执行 finalize 方法完毕后，GC 会再次判断该对象是否可达，若不可达，则进行回收，否则对象 “复活”。
 
+### Java 克隆
+使用等号复制时，对于值类型来说，彼此之间的修改操作是相对独立的；对于引用类型来说，因为复制的是引用对象的内存地址，所以修改其中一个值，另一个值也会跟着变化。  
+为了防止这种问题的发生，就要使用对象克隆来解决引用类型复制的问题。  
+
+克隆的好处：  
+1、使用方便：假如要复制一个对象，但这个对象中的部分属性已经被修改过了，如果不使用克隆的话，需要给属性手动赋值，相比克隆而已麻烦很多；  
+2、性能高：查看 clone 方法可以知道，它是 native 方法，native 方法是原生函数，使用操作系统底层的语言实现的，因此执行效率更高；  
+3、隔离性：克隆可以确保对象操作时相互隔离。  
+
+克隆分浅克隆和深克隆。  
+> 浅克隆：只会复制对象的值类型，而不会复制对象的引用类型；  
+> 深克隆：复制整个对象，包含值类型和引用类型。  
+
+实现浅克隆：克隆的对象实现 Cloneable 接口，并重写 clone() 方法（虽然所有类都是 Object 的子类，但因为 Object 中的 clone() 方法被声明为 protected 访问级别，所以非 java.lang 包下的其他类是不能直接使用的）。  
+```java
+class CloneTest 
+{
+    public static void main(String[] args) throws CloneNotSupportedException 
+    {
+        Dog dog = new Dog();
+        dog.name = "旺财";
+        dog.age = 5;
+        // 克隆
+        Dog dog3 = (Dog) dog.clone();
+        dog3.name = "小白";
+        dog3.age = 2;
+        System.out.println(dog.name + "，" + dog.age + "岁");
+        System.out.println(dog3.name + "，" + dog3.age + "岁");
+    }
+}
+
+class Dog implements Cloneable 
+{
+    public String name;
+    public int age;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException 
+    {
+        return super.clone();
+    }
+}
+```
+
+实现深克隆一般有两种方式：通过序列化实现深克隆（Java 原生序列化、JSON 序列化、Hessian 序列化）；所有引用类型都实现克隆，从而实现深克隆。  
+1、序列化实现深克隆的原理：先将原对象序列化到内存的字节流中，再从字节流中反序列化出刚刚存储的对象，这个新对象和原对象就不存在任何地址上的共享，从而实现深克隆。  
+```java
+class CloneTest 
+{
+    public static void main(String[] args) throws CloneNotSupportedException 
+    {
+        BirdChild birdChild = new BirdChild();
+        birdChild.name = "小小鸟";
+        Bird bird = new Bird();
+        bird.name = "小鸟";
+        bird.birdChild = birdChild;
+        // 使用序列化克隆对象
+        Bird bird2 = CloneUtils.clone(bird);
+        bird2.name = "黄雀";
+        bird2.birdChild.name = "小黄雀";
+        System.out.println("bird name:" + bird.name);
+        System.out.println("bird child name:" + bird.birdChild.name);
+        System.out.println("bird name 2:" + bird2.name);
+        System.out.println("bird child name 2:" + bird2.birdChild.name);
+    }
+}
+
+class CloneUtils 
+{
+    public static <T extends Serializable> T clone(T obj) 
+    {
+        T cloneObj = null;
+        try {
+            //写入字节流
+            ByteArrayOutputStream bo = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bo);
+            oos.writeObject(obj);
+            oos.close();
+            //分配内存,写入原始对象,生成新对象
+            ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());//获取上面的输出字节流
+            ObjectInputStream oi = new ObjectInputStream(bi);
+            //返回生成的新对象
+            cloneObj = (T) oi.readObject();
+            oi.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return cloneObj;
+    }
+}
+```
+
+2、所有引用类型都实现克隆  
+```java
+class SerializableTest 
+{
+    public static void main(String[] args) throws IOException, ClassNotFoundException 
+    {
+    ParrotChild parrotChild = new ParrotChild();
+        parrotChild.name = "小鹦鹉";
+        Parrot parrot = new Parrot();
+        parrot.name = "大鹦鹉";
+        parrot.parrotChild = parrotChild;
+        // 克隆
+        Parrot parrot2 = (Parrot) parrot.clone();
+        parrot2.name = "老鹦鹉";
+        parrot2.parrotChild.name = "少鹦鹉";
+        System.out.println("parrot name:" + parrot.name);
+        System.out.println("parrot child name:" + parrot.parrotChild.name);
+        System.out.println("parrot name 2:" + parrot2.name);
+        System.out.println("parrot child name 2:" + parrot2.parrotChild.name);
+    }
+}
+
+class Parrot implements Cloneable 
+{
+    public String name;
+    public ParrotChild parrotChild;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException 
+    {
+        Parrot bird = (Parrot) super.clone();
+        bird.parrotChild = (ParrotChild) parrotChild.clone();
+        return bird;
+    }
+}
+
+class ParrotChild implements Cloneable 
+{
+    public String name;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException 
+    {
+        return super.clone();
+    }
+}
+```
+
 ### Java 序列化与反序列化
 序列化是一种对象持久化的手段，普遍应用在网络传输、RMI 等场景中。  
 Java 对象序列化，在保存对象时会把其状态保存为一组字节，反序列化时再将这些字节组装成对象。  
