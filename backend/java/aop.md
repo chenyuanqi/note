@@ -30,4 +30,96 @@ AOP 的本质是在一系列纵向的控制流程中，把那些相同的子流�
 **引入（introduction）**  
 在不修改代码的前提下，引入可以在运行期为类动态地添加一些方法或字段。  
 
-### AOP 
+### Spring AOP 
+使用 Spring AOP，需要额外下载以下两个 jar 包：  
+> aopalliance.jar  
+> aspectjweaver.jar  
+
+```java
+public interface HelloWorld
+{
+    void printHelloWorld();
+    void doPrint();
+}
+
+public class HelloWorldImpl1 implements HelloWorld
+{
+    public void printHelloWorld()
+    {
+        System.out.println("Enter HelloWorldImpl1.printHelloWorld()");
+    }
+    
+    public void doPrint()
+    {
+        System.out.println("Enter HelloWorldImpl1.doPrint()");
+        return ;
+    }
+}
+
+public class HelloWorldImpl2 implements HelloWorld
+{
+    public void printHelloWorld()
+    {
+        System.out.println("Enter HelloWorldImpl2.printHelloWorld()");
+    }
+    
+    public void doPrint()
+    {
+        System.out.println("Enter HelloWorldImpl2.doPrint()");
+        return ;
+    }
+}
+
+public class TimeHandler
+{
+    public void printTime()
+    {
+        System.out.println("CurrentTime = " + System.currentTimeMillis());
+    }
+}
+```
+
+添加  aop.xml 配置：  
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.2.xsd">
+        
+        <bean id="helloWorldImpl1" class="com.xrq.aop.HelloWorldImpl1" />
+        <bean id="helloWorldImpl2" class="com.xrq.aop.HelloWorldImpl2" />
+        <bean id="timeHandler" class="com.xrq.aop.TimeHandler" />
+        
+        <aop:config>
+            <aop:aspect id="time" ref="timeHandler">
+                <aop:pointcut id="addAllMethod" expression="execution(* com.xrq.aop.HelloWorld.*(..))" />
+                <aop:before method="printTime" pointcut-ref="addAllMethod" />
+                <aop:after method="printTime" pointcut-ref="addAllMethod" />
+            </aop:aspect>
+        </aop:config>
+</beans>
+```
+
+使用 aop：  
+```java
+public static void main(String[] args)
+{
+    ApplicationContext ctx = new ClassPathXmlApplicationContext("aop.xml");
+        
+    HelloWorld hw1 = (HelloWorld)ctx.getBean("helloWorldImpl1");
+    HelloWorld hw2 = (HelloWorld)ctx.getBean("helloWorldImpl2");
+    hw1.printHelloWorld();
+    System.out.println();
+    hw1.doPrint();
+    
+    System.out.println();
+    hw2.printHelloWorld();
+    System.out.println();
+    hw2.doPrint();
+}
+```
