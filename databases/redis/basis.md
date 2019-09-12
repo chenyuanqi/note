@@ -113,7 +113,7 @@ redis> del NAME
 
 - 字符串（string）  
 > Redis 最简单而且最常用的数据类型之一，字符串（string）类型也可以用来存储数字，并支持对数字的加减操作  
-> 应用场景：流量访问限制、投票统计、用户 token 和 uid 的对应关系  
+> 应用场景：流量访问限制、投票统计、用户 token 和 uid 的对应关系，构建缓存系统  
 > ![redis_string_command](./static/redis_string_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
@@ -150,7 +150,7 @@ redis> decrby age 2
 
 - 哈希（hash）  
 > Redis hash 是一个 string 类型的 field 和 value 的映射表，hash 特别适合用于存储对象，能够存储 key 对多个属性的数据  
-> 应用场景： 存储用户信息  
+> 应用场景： 存储用户信息，存储结构化对象数据  
 > ![redis_hash_command](./static/redis_hash_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
@@ -249,7 +249,7 @@ redis> smembers lang
 - 有序集合（sorted set）
 > Redis 有序集合和集合一样也是 string 类型元素的集合，且不允许重复的成员  
 > 不同的是，Redis 有序集合每个元素都会关联一个 double 类型的分数，redis 正是通过分数来为集合中的成员进行从小到大的排序  
-> 应用场景： 排行榜  
+> 应用场景： 排行榜，带权重的消息队列  
 > ![redis_sorted_set_command](./static/redis_sorted_set_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）

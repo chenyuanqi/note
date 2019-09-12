@@ -21,6 +21,34 @@ cat /etc/issue
 # 只适用 redhat 系
 cat /etc/redhat-release
 
+# 系统发行版详细信息
+lsb_release -a
+# cpu
+lscpu
+# cpu型号
+cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
+# cpu物理数
+cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
+# cpu物理核数
+cat /proc/cpuinfo| grep "cpu cores"| uniq
+# cpu逻辑数
+cat /proc/cpuinfo| grep "processor"| wc -l
+# 内存
+free -g / free -m
+# 内存硬件信息
+dmidecode -t memory
+# 内存详细使用
+cat /proc/meminfo
+# 内存插槽
+dmidecode|grep -A5 "Memory Device"|grep Size|grep -v Range
+# 硬盘和分区分布
+lsblk
+# 硬盘和分区详细
+fdisk -l
+# 网卡硬件信息
+lspci | grep -i 'eth'
+# 显卡运行情况
+nvidia-smi
 
 # 时间同步，同步交通大学时间
 ntpdate ntp.sjtu.edu.cn && hwclock -w
