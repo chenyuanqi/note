@@ -367,4 +367,25 @@ require(__DIR__ . '/../../common/config/bootstrap.php');
 require(__DIR__ . '/../config/bootstrap.php');
 ```
 
-**容器**
+**容器**  
+关于 Container 创建对象的操作，我们可以使用 BaseYii::createObject 方法，该方法封装了 yii\di\Container 类的使用，所以通常直接用 Yii::createObject 方法创建对象或者调用可回调函数。  
+```php
+// Yii::createObject 方法的实现
+// $type 是要创建的对象类型，$params 是创建的对象的构造参数
+public static function createObject($type, array $params = [])
+{
+    if (is_string($type)) {
+        return static::$container->get($type, $params);
+    } elseif (is_array($type) && isset($type['class'])) {
+        $class = $type['class'];
+        unset($type['class']);
+        return static::$container->get($class, $params, $type);
+    } elseif (is_callable($type, true)) {
+        return static::$container->invoke($type, $params);
+    } elseif (is_array($type)) {
+        throw new InvalidConfigException('Object configuration must be an array containing a "class" element.');
+    }
+
+    throw new InvalidConfigException('Unsupported configuration type: ' . gettype($type));
+}
+```
