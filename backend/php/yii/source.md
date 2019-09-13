@@ -388,4 +388,159 @@ public static function createObject($type, array $params = [])
 
     throw new InvalidConfigException('Unsupported configuration type: ' . gettype($type));
 }
+
+// Container 中 set 方法
+public function set($class, $definition = [], array $params = [])
+{
+    // 规范化类以及其定义，并以 $class 为下标，保存于 Container::_definitions 属性
+    $this->_definitions[$class] = $this->normalizeDefinition($class, $definition);
+    // 以 $class 为下标，将$class定义时的参数 $params 保存于 Container::_params 属性
+    $this->_params[$class] = $params;
+    // 重新定义的 $class，自然没必要保留单例的对象
+    unset($this->_singletons[$class]);
+    
+    return $this;
+}
+
+// Container 中 get 方法
+public function get($class, $params = [], $config = [])
+{
+    if (isset($this->_singletons[$class])) {
+        // singleton
+        return $this->_singletons[$class];
+    } elseif (!isset($this->_definitions[$class])) {
+        return $this->build($class, $params, $config);
+    }
+
+    $definition = $this->_definitions[$class];
+
+    // 如果 $definition 是 callable，满足这个if
+    if (is_callable($definition, true)) {
+        // 调用 Container::resolveDependencies 方法解决依赖
+        $params = $this->resolveDependencies($this->mergeParams($class, $params));
+        // 调用 $definition
+        $object = call_user_func($definition, $this, $params, $config);
+    } 
+    // 此时我们的$definition满足数组这一条件
+    elseif (is_array($definition)) {
+        $concrete = $definition['class'];
+        unset($definition['class']);
+        // 合并 $definition 中相同的 key，实质是以调用get方法时传递的 k-v 为准，k-v分别是对象的属性和属性值
+        $config = array_merge($definition, $config);
+        // $params是构造参数值，这里就是覆盖set时所定义的构造参数值，以当前get传递的构造参数值为准
+        $params = $this->mergeParams($class, $params);
+        // 以我们当前的例子，$class=testName,$concrete=frontend\components\Test,所以第一次走else
+        // 如果我们当初直接定义的是类名 Yii::$container->set('frontend\components\Test'),此时就应该走下面这个if，然后直接build实例化了
+        if ($concrete === $class) {
+            $object = $this->build($class, $params, $config);
+        } else {
+            // 按照我们例子，走到这里之后，会继续调用 get 方法处理，即这是一个递归
+            // 如果继续走下去，那么下一个get就会循环我们上文介绍的build，即从get方法的第4行代码走起
+            // 不管怎么走，还是要build实例化 $class，如此，我们也就得到 $object 啦
+            $object = $this->get($concrete, $params, $config);
+        }
+    } 
+    // 如果 $definition 是对象，将其保存到 Container::_singletons 属性
+    elseif (is_object($definition)) {
+        return $this->_singletons[$class] = $definition;
+    } 
+    // 啥也不是，抛出异常
+    else {
+        throw new InvalidConfigException('Unexpected object definition type: ' . gettype($definition));
+    }
+
+    // 如果$class已经是单例了，则覆盖掉
+    if (array_key_exists($class, $this->_singletons)) {
+        // singleton
+        $this->_singletons[$class] = $object;
+    }
+    // 返回最终的$object
+    return $object;
+}
+
+// Container 中 build 方法
+// 获取依赖，解析依赖，实例化依赖对象
+protected function build($class, $params, $config)
+{
+    /* @var $reflection ReflectionClass */
+    // 获取 $class 的依赖，返回 $class 的反射信息和依赖信息
+    list ($reflection, $dependencies) = $this->getDependencies($class);
+
+    // 依赖信息是通过构造方法获取的，所以如果我们通过 get 方法有给构造函数传递参数，理应以我们传递的为准，即覆盖掉 getDependencies 获取的
+    foreach ($params as $index => $param) {
+        $dependencies[$index] = $param;
+    }
+
+    // 解析依赖
+    $dependencies = $this->resolveDependencies($dependencies, $reflection);
+    if (!$reflection->isInstantiable()) {
+        throw new NotInstantiableException($reflection->name);
+    }
+    // 如果$config为空，即不需要给 $class "注入" 属性和属性值，直接实例化
+    if (empty($config)) {
+        return $reflection->newInstanceArgs($dependencies);
+    }
+
+    // 检查 $class 是否实现了接口 yii\base\Configurable，我们的Test肯定是否了
+    if (!empty($dependencies) && $reflection->implementsInterface('yii\base\Configurable')) {
+        // set $config as the last parameter (existing one will be overwritten)
+        $dependencies[count($dependencies) - 1] = $config;
+        return $reflection->newInstanceArgs($dependencies);
+    } else {
+        // 实例化 $class，并"注入"属性，最后返回我们的对象 $object
+        $object = $reflection->newInstanceArgs($dependencies);
+        foreach ($config as $name => $value) {
+            $object->$name = $value;
+        }
+        return $object;
+    }
+}
+
+// 获取依赖
+protected function getDependencies($class)
+{
+    // ①、判断 Container::_reflections 属性是否有保存 $class 的反射信息，如果有就直接返回，不用再解析，毕竟获取类的反射信息也是要消耗时间
+    if (isset($this->_reflections[$class])) {
+        return [$this->_reflections[$class], $this->_dependencies[$class]];
+    }
+
+    $dependencies = [];
+    $reflection = new ReflectionClass($class);
+
+    $constructor = $reflection->getConstructor();
+    if ($constructor !== null) {
+        foreach ($constructor->getParameters() as $param) {
+            // ②、获取构造函数的参数时，通过 isDefaultValueAvailable 方法判断参数的默认值
+            if ($param->isDefaultValueAvailable()) {
+                $dependencies[] = $param->getDefaultValue();
+            } else {
+                $c = $param->getClass();
+                // ③、调用 yii\di\Instance::of 方法处理依赖的类名，Instance::of 方法返回 Instace 类的实例
+                $dependencies[] = Instance::of($c === null ? null : $c->getName());
+            }
+        }
+    }
+    // ④、将反射信息和依赖信息分别保存在 Container::_reflections和Container::_dependencies属性，防止重复实例化该类时重复解析反射信息和依赖信息
+    $this->_reflections[$class] = $reflection;
+    $this->_dependencies[$class] = $dependencies;
+
+    return [$reflection, $dependencies];
+}
+
+// 解析依赖
+protected function resolveDependencies($dependencies, $reflection = null)
+{
+    foreach ($dependencies as $index => $dependency) {
+        if ($dependency instanceof Instance) {
+            if ($dependency->id !== null) {
+                $dependencies[$index] = $this->get($dependency->id);
+            } elseif ($reflection !== null) {
+                $name = $reflection->getConstructor()->getParameters()[$index]->getName();
+                $class = $reflection->getName();
+                throw new InvalidConfigException("Missing required parameter \"$name\" when instantiating \"$class\".");
+            }
+        }
+    }
+    return $dependencies;
+}
 ```
