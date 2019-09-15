@@ -544,3 +544,8 @@ protected function resolveDependencies($dependencies, $reflection = null)
     return $dependencies;
 }
 ```
+
+**应用的生命周期**  
+应用程序类 yii\web\Application 的继承关系：  
+yii\web\Application => yii\base\Application => yii\base\Module => yii\di\ServiceLocator => yii\base\Component => yii\base\Object => yii\base\Configurable  
+
