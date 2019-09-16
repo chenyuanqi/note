@@ -548,4 +548,98 @@ protected function resolveDependencies($dependencies, $reflection = null)
 **应用的生命周期**  
 应用程序类 yii\web\Application 的继承关系：  
 yii\web\Application => yii\base\Application => yii\base\Module => yii\di\ServiceLocator => yii\base\Component => yii\base\Object => yii\base\Configurable  
+```php
+// 执行 yii\base\Application::run 方法之前， yii\base\Application 的构造方法__construct 会先被执行
+public function __construct($config = [])
+{
+    // yii\web\Application 对象被赋值给了 Yii::$app 静态属性
+    Yii::$app = $this;
+    // 调用 yii\base\Module::setInstance 方法，把当前 module 的实例保存到 yii\base\Application 的 loadedModules 属性
+    static::setInstance($this);
 
+    // 标记当前应用目前处于生命周期的哪个状态（共有 7 个状态）
+    $this->state = self::STATE_BEGIN;
+
+    // 预初始化配置
+    $this->preInit($config);
+
+    // 把 errorHandler 组件注册为应用的错误处理程序
+    $this->registerErrorHandler($config);
+
+    // 调用 yii\BaseYii::configure 方法，初始化 yii\web\Application 类的属性
+    // 调用 yii\web\Application::init 方法完成初始化操作
+    Component::__construct($config);
+}
+
+// 预初始化方法的目的：
+// 1、检测配置是否正常，包括 id,basePath 必须配置项
+// 2、设置 module 的 root 目录，并伴随一系列的别名设置，包括 @app、@vendor、@bower、@npm 、@runtime
+// 3、时区的设置
+// 4、合并核心 component 和自定义的 component
+public function preInit(&$config)
+{
+    // 必须存在下标为id的单元，否则throw抛出异常
+    if (!isset($config['id'])) {
+        throw new InvalidConfigException('The "id" configuration for the Application is required.');
+    }
+    // 1、basePath 也是要必须设置的，其含义指的是当前module的root目录，不设置则抛出异常。我们看到basePath在 main.php中的值是 dirname(__DIR__)，即 frontend 目录
+    // 2、调用 yii\base\Application::setBasePath 方法处理，会先调用 yii\base\Module::setBasePath 方法处理，yii\base\Module::setBasePath方法会获取 basePath的值的绝对路径，保存在 yii\base\Module::_basePath属性，表示当前module的root目录
+    // 3、yii\base\Application::setBasePath 跟着会通过 Yii::setAlias('@app', $this->getBasePath()) 设置别名 @app 指向 yii\base\Module::_basePath 所指目录，不信你可以在其他位置打印下 Yii::getAlias('@app') 看看结果
+    if (isset($config['basePath'])) {
+        $this->setBasePath($config['basePath']);
+        unset($config['basePath']);
+    } else {
+        throw new InvalidConfigException('The "basePath" configuration for the Application is required.');
+    }
+
+    // vendorPath，默认在common/config/main.php内配置的值是 dirname(dirname(__DIR__)) . '/vendor'
+    // 调用 yii\base\Application::setVendorPath 方法处理，其目的是设置三个别名，@vendor、@bower、@npm 你可以在 yii\base\Application::setVendorPath 方法内看到，也就是说composer的安装包的位置，我们也是可以通过配置指定的
+    if (isset($config['vendorPath'])) {
+        $this->setVendorPath($config['vendorPath']);
+        unset($config['vendorPath']);
+    } else {
+        // set "@vendor"
+        // 如果没有指定 vendorPath,默认vendorPath是 yii\base\Module::_basePath 上一级目录下的vendor目录
+        $this->getVendorPath();
+    }
+
+    // 如果配置了 runtimePath，即程序运行时的存储路径，比如日志路径，debug信息路径等都可以通过 runtimePath配置
+    // 同时，yii\base\Application::setRuntimePath 方法会设置 @runtime 别名指向该路径
+    if (isset($config['runtimePath'])) {
+        $this->setRuntimePath($config['runtimePath']);
+        unset($config['runtimePath']);
+    } else {
+        // set "@runtime"
+        // 如果没有配置runtimePath，默认的runtimePath是 yii\base\Module::_basePath 目录下的runtime目录，即@runtime默认指向这里
+        $this->getRuntimePath();
+    }
+
+    // 设置时区,我们尚未配置该选项，如果指定了，调用 yii\base\Application::setTimeZone会调用 date_default_timezone_set函数设置时区，否则将会以 php.ini内指定的时区为准，如果php.ini也未配置，默认时区格式是 UTC，也就是部分同学什么都没有配置时发现程序内的时间总是相差8小时的缘故
+    if (isset($config['timeZone'])) {
+        $this->setTimeZone($config['timeZone']);
+        unset($config['timeZone']);
+    } elseif (!ini_get('date.timezone')) {
+        $this->setTimeZone('UTC');
+    }
+
+    // 设置自己的container，当然，大多数情况下是没有必要的，默认的container是yii\di\Container
+    if (isset($config['container'])) {
+        $this->setContainer($config['container']);
+
+        unset($config['container']);
+    }
+
+    // merge core components with custom components
+    // 合并核心component和自定义的component
+    // 核心组件，在 yii\web\Application::coreComponents 和 yii\base\Application::coreComponents 方法内均有配置
+    // 自定义的component指的是 $config['components'] 内的配置
+    // 如果自定义的component跟核心component不冲突，则把核心component追加到 $config['components']；如果二者冲突且自定义的component结构规范，则以自定义的为准，规范指的是 是个数组且包含 class 下标
+    foreach ($this->coreComponents() as $id => $component) {
+        if (!isset($config['components'][$id])) {
+            $config['components'][$id] = $component;
+        } elseif (is_array($config['components'][$id]) && !isset($config['components'][$id]['class'])) {
+            $config['components'][$id]['class'] = $component['class'];
+        }
+    }
+}
+```
