@@ -547,7 +547,7 @@ protected function resolveDependencies($dependencies, $reflection = null)
 
 **应用的生命周期**  
 应用程序类 yii\web\Application 的继承关系：  
-yii\web\Application => yii\base\Application => yii\base\Module => yii\di\ServiceLocator => yii\base\Component => yii\base\Object => yii\base\Configurable  
+yii\web\Application => yii\base\Application => yii\base\Module => yii\di\ServiceLocator（服务定位器） => yii\base\Component => yii\base\Object => yii\base\Configurable  
 ```php
 // 执行 yii\base\Application::run 方法之前， yii\base\Application 的构造方法__construct 会先被执行
 public function __construct($config = [])
@@ -641,5 +641,98 @@ public function preInit(&$config)
             $config['components'][$id]['class'] = $component['class'];
         }
     }
+}
+```
+
+**事件**  
+事件分实例事件（针对某个实例进行的事件操作）、类级别事件（如 yii\web\User 类中 beforeLogin 和 afterLogin）、全局事件（Yii::$app 的实例事件）。  
+事件的实现原理：先通过一个方法对某个事件注册相关的回调函数，触发事件的时候，再通过事件 ID 找到注册的事件进行回调。  
+```php
+// 绑定事件：存储到 yii\base\Component::_events[$name]
+public function on($name, $handler, $data = null, $append = true)
+{
+    // 确保行为已被渲染到 $_behaviors 中
+    $this->ensureBehaviors();
+    if ($append || empty($this->_events[$name])) {
+        $this->_events[$name][] = [$handler, $data];
+    } else {
+        array_unshift($this->_events[$name], [$handler, $data]);
+    }
+}
+
+// 移除事件
+public function off($name, $handler = null)
+{
+    $this->ensureBehaviors();
+    if (empty($this->_events[$name]) && empty($this->_eventWildcards[$name])) {
+        return false;
+    }
+    if ($handler === null) {
+        unset($this->_events[$name], $this->_eventWildcards[$name]);
+        return true;
+    }
+
+    $removed = false;
+    // plain event names
+    if (isset($this->_events[$name])) {
+        foreach ($this->_events[$name] as $i => $event) {
+            if ($event[0] === $handler) {
+                unset($this->_events[$name][$i]);
+                $removed = true;
+            }
+        }
+        if ($removed) {
+            $this->_events[$name] = array_values($this->_events[$name]);
+            return $removed;
+        }
+    }
+
+    // wildcard event names
+    if (isset($this->_eventWildcards[$name])) {
+        foreach ($this->_eventWildcards[$name] as $i => $event) {
+            if ($event[0] === $handler) {
+                unset($this->_eventWildcards[$name][$i]);
+                $removed = true;
+            }
+        }
+        if ($removed) {
+            $this->_eventWildcards[$name] = array_values($this->_eventWildcards[$name]);
+            // remove empty wildcards to save future redundant regex checks:
+            if (empty($this->_eventWildcards[$name])) {
+                unset($this->_eventWildcards[$name]);
+            }
+        }
+    }
+
+    return $removed;
+}
+
+// 触发事件
+public function trigger($name, Event $event = null)
+{
+    $this->ensureBehaviors();
+    if (!empty($this->_events[$name])) {
+        if ($event === null) {
+            $event = new Event;
+        }
+        if ($event->sender === null) {
+            $event->sender = $this;
+        }
+        $event->handled = false;
+        $event->name = $name;
+        foreach ($this->_events[$name] as $handler) {
+            // 存储数据
+            $event->data = $handler[1];
+            // 把 $event 传递给事件回调函数
+            call_user_func($handler[0], $event);
+            // 如果 trigger 时设置的 event 实例的 handled 属性为真，则该事件后续未调用的其他回调将不会被触发
+            if ($event->handled) {
+                return;
+            }
+        }
+    }
+
+    // 传递给类级别的事件触发
+    Event::trigger($this, $name, $event);
 }
 ```
