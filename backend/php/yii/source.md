@@ -736,3 +736,117 @@ public function trigger($name, Event $event = null)
     Event::trigger($this, $name, $event);
 }
 ```
+
+**行为**  
+行为是 yii\base\Behavior 或其子类的实例。  
+行为，也称为 mixins， 可以无须改变类继承关系即可增强一个已有的 yii\base\Component 类功能。当行为附加到组件后，它将“注入”它的方法和属性到组件，然后可以像访问组件内定义的方法和属性一样访问它们。此外，行为通过组件能响应被触发的事件，从而自定义或调整组件正常执行的代码。  
+实际上，行为就是一个类，通过某些特殊的方式（注入、绑定等），跟其他类进行了绑定，二者从而可以进行交互。行为，就是对当前类进行一个扩展，而且不用修改当前类。  
+```php
+// 行为绑定
+public function attachBehavior($name, $behavior)
+{
+    // 确保行为已被渲染到 $_behaviors 中
+    $this->ensureBehaviors();
+
+    return $this->attachBehaviorInternal($name, $behavior);
+}
+
+// 绑定行为到组件内部
+private function attachBehaviorInternal($name, $behavior)
+{
+    if (!($behavior instanceof Behavior)) {
+        $behavior = Yii::createObject($behavior);
+    }
+    if (is_int($name)) {
+        // 关联 component
+        $behavior->attach($this);
+        // 把行为添加到 yii\base\Component::_behaviors 属性
+        $this->_behaviors[] = $behavior;
+    } else {
+        if (isset($this->_behaviors[$name])) {
+            $this->_behaviors[$name]->detach();
+        }
+        $behavior->attach($this);
+        $this->_behaviors[$name] = $behavior;
+    }
+
+    return $behavior;
+}
+
+public function __call($name, $params)
+{
+    $this->ensureBehaviors();
+    foreach ($this->_behaviors as $object) {
+        if ($object->hasMethod($name)) {
+            return call_user_func_array([$object, $name], $params);
+        }
+    }
+    throw new UnknownMethodException('Calling unknown method: ' . get_class($this) . "::$name()");
+}
+```
+为了让 component 更强大，再看看行为事件。  
+典型案例就是 yii\behaviors\TimestampBehavior 的使用，流程大致是这样的：  
+yii\behaviors\TimestampBehavior::init =>  
+yii\base\Behavior::attach =>  
+yii\behaviors\AttributeBehavior::events =>  
+yii\db\BaseActiveRecord::beforeSave =>  
+yii\behaviors\AttributeBehavior::evaluateAttributes。    
+```php
+// AR 类中
+public function behaviors()
+{
+    return [
+        [
+            'class' => TimestampBehavior::className(),
+            'createdAtAttribute' => 'created_at',
+            'updatedAtAttribute' => 'updated_at',
+            'value' => date('Y-m-d H:i:s'),
+        ],
+    ];
+}
+
+// yii\behaviors\TimestampBehavior::init
+if (empty($this->attributes)) {
+    $this->attributes = [
+        BaseActiveRecord::EVENT_BEFORE_INSERT => [$this->createdAtAttribute, $this->updatedAtAttribute],
+        BaseActiveRecord::EVENT_BEFORE_UPDATE => $this->updatedAtAttribute,
+    ];
+}
+
+// yii\behaviors\AttributeBehavior::events
+return array_fill_keys(
+    array_keys($this->attributes),
+    'evaluateAttributes'
+);
+
+// yii\base\Behavior::attach
+foreach ($this->events() as $event => $handler) {
+    $owner->on($event, is_string($handler) ? [$this, $handler] : $handler);
+}
+
+// 计算属性
+public function evaluateAttributes($event)
+{
+    if ($this->skipUpdateOnClean
+        && $event->name == ActiveRecord::EVENT_BEFORE_UPDATE
+        && empty($this->owner->dirtyAttributes)
+    ) {
+        return;
+    }
+
+    if (!empty($this->attributes[$event->name])) {
+        $attributes = (array) $this->attributes[$event->name];
+        $value = $this->getValue($event);
+        foreach ($attributes as $attribute) {
+            // ignore attribute names which are not string (e.g. when set by TimestampBehavior::updatedAtAttribute)
+            if (is_string($attribute)) {
+                if ($this->preserveNonEmptyValues && !empty($this->owner->$attribute)) {
+                    continue;
+                }
+                // 为属性赋值
+                $this->owner->$attribute = $value;
+            }
+        }
+    }
+}
+```
