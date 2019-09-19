@@ -545,7 +545,7 @@ protected function resolveDependencies($dependencies, $reflection = null)
 }
 ```
 
-**应用的生命周期**  
+**应用的生命周期之预初始化**  
 应用程序类 yii\web\Application 的继承关系：  
 yii\web\Application => yii\base\Application => yii\base\Module => yii\di\ServiceLocator（服务定位器） => yii\base\Component => yii\base\Object => yii\base\Configurable  
 ```php
@@ -848,5 +848,284 @@ public function evaluateAttributes($event)
             }
         }
     }
+}
+```
+
+**应用的生命周期之初始化**  
+应用的初始化从 yii\base\Object::__construct 构造方法中调用 $this->init()，这里的 $this 就是 yii\web\Application 类的实例 Yii::$app。  
+```php
+public function init()
+{
+    // 标识状态为初始化
+    $this->state = self::STATE_INIT;
+    $this->bootstrap();
+}
+
+protected function bootstrap()
+{
+    // 获取请求组件
+    $request = $this->getRequest();
+    Yii::setAlias('@webroot', dirname($request->getScriptFile()));
+    Yii::setAlias('@web', $request->getBaseUrl());
+
+    parent::bootstrap();
+}
+
+// 父级 yii\base\Application::bootstrap
+protected function bootstrap()
+{
+    // yii\web\Application 的 extensions 属性
+    // 默认指的是 @vendor/yiisoft/extensions.php 内返回的数组
+    if ($this->extensions === null) {
+        $file = Yii::getAlias('@vendor/yiisoft/extensions.php');
+        $this->extensions = is_file($file) ? include($file) : [];
+    }
+
+    // 循环处理 extensions,如果扩展存在 alias 项，则设置别名
+    // 如果扩展存在 bootstrap 项，且经过 Container 容器实例化之后，bootstrap 项是 BootstrapInterface 的实例，调用该实例的 bootstrap 方法执行一些扩展的启动操作
+    foreach ($this->extensions as $extension) {
+        if (!empty($extension['alias'])) {
+            foreach ($extension['alias'] as $name => $path) {
+                Yii::setAlias($name, $path);
+            }
+        }
+
+        if (isset($extension['bootstrap'])) {
+            $component = Yii::createObject($extension['bootstrap']);
+            if ($component instanceof BootstrapInterface) {
+                Yii::trace('Bootstrap with ' . get_class($component) . '::bootstrap()', __METHOD__);
+                $component->bootstrap($this);
+            } else {
+                Yii::trace('Bootstrap with ' . get_class($component), __METHOD__);
+            }
+        }
+    }
+
+    // bootstrap 属性，默认在 frontend/config/main.php 和 frontend/config/main-local.php 文件内都有配置，是个数组，包括 log、gii、debug 三个元素，这里循环处理
+    foreach ($this->bootstrap as $class) {
+        $component = null;
+        // 这里判断 bootstrap 项是否是字符串，如果是且已经在 yii\di\ServiceLocator 中注册过，则直接获取
+        // 如果是 yii\base\Module 中注册过的 module，则直接获取，否则抛出异常
+        if (is_string($class)) {
+            if ($this->has($class)) {
+                $component = $this->get($class);
+            } elseif ($this->hasModule($class)) {
+                $component = $this->getModule($class);
+            } elseif (strpos($class, '\\') === false) {
+                throw new InvalidConfigException("Unknown bootstrapping component ID: $class");
+            }
+        }
+
+        if (!isset($component)) {
+            $component = Yii::createObject($class);
+        }
+
+        // 如果经过以上获取到的 $component 是 yii\base\BootstrapInterface 接口，则 trace 记录之后，调用 component 的 bootstrap 方法启动 component
+        if ($component instanceof BootstrapInterface) {
+            Yii::trace('Bootstrap with ' . get_class($component) . '::bootstrap()', __METHOD__);
+            $component->bootstrap($this);
+        } else {
+            Yii::trace('Bootstrap with ' . get_class($component), __METHOD__);
+        }
+    }
+}
+```
+
+**应用的生命周期之执行请求**  
+应用的运行，从 yii\base\Application::run 开始。  
+```php
+public function run()
+{
+    try {
+        $this->state = self::STATE_BEFORE_REQUEST;
+        // 事件触发，事件的绑定在于预定义事件的时候
+        $this->trigger(self::EVENT_BEFORE_REQUEST);
+
+        $this->state = self::STATE_HANDLING_REQUEST;
+        // 处理请求：捕获路由，处理路由以及根据路由规则调用对应的方法
+        $response = $this->handleRequest($this->getRequest());
+
+        $this->state = self::STATE_AFTER_REQUEST;
+        $this->trigger(self::EVENT_AFTER_REQUEST);
+
+        $this->state = self::STATE_SENDING_RESPONSE;
+        $response->send();
+
+        $this->state = self::STATE_END;
+
+        return $response->exitStatus;
+    } catch (ExitException $e) {
+        $this->end($e->statusCode, isset($response) ? $response : null);
+        return $e->statusCode;
+    }
+}
+```
+
+**请求**  
+request 组件（yii\web\Request）是用来处理应用的请求。
+```php
+public function get($name = null, $defaultValue = null)
+{
+    if ($name === null) {
+        return $this->getQueryParams();
+    }
+    return $this->getQueryParam($name, $defaultValue);
+}
+
+public function getQueryParams()
+{
+    if ($this->_queryParams === null) {
+        return $_GET;
+    }
+    return $this->_queryParams;
+}
+
+public function getQueryParam($name, $defaultValue = null)
+{
+    $params = $this->getQueryParams();
+    return isset($params[$name]) ? $params[$name] : $defaultValue;
+}
+
+public function getBodyParams()
+{
+    // 判断请求体参数是否是 null，可以通过 yii\web\Request::setBodyParams 方法修改并非实际意义的请求体参数集合
+    if ($this->_bodyParams === null) {
+        // 可以在 post 请求中添加 yii\web\Request::methodParam 对应的 key：_method，来修改当前的请求方法，但是请求体参数还是 $_POST
+        if (isset($_POST[$this->methodParam])) {
+            $this->_bodyParams = $_POST;
+            unset($this->_bodyParams[$this->methodParam]);
+            return $this->_bodyParams;
+        }
+        // 获取请求头的 content_type，不同的请求可以设置不同的 content_type，同时这也是解析的关键
+        // 比如说客户端可以设置请求头 content_type 等于 'application/json; charset=UTF-8',也可以让其等于 'application/json',具体以分号";"前面的为准，紧接着下面的 if else 是这句话的实现
+        $rawContentType = $this->getContentType();
+        if (($pos = strpos($rawContentType, ';')) !== false) {
+            // e.g. application/json; charset=UTF-8
+            $contentType = substr($rawContentType, 0, $pos);
+        } else {
+            $contentType = $rawContentType;
+        }
+        // yii\web\Request::parsers 属性，我们可以在配置 request 组件的时候，配置该属性
+        // 这个属性的值，是 content_type 和解析方法的映射，比如我们可以设定凡是 content_type=application/json 的请求，用 yii\web\JsonParser 解析。我们也可以自定义 content_type, 让解析的类继承 RequestParserInterface 接口即可
+        if (isset($this->parsers[$contentType])) {
+            $parser = Yii::createObject($this->parsers[$contentType]);
+            if (!($parser instanceof RequestParserInterface)) {
+                throw new InvalidConfigException("The '$contentType' request parser is invalid. It must implement the yii\\web\\RequestParserInterface.");
+            }
+            $this->_bodyParams = $parser->parse($this->getRawBody(), $rawContentType);
+        } elseif (isset($this->parsers['*'])) {
+            $parser = Yii::createObject($this->parsers['*']);
+            if (!($parser instanceof RequestParserInterface)) {
+                throw new InvalidConfigException("The fallback request parser is invalid. It must implement the yii\\web\\RequestParserInterface.");
+            }
+            $this->_bodyParams = $parser->parse($this->getRawBody(), $rawContentType);
+        } 
+        // 如果没有定义parsers, 这里会以POST为准
+        elseif ($this->getMethod() === 'POST') {
+            // PHP has already parsed the body so we have all params in $_POST
+            $this->_bodyParams = $_POST;
+        } 
+        // 以上都不符合的情况下，则使用 mb_parse_str 函数解析
+        else {
+            $this->_bodyParams = [];
+            mb_parse_str($this->getRawBody(), $this->_bodyParams);
+        }
+    }
+    return $this->_bodyParams;
+}
+```
+
+**响应**  
+response 组件（yii\web\Response）是用来处理应用的响应。  
+可以使用 Yii::$app->get ('response') 或者 Yii::$app->getResponse () 获取 Response 组件。  
+响应从 yii\web\Application::handleRequest 方法的 $this->runAction 开始。  
+```php
+// yii\web\Application::runAction
+public function runAction($route, $params = [])
+{
+    $parts = $this->createController($route);
+    if (is_array($parts)) {
+        /* @var $controller Controller */
+        list($controller, $actionID) = $parts;
+        $oldController = Yii::$app->controller;
+        Yii::$app->controller = $controller;
+        $result = $controller->runAction($actionID, $params);
+        if ($oldController !== null) {
+            Yii::$app->controller = $oldController;
+        }
+
+        return $result;
+    }
+
+    $id = $this->getUniqueId();
+    throw new InvalidRouteException('Unable to resolve the request "' . ($id === '' ? $route : $id . '/' . $route) . '".');
+}
+
+// controller 的 runAction
+public function runAction($id, $params = [])
+{
+    $action = $this->createAction($id);
+    if ($action === null) {
+        throw new InvalidRouteException('Unable to resolve the request: ' . $this->getUniqueId() . '/' . $id);
+    }
+
+    Yii::debug('Route to run: ' . $action->getUniqueId(), __METHOD__);
+
+    if (Yii::$app->requestedAction === null) {
+        Yii::$app->requestedAction = $action;
+    }
+
+    $oldAction = $this->action;
+    $this->action = $action;
+
+    $modules = [];
+    $runAction = true;
+
+    // call beforeAction on modules
+    foreach ($this->getModules() as $module) {
+        if ($module->beforeAction($action)) {
+            array_unshift($modules, $module);
+        } else {
+            $runAction = false;
+            break;
+        }
+    }
+
+    $result = null;
+
+    if ($runAction && $this->beforeAction($action)) {
+        // run the action
+        $result = $action->runWithParams($params);
+
+        $result = $this->afterAction($action, $result);
+
+        // call afterAction on modules
+        foreach ($modules as $module) {
+            /* @var $module Module */
+            $result = $module->afterAction($action, $result);
+        }
+    }
+
+    if ($oldAction !== null) {
+        $this->action = $oldAction;
+    }
+
+    return $result;
+}
+
+// yii\web\Response::send 
+public function send()
+{   
+    if ($this->isSent) {
+        return;
+    }
+    $this->trigger(self::EVENT_BEFORE_SEND);
+    $this->prepare();
+    $this->trigger(self::EVENT_AFTER_PREPARE);
+    $this->sendHeaders();
+    $this->sendContent();
+    $this->trigger(self::EVENT_AFTER_SEND);
+    // 避免重复发送
+    $this->isSent = true;
 }
 ```
