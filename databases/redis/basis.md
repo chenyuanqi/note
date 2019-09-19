@@ -307,6 +307,13 @@ phpredis 扩展和 predis 在连接的保持上是有区别的
 phpredis 和 predis 的性能差距没有跨数量级。  
 根据业务场景，如果业务非常依赖 redis，并且单机 qps 需要支持的比较大，建议使用 phpredis；如果是小规模业务，建议使用 predis（laravel 官方推荐使用，便捷）。  
 
+### Redis 安全
+Redis 在生产环境的使用过程中可能存在一些安全隐患：  
+1、禁止执行高危命令，如 FLUSHALL，以免被恶意清空所有数据；
+2、创建单独的非 ROOT 用户执行 Redis 服务，并设置禁止登录；
+3、启用密码验证（redis.conf 的 requirepass 配置）；
+4、禁止外网访问 Redis，只允许内网访问，必要的话还可以修改监听端口（redis.conf 的 bind 配置）
+
 ### Redis 疑难杂症
 - predis 与 phpredis 的区别
 > predis 是纯 php 实现的，通过 socket 与 redis 服务器通信，使用时只需要通过 composer 加载依赖，无需额外安装扩展  
