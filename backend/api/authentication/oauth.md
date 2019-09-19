@@ -19,6 +19,9 @@ OAuth 2.0 规定了四种获得令牌的流程：
 > 第二步，用户跳转后，B 网站会要求用户登录，然后询问是否同意给予 A 网站授权。用户表示同意，这时 B 网站就会跳回 redirect_uri 参数指定的网址。跳转时，会传回一个授权码，就像下面这样：https://a.com/callback?code=AUTHORIZATION_CODE（code 参数就是授权码）  
 > 第三步，A 网站拿到授权码以后，就可以在后端，向 B 网站请求令牌：https://b.com/oauth/token?client_id=CLIENT_ID&client_secret=CLIENT_SECRET&grant_type=authorization_code&code=AUTHORIZATION_CODE&redirect_uri=CALLBACK_URL（client_id 参数和 client_secret 参数用来让 B 确认 A 的身份，grant_type 参数的值是 AUTHORIZATION_CODE，表示采用的授权方式是授权码，code 参数是上一步拿到的授权码，redirect_uri 参数是令牌颁发后的回调网址）  
 > 第四步，B 网站收到请求以后，就会颁发令牌。具体做法是向 redirect_uri 指定的网址，发送一段 JSON 数据。JSON 数据中，access_token 字段就是令牌，A 网站在后端拿到了。  
+
+![授权码](../../../others/static/images/oauth-authorization-code-flow.png)
+
 - 隐藏式（implicit）：允许直接向前端颁发令牌，这种方式没有授权码这个中间步骤。这种方式把令牌直接传给前端，是很不安全的。因此，只能用于一些安全要求不高的场景，并且令牌的有效期必须非常短，通常就是会话期间（session）有效，浏览器关掉，令牌就失效了。  
 > 第一步，A 网站提供一个链接，要求用户跳转到 B 网站，授权用户数据给 A 网站使用:  
 > https://b.com/oauth/authorize?response_type=token&client_id=CLIENT_ID&redirect_uri=CALLBACK_URL&scope=read（response_type 参数为 token，表示要求直接返回令牌）  

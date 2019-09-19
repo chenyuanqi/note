@@ -7,6 +7,14 @@ cookie 是早期的用户认证机制，不过由于安全系数太低而几近�
 
 JWT（Json Web Token）是一个开放标准，它规定通信双方使用 JSON 对象的形式进行安全通信，它可以使用非对称加密算法对数据进行加密，保证数据的安全。JWT 方式将用户状态分散到了客户端中，可以明显减轻服务端的内存压力。  
 
+JWT 和 Token 有一定的差别， JWT 适合一次性验证，比方邮件激活，Token 适合我们一般的 API 请求。JWT 不需要在后端存储用户和 Signature 的关系，只需要做验签即可；Token 需要服务端存储 Token 和用户的关系。  
+
+JWT 常见流程：  
+1、用户发起请求登录，服务端验证后，通过 JWT 生成一个 Token，并返回个前端  
+2、前端存储起来，一般存在 sessionStorage  
+3、后续 API 请求都带上这个 Token，服务端通过这个 Token 来验明用户身份  
+4、Token 有一个时效性，过了时间需要重新获取，所以一般前端会在 Ajax 的请求做个统一的 interceptors  
+
 ### JWT 的组成结构
 JWT 由三个部分组成，分别是 Header 头部、Payload 载荷、Signature 签名。  
 ```
@@ -28,6 +36,7 @@ base64({
 
 # Signature
 # 签名目的是为了保证 JWT 没有被人篡改过，保证信息的安全性和可靠性
+# secretKey 用于验签，最好能定时更换
 HMACSHA256(base64enc(header) + "." + base64enc(payload), secretKey);
 ```
 
@@ -50,4 +59,11 @@ Authorization: Bearer <token>
 
 5）JWT 本身包含了认证信息，一旦泄露，任何人都可以获得该令牌的所有权限。为了减少盗用，JWT 的有效期应该设置得比较短。对于一些比较重要的权限，使用时应该再次对用户进行认证。
 
-6）为了减少盗用，JWT 不应该使用 HTTP 协议明码传输，要使用 HTTPS 协议传输。
+6）为了减少盗用，JWT 不应该使用 HTTP 协议明码传输，要使用 HTTPS 协议传输。  
+
+### 关于 JWT 安全性
+主要考虑如下策略：  
+1、缩短 Token 有效时间  
+2、secret 定时替换  
+3、使用 HTTPS 加密协议  
+4、对标准字段 iss、sub、aud、nbf、exp 进行校验  
