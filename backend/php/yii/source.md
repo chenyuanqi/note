@@ -1129,3 +1129,481 @@ public function send()
     $this->isSent = true;
 }
 ```
+
+**cookie**  
+cookie 主要涉及以下两部分：服务端设置 cookie，并向客户端发送 cookie；客户端获取 cookie。  
+
+用 Response 组件描述服务端对 cookie 的设置，用 Request 组件描述客户端对 cookie 的获取等操作。  
+实际上，Response 组件并没有直接对 cookie 进行操作，cookie 的操作主要由 yii\web\CookieCollection 负责。Response 组件的作用非常关键，虽然 yii\web\CookieCollection 负责管理 cookie，比如添加 / 删除等。但对服务端而言，通过 setcookie 方法把 cookie 发送给客户端才有意义，Response 的作用即在于此。  
+通常，可以直接用 $response->cookies （$reponse 是 yii\web\Response 的实例）去描述 yii\web\CookieCollection 实例（间接的调用 $response->getCookies() 方法）。  
+```php
+class CookieCollection extends Object implements \IteratorAggregate, \ArrayAccess, \Countable
+{
+    public function __construct($cookies = [], $config = [])
+    {
+        $this->_cookies = $cookies;
+        parent::__construct($config);
+    }
+
+    public function getIterator()
+    {
+        return new ArrayIterator($this->_cookies);
+    }
+
+    public function getValue($name, $defaultValue = null)
+    {
+        return isset($this->_cookies[$name]) ? $this->_cookies[$name]->value : $defaultValue;
+    }
+
+    public function has($name)
+    {
+        // 存在且值不为空，过期时间存在且大于当前时间
+        return isset($this->_cookies[$name]) && $this->_cookies[$name]->value !== ''
+            && ($this->_cookies[$name]->expire === null || $this->_cookies[$name]->expire === 0 || $this->_cookies[$name]->expire >= time());
+    }
+
+    public function add($cookie)
+    {
+        if ($this->readOnly) {
+            throw new InvalidCallException('The cookie collection is read only.');
+        }
+        $this->_cookies[$cookie->name] = $cookie;
+    }
+
+    public function remove($cookie, $removeFromBrowser = true)
+    {
+        if ($this->readOnly) {
+            throw new InvalidCallException('The cookie collection is read only.');
+        }
+
+        // 设置过期时间为 1s
+        if ($cookie instanceof Cookie) {
+            $cookie->expire = 1;
+            $cookie->value = '';
+        } else {
+            $cookie = Yii::createObject([
+                'class' => 'yii\web\Cookie',
+                'name' => $cookie,
+                'expire' => 1,
+            ]);
+        }
+
+        // 浏览器设置cookie，其他直接移除
+        if ($removeFromBrowser) {
+            $this->_cookies[$cookie->name] = $cookie;
+        } else {
+            unset($this->_cookies[$cookie->name]);
+        }
+    }
+
+    public function removeAll()
+    {
+        if ($this->readOnly) {
+            throw new InvalidCallException('The cookie collection is read only.');
+        }
+        $this->_cookies = [];
+    }
+
+}
+
+```
+
+**session**  
+session 组件 yii\web\Session 的定义跟 yii\web\CookieCollection 类似，但是父类不同。  
+session 组件的实现主要是针对 $_SESSION 的操作，这一点跟原生 php 保持一致。  
+```php
+class Session extends Component implements \IteratorAggregate, \ArrayAccess, \Countable
+{
+    public function getIterator()
+    {
+        $this->open();
+        return new SessionIterator;
+    }
+
+    public function open()
+    {
+        // 判断当前 session 的状态
+        if ($this->getIsActive()) {
+            return;
+        }
+
+        // 对 session_set_save_handler 方法的封装
+        $this->registerSessionHandler();
+        // 设置 cookie 参数
+        $this->setCookieParamsInternal();
+
+        YII_DEBUG ? session_start() : @session_start();
+
+        // 再次判断当前 session 的状态
+        if ($this->getIsActive()) {
+            Yii::info('Session started', __METHOD__);
+            // 更新 flash 数据
+            $this->updateFlashCounters();
+        } else {
+            // 记录异常信息
+            $error = error_get_last();
+            $message = isset($error['message']) ? $error['message'] : 'Failed to start session.';
+            Yii::error($message, __METHOD__);
+        }
+    }
+
+    public function getIsActive()
+    {
+        return session_status() === PHP_SESSION_ACTIVE;
+    }
+
+    protected function registerSessionHandler()
+    {
+        // handler 属性是一个继承 \SessionHandlerInterface 的 object
+        if ($this->handler !== null) {
+            if (!is_object($this->handler)) {
+                $this->handler = Yii::createObject($this->handler);
+            }
+            if (!$this->handler instanceof \SessionHandlerInterface) {
+                throw new InvalidConfigException('"' . get_class($this) . '::handler" must implement the SessionHandlerInterface.');
+            }
+            YII_DEBUG ? session_set_save_handler($this->handler, false) : @session_set_save_handler($this->handler, false);
+        } elseif ($this->getUseCustomStorage()) {
+            // 如果让 yii\web\Session::getUseCustomStorage 方法 return true，会覆盖 yii\web\Session 中的方法（session 保存到 redis、mysql 等介质时）
+            if (YII_DEBUG) {
+                session_set_save_handler(
+                    [$this, 'openSession'],
+                    [$this, 'closeSession'],
+                    [$this, 'readSession'],
+                    [$this, 'writeSession'],
+                    [$this, 'destroySession'],
+                    [$this, 'gcSession']
+                );
+            } else {
+                @session_set_save_handler(
+                    [$this, 'openSession'],
+                    [$this, 'closeSession'],
+                    [$this, 'readSession'],
+                    [$this, 'writeSession'],
+                    [$this, 'destroySession'],
+                    [$this, 'gcSession']
+                );
+            }
+        }
+    }
+
+    private function setCookieParamsInternal()
+    {
+        $data = $this->getCookieParams();
+        if (isset($data['lifetime'], $data['path'], $data['domain'], $data['secure'], $data['httponly'])) {
+            if (PHP_VERSION_ID >= 70300) {
+                session_set_cookie_params($data);
+            } else {
+                if (!empty($data['sameSite'])) {
+                    throw new InvalidConfigException('sameSite cookie is not supported by PHP versions < 7.3.0 (set it to null in this environment)');
+                }
+                session_set_cookie_params($data['lifetime'], $data['path'], $data['domain'], $data['secure'], $data['httponly']);
+            }
+
+        } else {
+            throw new InvalidArgumentException('Please make sure cookieParams contains these elements: lifetime, path, domain, secure and httponly.');
+        }
+    }
+
+    public function get($key, $defaultValue = null)
+    {
+        $this->open();
+        return isset($_SESSION[$key]) ? $_SESSION[$key] : $defaultValue;
+    }
+
+    public function set($key, $value)
+    {
+        $this->open();
+        $_SESSION[$key] = $value;
+    }
+
+    public function destroy()
+    {
+        if ($this->getIsActive()) {
+            $sessionId = session_id();
+            $this->close();
+            $this->setId($sessionId);
+            $this->open();
+            session_unset();
+            session_destroy();
+            $this->setId($sessionId);
+        }
+    }
+}
+```
+
+**User 组件**  
+User 组件指的是 yii\web\User。  
+User 组件的作用是为应用提供用户认证状态的管理，即和 cookie、session 交互。而真正和用户信息相关的是 identityClass 指向的类，比如用户名、密码等。
+```php
+// user 组件的默认配置
+[
+    'components' => [
+        'user' => [
+            'identityClass' => 'common\models\User',
+            'enableAutoLogin' => true,
+            'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
+        ],
+    ]
+]
+```
+User 组件实现登陆登出。
+```php
+protected function beforeLogin($identity, $cookieBased, $duration)
+{
+    $event = new UserEvent([
+        'identity' => $identity,
+        'cookieBased' => $cookieBased,
+        'duration' => $duration,
+    ]);
+    $this->trigger(self::EVENT_BEFORE_LOGIN, $event);
+
+    return $event->isValid;
+}
+
+public function login(IdentityInterface $identity, $duration = 0)
+{
+    if ($this->beforeLogin($identity, false, $duration)) {
+        // 切换用户身份
+        $this->switchIdentity($identity, $duration);
+        $id = $identity->getId();
+        $ip = Yii::$app->getRequest()->getUserIP();
+        if ($this->enableSession) {
+            $log = "User '$id' logged in from $ip with duration $duration.";
+        } else {
+            $log = "User '$id' logged in from $ip. Session not enabled.";
+        }
+
+        $this->regenerateCsrfToken();
+
+        Yii::info($log, __METHOD__);
+        $this->afterLogin($identity, false, $duration);
+    }
+
+    return !$this->getIsGuest();
+}
+
+public function switchIdentity($identity, $duration = 0)
+{
+    // 标识用户的状态信息
+    $this->setIdentity($identity);
+
+    if (!$this->enableSession) {
+        return;
+    }
+
+    /* Ensure any existing identity cookies are removed. */
+    if ($this->enableAutoLogin && ($this->autoRenewCookie || $identity === null)) {
+        $this->removeIdentityCookie();
+    }
+
+    $session = Yii::$app->getSession();
+    if (!YII_ENV_TEST) {
+        $session->regenerateID(true);
+    }
+    $session->remove($this->idParam);
+    $session->remove($this->authTimeoutParam);
+
+    if ($identity) {
+        // 存储 id  信息
+        $session->set($this->idParam, $identity->getId());
+        // authTimeout 如果用户不活动了，将会在该秒数之后自动退出
+        if ($this->authTimeout !== null) {
+            // 存储认证时间
+            $session->set($this->authTimeoutParam, time() + $this->authTimeout);
+        }
+        // absoluteAuthTimeout 不管用户活不活动，时间到了就退出
+        if ($this->absoluteAuthTimeout !== null) {
+            // 存储绝对认证时间
+            $session->set($this->absoluteAuthTimeoutParam, time() + $this->absoluteAuthTimeout);
+        }
+        // 自动登陆，注意 enableAutoLogin 是 User 组件的属性而不是表单值
+        if ($this->enableAutoLogin && $duration > 0) {
+            // 记录 cookie：用户标识、auth_key 和有效时间
+            $this->sendIdentityCookie($identity, $duration);
+        }
+    }
+}
+
+public function logout($destroySession = true)
+{
+    $identity = $this->getIdentity();
+    if ($identity !== null && $this->beforeLogout($identity)) {
+        $this->switchIdentity(null);
+        $id = $identity->getId();
+        $ip = Yii::$app->getRequest()->getUserIP();
+        Yii::info("User '$id' logged out from $ip.", __METHOD__);
+        if ($destroySession && $this->enableSession) {
+            Yii::$app->getSession()->destroy();
+        }
+        $this->afterLogout($identity);
+    }
+
+    return $this->getIsGuest();
+}
+```
+
+**view 组件**  
+view 组件用于渲染视图页面，他们的类之间的关系如下：  
+```
+frontend\controllers\SiteController  
+=> yii\web\Controller  
+=> yii\base\Controller  
+=> yii\base\Component  
+=> yii\web\View  
+=> yii\base\View  
+=> yii\base\Component  
+```
+view 组件获取视图文件内容的字符串过程：  
+```php
+// yii\base\Controller::render
+public function render($view, $params = [])
+{
+    // getView 获取 view 组件的实例 
+    // 跳转 yii\web\View::render，实际是 yii\base\View::render
+    $content = $this->getView()->render($view, $params, $this);
+    return $this->renderContent($content);
+}
+
+// yii\base\View::render
+public function render($view, $params = [], $context = null)
+{
+    // 寻找指定的视图文件
+    $viewFile = $this->findViewFile($view, $context);
+    return $this->renderFile($viewFile, $params, $context);
+}
+// 支持多种格式查找视图文件
+protected function findViewFile($view, $context = null)
+{
+    if (strncmp($view, '@', 1) === 0) {
+        // e.g. "@app/views/main"
+        $file = Yii::getAlias($view);
+    } elseif (strncmp($view, '//', 2) === 0) {
+        // e.g. "//layouts/main"
+        $file = Yii::$app->getViewPath() . DIRECTORY_SEPARATOR . ltrim($view, '/');
+    } elseif (strncmp($view, '/', 1) === 0) {
+        // e.g. "/site/index"
+        if (Yii::$app->controller !== null) {
+            $file = Yii::$app->controller->module->getViewPath() . DIRECTORY_SEPARATOR . ltrim($view, '/');
+        } else {
+            throw new InvalidCallException("Unable to locate view file for view '$view': no active controller.");
+        }
+    } elseif ($context instanceof ViewContextInterface) {
+        $file = $context->getViewPath() . DIRECTORY_SEPARATOR . $view;
+    } elseif (($currentViewFile = $this->getRequestedViewFile()) !== false) {
+        $file = dirname($currentViewFile) . DIRECTORY_SEPARATOR . $view;
+    } else {
+        throw new InvalidCallException("Unable to resolve view file for view '$view': no active view context.");
+    }
+
+    if (pathinfo($file, PATHINFO_EXTENSION) !== '') {
+        return $file;
+    }
+    $path = $file . '.' . $this->defaultExtension;
+    if ($this->defaultExtension !== 'php' && !is_file($path)) {
+        $path = $file . '.php';
+    }
+
+    return $path;
+}
+// 渲染文件
+public function renderFile($viewFile, $params = [], $context = null)
+{
+    $viewFile = $requestedFile = Yii::getAlias($viewFile);
+
+    // 如果配置了主题
+    if ($this->theme !== null) {
+        $viewFile = $this->theme->applyTo($viewFile);
+    }
+    // 加载视图文件
+    if (is_file($viewFile)) {
+        $viewFile = FileHelper::localize($viewFile);
+    } else {
+        throw new ViewNotFoundException("The view file does not exist: $viewFile");
+    }
+
+    $oldContext = $this->context;
+    if ($context !== null) {
+        // 把 controller 的实例赋值给 yii\base\View::context 属性
+        $this->context = $context;
+    }
+    $output = '';
+    $this->_viewFiles[] = [
+        'resolved' => $viewFile,
+        'requested' => $requestedFile
+    ];
+
+    // 渲染之前和渲染之后，会分别调用 yii\base\View::beforeRender 和 yii\base\View::afterRender 方法触发 yii\base\View::EVENT_BEFORE_RENDER 和 yii\base\View::EVENT_AFTER_RENDER 两个事件
+    if ($this->beforeRender($viewFile, $params)) {
+        Yii::debug("Rendering view file: $viewFile", __METHOD__);
+        $ext = pathinfo($viewFile, PATHINFO_EXTENSION);
+        // renderers 可以配置下相关的模板引擎如 twig，根据后缀属性配置的键值找到具体的模板解析类
+        if (isset($this->renderers[$ext])) {
+            if (is_array($this->renderers[$ext]) || is_string($this->renderers[$ext])) {
+                $this->renderers[$ext] = Yii::createObject($this->renderers[$ext]);
+            }
+            /* @var $renderer ViewRenderer */
+            $renderer = $this->renderers[$ext];
+            $output = $renderer->render($this, $viewFile, $params);
+        } else {
+            $output = $this->renderPhpFile($viewFile, $params);
+        }
+        $this->afterRender($viewFile, $params, $output);
+    }
+
+    array_pop($this->_viewFiles);
+    $this->context = $oldContext;
+
+    return $output;
+}
+// 渲染 php 文件
+public function renderPhpFile($_file_, $_params_ = [])
+{
+    $_obInitialLevel_ = ob_get_level();
+    ob_start();
+    ob_implicit_flush(false);
+    // 通过 extract 函数处理页面传参使用
+    extract($_params_, EXTR_OVERWRITE);
+    try {
+        // 视图文件内的 $this 是 view 的实例
+        require $_file_;
+        return ob_get_clean();
+    } catch (\Exception $e) {
+        while (ob_get_level() > $_obInitialLevel_) {
+            if (!@ob_end_clean()) {
+                ob_clean();
+            }
+        }
+        throw $e;
+    } catch (\Throwable $e) {
+        while (ob_get_level() > $_obInitialLevel_) {
+            if (!@ob_end_clean()) {
+                ob_clean();
+            }
+        }
+        throw $e;
+    }
+}
+```
+之后，调用  yii\base\Controller::renderContent 方法处理（寻找布局文件，找不到就直接返回内容，找到就把内容渲染一下再做返回），最终交由 yii\web\Application::handleRequest 方法接管后续流程。  
+
+此外，如果是 renderAjax，会回调 beginPage、head、beginBody、endBody、endPage 等方法处理环绕文件的渲染，以 ajax 方式返回页面内容（可配合 js/css 实现各种特效）。
+```php
+// yii/web/View::renderAjax
+public function renderAjax($view, $params = [], $context = null)
+{
+    $viewFile = $this->findViewFile($view, $context);
+
+    ob_start();
+    ob_implicit_flush(false);
+
+    $this->beginPage();
+    $this->head();
+    $this->beginBody();
+    echo $this->renderFile($viewFile, $params, $context);
+    $this->endBody();
+    $this->endPage(true);
+
+    return ob_get_clean();
+}
+```
