@@ -1607,3 +1607,268 @@ public function renderAjax($view, $params = [], $context = null)
     return ob_get_clean();
 }
 ```
+
+**异常处理**  
+try/catch 捕获的异常是有限的。  
+set_exception_handler 函数（用户自定义异常处理的函数）专门处理未被 try/catch 捕获的异常；并且，类似程序中的 warning、notice 信息，需要另外一个函数捕获 set_error_handler。  
+> 对于 php 初始化或者编译等产生的核心错误，我们并不能捕获并处理掉。  
+> 以下级别的错误不能由用户定义的函数来处理： E_ERROR、 E_PARSE、 E_CORE_ERROR、 E_CORE_WARNING、 E_COMPILE_ERROR、 E_COMPILE_WARNING，和在调用 set_error_handler () 函数所在文件中产生的大多数 E_STRICT。  
+
+在 yii\base\Application::\_\_construct 方法中，Yii 框架注册了  errorHandler 组件。  
+那么，从 yii\base\Application::registerErrorHandler 方法的实现开始，看看 Yii 是如何实现异常处理的。  
+```php
+// yii\base\Application::registerErrorHandler
+protected function registerErrorHandler(&$config)
+{
+	// YII_ENABLE_ERROR_HANDLER 常量在 yii\BaseYii 类中定义为 true
+	// 当然 Yii 也允许用户自定义异常处理
+    if (YII_ENABLE_ERROR_HANDLER) {
+        if (!isset($config['components']['errorHandler']['class'])) {
+            echo "Error: no errorHandler component is configured.\n";
+            exit(1);
+        }
+        // 把 errorHandler 组件（yii\web\ErrorHandler）的定义保存起来
+        $this->set('errorHandler', $config['components']['errorHandler']);
+        unset($config['components']['errorHandler']);
+        // 获取 errorHandler 组件，并调用 yii\web\ErrorHandler::register 方法开始执行
+        $this->getErrorHandler()->register();
+    }
+}
+//  yii\web\ErrorHandler::register，即 yii\base\ErrorHandler::register 
+public function register()
+{
+	// 动态修改配置，避免错误信息直接显示到页面上
+    ini_set('display_errors', false);
+    // 自定义异常处理函数
+    set_exception_handler([$this, 'handleException']);
+    // 自定义错误处理函数
+    if (defined('HHVM_VERSION')) {
+        set_error_handler([$this, 'handleHhvmError']);
+    } else {
+        set_error_handler([$this, 'handleError']);
+    }
+    if ($this->memoryReserveSize > 0) {
+        $this->_memoryReserve = str_repeat('x', $this->memoryReserveSize);
+    }
+    // 注册程序终止前执行的函数
+    register_shutdown_function([$this, 'handleFatalError']);
+}
+// yii\base\ErrorHandler::handleException 
+public function handleException($exception)
+{
+    if ($exception instanceof ExitException) {
+        return;
+    }
+
+    $this->exception = $exception;
+
+    // disable error capturing to avoid recursive errors while handling exceptions
+    $this->unregister();
+
+    // set preventive HTTP status code to 500 in case error handling somehow fails and headers are sent
+    // HTTP exceptions will override this value in renderException()
+    if (PHP_SAPI !== 'cli') {
+        http_response_code(500);
+    }
+
+    try {
+    	// 记录日志
+    	// 日志记录部分取决于 Yii::error 方法的实现，如果在处理异常的过程中又发生了异常，则依赖 yii\base\ErrorHandler::handleFallbackExceptionMessage 方法了，这个方法就简单多了，直接输出错误信息，不过会有 YII_DEBUG 是否开启的区别
+        $this->logException($exception);
+        // 丢弃其他任何的输出
+        if ($this->discardExistingOutput) {
+            $this->clearOutput();
+        }
+        // 渲染 exception
+        $this->renderException($exception);
+        if (!YII_ENV_TEST) {
+            \Yii::getLogger()->flush(true);
+            if (defined('HHVM_VERSION')) {
+                flush();
+            }
+            exit(1);
+        }
+    } catch (\Exception $e) {
+        // an other exception could be thrown while displaying the exception
+        $this->handleFallbackExceptionMessage($e, $exception);
+    } catch (\Throwable $e) {
+        // additional check for \Throwable introduced in PHP 7
+        $this->handleFallbackExceptionMessage($e, $exception);
+    }
+
+    $this->exception = null;
+}
+// yii\web\ErrorHandler::renderException
+protected function renderException($exception)
+{
+    if (Yii::$app->has('response')) {
+        $response = Yii::$app->getResponse();
+        // reset parameters of response to avoid interference with partially created response data
+        // in case the error occurred while sending the response.
+        $response->isSent = false;
+        $response->stream = null;
+        $response->data = null;
+        $response->content = null;
+    } else {
+        $response = new Response();
+    }
+
+    $response->setStatusCodeByException($exception);
+
+    // 区分 exception 是否是用户主动抛出的异常
+    $useErrorView = $response->format === Response::FORMAT_HTML && (!YII_DEBUG || $exception instanceof UserException);
+
+    if ($useErrorView && $this->errorAction !== null) {
+        $result = Yii::$app->runAction($this->errorAction);
+        if ($result instanceof Response) {
+            $response = $result;
+        } else {
+            $response->data = $result;
+        }
+    } elseif ($response->format === Response::FORMAT_HTML) {
+        if ($this->shouldRenderSimpleHtml()) {
+            // AJAX request
+            $response->data = '<pre>' . $this->htmlEncode(static::convertExceptionToString($exception)) . '</pre>';
+        } else {
+            // if there is an error during error rendering it's useful to
+            // display PHP error in debug mode instead of a blank screen
+            if (YII_DEBUG) {
+                ini_set('display_errors', 1);
+            }
+            $file = $useErrorView ? $this->errorView : $this->exceptionView;
+            $response->data = $this->renderFile($file, [
+                'exception' => $exception,
+            ]);
+        }
+    } elseif ($response->format === Response::FORMAT_RAW) {
+        $response->data = static::convertExceptionToString($exception);
+    } else {
+        $response->data = $this->convertExceptionToArray($exception);
+    }
+
+    $response->send();
+}
+// yii\base\ErrorHandler::handleError 
+public function handleError($code, $message, $file, $line)
+{
+    if (error_reporting() & $code) {
+        // load ErrorException manually here because autoloading them will not work
+        // when error occurs while autoloading a class
+        if (!class_exists('yii\\base\\ErrorException', false)) {
+            require_once __DIR__ . '/ErrorException.php';
+        }
+        // 抛出 yii\base\ErrorException 异常，经由 yii\base\ErrorHandler::handleException 方法捕获，最终渲染
+        $exception = new ErrorException($message, $code, $code, $file, $line);
+
+        // in case error appeared in __toString method we can't throw any exception
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        array_shift($trace);
+        foreach ($trace as $frame) {
+            if ($frame['function'] === '__toString') {
+                $this->handleException($exception);
+                if (defined('HHVM_VERSION')) {
+                    flush();
+                }
+                exit(1);
+            }
+        }
+
+        throw $exception;
+    }
+
+    return false;
+}
+// yii\base\ErrorHandler::handleFatalError
+public function handleFatalError()
+{
+    unset($this->_memoryReserve);
+
+    // load ErrorException manually here because autoloading them will not work
+    // when error occurs while autoloading a class
+    if (!class_exists('yii\\base\\ErrorException', false)) {
+        require_once __DIR__ . '/ErrorException.php';
+    }
+
+    // 获取最终的错误信息
+    $error = error_get_last();
+
+    // 判断错误类型是否是核心错误（E_ERROR, E_PARSE, E_CORE_ERROR 等类型的错误）
+    if (ErrorException::isFatalError($error)) {
+        if (!empty($this->_hhvmException)) {
+            $exception = $this->_hhvmException;
+        } else {
+            $exception = new ErrorException($error['message'], $error['type'], $error['type'], $error['file'], $error['line']);
+        }
+        $this->exception = $exception;
+
+        $this->logException($exception);
+
+        if ($this->discardExistingOutput) {
+            $this->clearOutput();
+        }
+        $this->renderException($exception);
+
+        // need to explicitly flush logs because exit() next will terminate the app immediately
+        Yii::getLogger()->flush(true);
+        if (defined('HHVM_VERSION')) {
+            flush();
+        }
+        exit(1);
+    }
+}
+```
+
+**数据访问层 DAO**  
+DAO（Data Access Objects）数据访问对象，DAO 十分友好，比如事务、读写分离、预处理等等，使用都非常简单。  
+在 yii2 内，DAO 的封装基于 db 组件。  
+```php
+// 配置
+[
+	'components' => [
+	    'db' => [
+	        'class' => 'yii\db\Connection',
+	        'dsn' => 'mysql:host=your host;dbname=your dbname',
+	        'username' => 'your username',
+	        'password' => 'your password',
+	        'charset' => 'utf8',
+	    ],
+	],
+];
+
+// 使用
+$sql = "SELECT id, username FROM user"; 
+$users = Yii::$app->db->createCommand($sql)->queryAll();
+```
+
+db 组件指的是 yii\db\Connection，对 sql 处理的大致情况如下：  
+```php
+public function createCommand($sql = null, $params = [])
+{
+    /** @var Command $command */
+    // 交给 yii\db\Command 类处理
+    $command = new $this->commandClass([
+        'db' => $this,
+        'sql' => $sql,
+    ]);
+    return $command->bindValues($params);
+}
+// sql 处理，需要 yii\db\Command::setSql 方法的实现
+// 除了重置的操作之外，调用 yii\db\Connection::quoteSql 方法对 sql 语句做处理
+public function quoteSql($sql)
+{
+	// {{%tablename%}}
+    return preg_replace_callback(
+        '/(\\{\\{(%?[\w\-\. ]+%?)\\}\\}|\\[\\[([\w\-\. ]+)\\]\\])/',
+        function ($matches) {
+            if (isset($matches[3])) {
+            	// 对列名处理
+                return $this->quoteColumnName($matches[3]);
+            }
+
+            // 对表名处理
+            return str_replace('%', $this->tablePrefix, $this->quoteTableName($matches[2]));
+        },
+        $sql
+    );
+}
+```
