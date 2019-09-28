@@ -16,3 +16,9 @@ Kubernetes 的名字来自希腊语，意思是“舵手” 或 “领航员”�
 
 **Kubernets 技能图谱**   
 ![Kubernets 技能图谱](../../../others/static/images/kubernets-tech-graph.png)  
+
+### 为什么 Kubernets
+
+
+### Kubernets 基础概念
+
