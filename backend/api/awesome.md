@@ -14,3 +14,9 @@
 [Fiddler](http://www.telerik.com/fiddler) Windows 抓包工具  
 [Charles Proxy](https://www.charlesproxy.com/) Mac 抓包工具  
 [Thor](#) IOS 抓包工具  
+
+
+### 公用 API
+[免费 API 集](https://github.com/fangzesheng/free-api)  
+[免费 API 试用](https://www.apishop.net/#/)  
+
