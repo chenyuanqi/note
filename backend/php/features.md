@@ -4,7 +4,99 @@ PHP 走过了漫长的道路，成长为处理 web 的最卓越的语言。
 > PHP 发行版可以在「[PHP 博物馆](http://museum.php.net/)」找到。  
 
 ### PHP 7.3 新特性
-1、waiting~  
+1、灵活的 Heredoc 和 Nowdoc 语法  
+> 闭合标识符前支持缩进  
+> 闭合标识符后不再强制换行 
+
+```php
+$query = <<<SQL
+
+   SELECT *
+
+   FROM `table`
+
+   WHERE `column` = true;
+
+   SQL;
+```
+
+2、函数调用时允许尾随逗号  
+```php
+use Foo\Bar\{
+   Foo,
+   Bar,
+};
+
+unset(
+   $foo,
+   $bar,
+   $baz,
+);
+```
+
+3、JSON_THROW_ON_ERROR  
+> 解析 JSON 响应数据，有 json_encode() 以及 json_decode() 两个函数可供使用。不幸的是，它们都没有恰当的错误抛出表现。  
+> json_encode 失败时仅会返回 false；json_decode 失败时则会返回 null，而 null 可作为合法的 JSON 数值。唯一获取错误的方法是，调用 json_last_error() 或 json_last_error_msg()，它们将分别返回机器可读和人类可读的全局错误状态。  
+> 为 JSON 函数新增 JSON_THROW_ON_ERROR 常量用于忽略全局错误状态。当错误发生时，JSON 函数将会抛出 JsonException 异常，异常消息（message）为 json_last_error() 的返回值，异常代码（code）为 json_last_error_msg() 的返回值。  
+
+```php
+json_encode($data, JSON_THROW_ON_ERROR);
+json_decode("invalid json", null, 512, JSON_THROW_ON_ERROR);
+// 抛出 JsonException 异常
+```
+
+4、PCRE2 迁移  
+> PCRE 作为正则表达式引擎，从 PHP 7.3 开始，PCRE2 将作为新的正则引擎大显身手。  
+> PCRE2 严格要求，同时支持更多特性：  
+> 相对后向引用 \g{+2}（等效于已存在的 \g{-2}）  
+> PCRE2 版本检查 (?(VERSION>=x)...)  
+> (\*NOTEMPTY) 和 (\*NOTEMPTY_ATSTART) 告知引擎勿返回空匹配  
+> (\*NO_JIT) 禁用 JIT 优化  
+> (\*LIMIT_HEAP=d) 限制堆大小为 d KB  
+> (\*LIMIT_DEPTH=d) 设置回溯深度限制为 d  
+> (\*LIMIT_MATCH=d) 设置匹配数量限制为 d  
+
+5、list () 分配参考  
+>  list() 可以赋值给引用
+
+```php
+$array = [1, 2];
+list($a, &$b) = $array;
+// 相当于
+$array = [1, 2];
+$a = $array[0];
+$b =& $array[1];
+```
+
+6、is_countable 函数  
+> 在 PHP 7.2 中，用 count () 获取对象和数组的数量。如果对象不可数，PHP 会抛出警告。  
+> 新函数 is_countable() 对数组类型或者实现了 Countable 接口的实例的变量返回 true。
+
+7、array_key_first(), array_key_last()  
+> PHP 允许使用 reset() ，end() 和 key() 等方法，通过改变数组的内部指针来获取数组首尾的键和值。  
+> 现在，为了避免这种内部干扰，PHP 7.3 推出了新的函数来解决这个问题：  
+> array_key_first($array); 获取数组第一个元素的键名  
+> array_key_last($array); 获取数组最后一个元素的键名  
+
+8、Argon2 密码哈希增强功能  
+
+9、弃用和删除 image2wbmp()  
+> image2wbmp() 函数能够将图像输出为 WBMP 格式。  
+> 另一个名为 imagewbmp() 的函数也同样具备单色转换的作用。出于重复原因，image2wbmp() 现已被废弃，你可使用 imagewbmp() 代替它。此函数被弃用后，再次调用它将会触发已弃用警告。待后续此函数被移除后，再次调用它将会触发致命错误。
+
+10、弃用和删除不区分大小写的常量  
+
+11、相同站点 Cookie  
+> 建议在使用 cookies 时，增加同站点标志。
+
+12、FPM 更新  
+> FastCGI 进程管理器也进行了更新，现在提供了新的方式来记录 FPM 日志。  
+> log_limit: 设置允许的日志长度，可以超过 1024 字符。  
+> log_buffering: 允许不需要额外缓冲去操作日志。  
+> decorate_workers_output: 当启用了 catch_workers_output 时，系统会去禁用渲染输出。
+
+13、改进 Windows 下的文件删除
+> 默认情况下，文件描述符以共享读、写、删除的方式去操作。这很有效的去映射 POSIX 并允许去删除正在使用中的文件。但这并不是 100% 都是一样的，不同的平台可能仍存在一些差异。删除操作之后，文件目录仍存在直到所有的文件操作被关闭。  
 
 ### PHP 7.2 新特性
 1、新增「[object 对象类型](http://php.net/manual/zh/language.types.object.php)」，引进了可用于逆变参数输入和协变返回任何对象类型  
