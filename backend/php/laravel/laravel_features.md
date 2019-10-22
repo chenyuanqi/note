@@ -1,9 +1,18 @@
 
 ### Laravel 版本发布路线
+- Laravel 6.0 LTS - 2019 年 9 月份
+> LTS 长久支持版本，Bug 修复直到 2021 年 9 月份，安全修复直到 2022 年 9 月份。
+
+- Laravel 5.8 - 2019 年 2 月份
+> 一般发行版，提供 6 个月的 Bug 修复支持，一年的安全修复支持
+
+- Laravel 5.7 - 2018 年 9 月份
+> 一般发行版，提供 6 个月的 Bug 修复支持，一年的安全修复支持
+
 - Laravel 5.6 - 2018 年 2 月份
 > 一般发行版，提供 6 个月的 Bug 修复支持，一年的安全修复支持
 
-- Laravel 5.5 – 2017 年 8 月份
+- Laravel 5.5 LTS – 2017 年 8 月份
 > LTS 长久支持版本，会从这一刻开始停止 Laravel 5.1 的 Bug 修复，安全修复直到 2018 年 7 月份
 
 - Laravel 5.4 – 2017 年 1 月份
@@ -20,6 +29,245 @@
 
 - Laravel 的开始  
 > 2011 年 6 月 9 日，Laravel 的创始人 Taylor Otwell 发布第一个测试版本
+
+### Laravel 6.0 新特性
+Laravel 6.0 的发布标志着 laravel 框架开始使用语义化版本，此外，该版本还包含了对 Laravel Vapor 的支持、优化了授权响应、任务中间件、懒集合、子查询优化以及很多其它细节优化。要求 PHP 7.2+。  
+
+- 语义版本号
+> Laravel 框架 (Laravel /framework) 包遵循语义版本控制标准。这使得框架与已经遵循此版本控制标准的其他第一方 Laravel 包保持一致，Laravel 的发布周期将保持不变。
+
+- 优化授权响应
+> 在此之前，围绕授权策略提供自定义错误信息给终端用户非常困难，Laravel6 提供 Gate::inspect 方法来授权策略响应。  
+```php
+$response = Gate::inspect('view', $flight);
+
+if ($response->allowed()) {
+    // 用户已授权...
+}
+
+if ($response->denied()) {
+    // 用户未授权，返回响应信息
+    echo $response->message();
+}
+```
+
+- 任务中间件
+> 任务中间件允许中间件到队列任务中对其进行过滤。  
+> 使用中间件可以避免在任务类的 handle() 方法中编写与主体业务逻辑无关的代码。  
+```php
+// 在任务类中定义中间件方法
+public function middleware()
+{
+     return [new SomeMiddleware];
+}
+
+// 分发任务时可通过through指定中间件
+SomeJob::dispatch()->through([new SomeMiddleware]);
+```
+
+- 惰性集合
+> 对于处理大量数据的集合 (包括 Eloquent 模型集合)，惰性集合是一个改变（既定的）游戏规则者。一个新的 `lighting \Support\LazyCollection` 类利用 PHP 的生成器在处理大型数据集时保持低内存。
+
+- Eloquent 子查询增强
+> 详见 https://learnku.com/laravel/t/33324
+
+- Laravel UI
+> Laravel 5.x 自带的前端脚手架，现在被分离成一个独立的 laravel/ui Composer 包。这允许在主框架之外，方便迭代 UI 脚手架。  
+```bash
+# 如果用传统的 Bootstrap/Vue/ 搭建
+composer require laravel/ui
+php artisan ui vue --auth
+```
+
+### Laravel 5.8 新特性
+Laravel 5.8 在 Laravel 5.7 的基础上继续进行优化，包括引入新的 Eloquent 关联关系（远层一对一）、优化邮箱验证、基于约定的授权策略类自动注册、DynamoDB 缓存及 Session 驱动、优化任务调度器的时区配置、支持分配多个认证 guard 到广播频道、PSR-16 缓存驱动规范、优化 artisan serve 命令、支持 PHPUnit 8.0、支持 Carbon 2.0、支持 Pheanstalk 4.0，以及多个 bug 修复和可用性的提升。  
+要求 PHP 7.1.3+。
+
+- Eloquent HasOneThrough 关联关系
+> Eloquent 现在提供了对 HasOneThrough 关联类型的支持。  
+> 例如，假设 Supplier 模型类与 Account 模型类之间是一对一关联，并且 Account 模型类与 AccountHistory 模型类之间也是一对一关联，那么我们说 Supplier 模型类与 AccountHistory 模型类之间可以通过 hasOneThrough 方法基于 Account 模型类建立远层的一对一关联
+```php
+/**
+ * Get the account history for the supplier.
+ */
+public function accountHistory()
+{
+    return $this->hasOneThrough(AccountHistory::class, Account::class);
+}
+```
+
+- 自动发现模型对应策略类
+> 在之前版本中，每个模型类对应的授权策略类需要在应用的 AuthServiceProvider 中显式注册。  
+```php
+/**
+ * The policy mappings for the application.
+ *
+ * @var array
+ */
+protected $policies = [
+    'App\User' => 'App\Policies\UserPolicy',
+];
+```
+> Laravel 5.8 引入了模型类对应策略类的自动发现机制，只要模型类和策略类遵循标准的 Laravel 命名约定（在约定的命名空间及对应目录下）。  
+> 即策略类都必须位于模型类所在目录的子目录 Policies 中，例如，如果模型类都位于 app 目录下，则策略类必须位于 app/Policies 目录下。此外，策略类的名称必须和模型类相匹配，并且有一个 Policy 后缀，因此，User 模型类对应的策略类就是 UserPolicy。  
+> 如果你想要提供自己的策略类发现逻辑，可以使用 Gate::guessPolicyNamesUsing 方法注册自定义的回调。通常，该方法会在应用自带的服务提供者类 AuthServiceProvider 中调用。  
+```php
+use Illuminate\Support\Facades\Gate;
+
+Gate::guessPolicyNamesUsing(function ($modelClass) {
+    // 返回相应的策略类名称...
+});
+```
+`注：任何显式注册在 AuthServiceProvider 中的模型映射策略类优先级高于这种自动发现获取的策略类。`
+
+- PSR-16 缓存规范
+> 为了在存储缓存项时允许更细粒度的过期时间并遵守 PSR-16 缓存标准，我们将缓存项的有效期单位从分钟调整到秒。
+
+- 多个广播认证 Guard
+> 在 Laravel 之前的版本中，私有和存在广播频道通过应用的默认认证 guard 对用户进行认证。从 Laravel 5.8 开始，你可以分配多个不同的 guard 来对请求进行认证。  
+```php
+Broadcast::channel('channel', function() {
+    // ...
+}, ['guards' => ['web', 'admin']])
+```
+
+- Token Guard 令牌哈希算法
+> Laravel 的 token guard 用于提供最基本的 API 认证，现在支持以 SHA-256 哈希算法对 API 令牌进行存储，这样比存储纯文本令牌更加安全。
+
+- 优化邮箱验证
+> Laravel 5.8 通过 SwiftMailer 提供的 egulias/email-validator 扩展包对验证器的底层邮箱验证逻辑进行了优化。之前版本的邮箱验证逻辑偶尔会将有效的邮箱地址，如 example@bär.se 判定为无效。
+
+- 默认调度器时区
+> Laravel 允许你使用 timezone 方法自定义调度任务的时区
+```php
+$schedule->command('inspire')
+     ->hourly()
+     ->timezone('America/Chicago');
+
+// 不过，当每个调度任务的时区都一样时这样编写代码显得笨重和累赘
+// 现在，可以在 app/Console/Kernel.php 文件中定义一个 scheduleTimezone 方法，用来返回在所有调度任务中使用的默认时区
+/**
+ * Get the timezone that should be used by default for scheduled events.
+ *
+ * @return \DateTimeZone|string|null
+ */
+protected function scheduleTimezone()
+{
+    return 'America/Chicago';
+}
+```
+
+- Artisan 调用优化
+> Laravel 允许你通过 Artisan::call 方法调用 Artisan 命令。  
+```php
+use Illuminate\Support\Facades\Artisan;
+// 在之前发布的版本中，命令的选项通过数组以第二个参数的方式传递到该方法
+Artisan::call('migrate:install', ['database' => 'foo']);
+// 在 Laravel 5.8 中，可以传递整个命令，包括命令的选项，只需传递一个参数即可
+Artisan::call('migrate:install --database=foo');
+```
+
+- 测试辅助方法 mock/spy
+> 为了让模拟对象更方便，Laravel 测试用例基类中新增了 mock 和 spy 方法，这两个方法会自动绑定模拟类到容器中。
+```php
+// Laravel 5.7
+$this->instance(Service::class, Mockery::mock(Service::class, function ($mock) {
+    $mock->shouldReceive('process')->once();
+}));
+
+// Laravel 5.8
+$this->mock(Service::class, function ($mock) {
+    $mock->shouldReceive('process')->once();
+});
+```
+
+- Eloquent 资源键保留
+> 当从路由中返回一个 Eloquent 资源集合时，Laravel 会重置集合的键以便它们以简单的数字顺序呈现。  
+> 当使用 Laravel 5.8 时，你可以添加一个 preserveKeys 属性到资源类表明资源类的键是否保留。默认情况下，为了和之前版本的 Laravel 保持一致，这些键会被重置；而如果 preserveKeys 属性值为 true 时，集合键会被保留。  
+
+- 更高阶的 Eloquent 方法 orWhere
+> Laravel 5.8 引入了更高阶的 orWhere 方法，允许你以方法链的方式链接作用域，而不必使用闭包。  
+```php
+// 在之前版本的 Laravel 中，通过 or 查询操作符连接不同的 Eloquent 模型作用域时需要使用闭包回调
+// scopePopular and scopeActive methods defined on the User model...
+$users = App\User::popular()->orWhere(function (Builder $query) {
+    $query->active();
+})->get();
+
+// laravel 5.8
+$users = App\User::popular()->orWhere->active()->get();
+```
+
+- Artisan Serve 命令优化
+> 在之前版本的 Laravel 中，Artisan 的 serve 命令会在 8000 端口上提供服务，如果有一个 serve 命令已经在监听这个端口，则再次运行 artisan serve 命令会失败。从 Laravel 5.8 开始，serve 会扫描从 8000 到 8009 之间的所有有效端口，以便你可以一次运行多个 serve 命令。
+
+- Blade 文件映射
+> 编译 Blade 模板时，Laravel 现在会添加一行注释到编译后文件的顶部，其中包含了编译前 Blade 模板文件的路径。 
+
+- DynamoDB 缓存 / Session 驱动
+> Laravel 5.8 引入了 [DynamoDB](https://aws.amazon.com/dynamodb/) 缓存和 Session 驱动，DynamoDB 是一个由 AWS 提供的无服务器 NoSQL 数据库，dynamodb 缓存的默认配置可以在 Laravel 5.8 的缓存配置文件中找到。
+
+- 支持 Carbon 2.0
+
+- 支持 Pheanstalk 4.0
+> Laravel 5.8 提供了对队列库 Pheanstalk ~4.0 版本的支持。  
+
+
+### Laravel 5.7 新特性
+Laravel 5.7 引入了一些新特性并修复了很多 5.6 版本中的 bug，要求 PHP 7.1.3+。  
+
+- 新的目录结构
+> resources 目录移除了 assets 子目录并将之前在 assets 目录下的子目录移到 resources 目录下。
+
+- 新的自定义分页
+> 提供了一个新的分页方法 linksOnEachSide($number) 来自定义分页器上显示的链接数目。  
+
+- 优化错误消息
+> 跟踪动态调用 Eloquent 模型引起的错误消息将变得更加简单
+
+- Laravel Nova
+> [Laravel Nova](https://nova.laravel.com/) 是一个专门为 Laravel 应用打造的、美观的、一流的后台管理面板，当然，Nova 的核心功能还是通过 Eloquent 管理底层数据库记录，不过在这个核心功能之上，Nova 还支持过滤器、透镜、动作、动作队列、授权、自定义工具、自定义卡片、自定义字段等额外功能。
+
+- 邮箱验证
+> Laravel 框架自带的认证脚手架代码引入了邮箱验证功能，为了实现这个功能，框架自带的 users 表迁移还新增了一个时间戳字段 email_verified_at。  
+> 如果想提示新注册用户验证他们的邮箱，User 模型类需要实现 MustVerifyEmail 接口。一旦 User 模型类标记实现 MustVerifyEmail 接口，新注册的用户将会收到一封邮件，其中包含已签名的验证链接，点击这个链接，Laravel 将会自动在数据库中记录验证时间并将用户重定向到你设置的页面。此外，默认 HTTP kernel 中还新增了一个 verified 中间件，用于过滤那些未验证邮箱的用户。  
+
+- 未登录用户授权  
+> 在之前版本的 Laravel 中，对于未登录访客的权限判断，无论是 Gate 还是 Policy，都会自动返回 false。不过，在 Laravel 5.7 中，你可以通过声明一个可选的类型提示或者将用户参数定义默认设置为 null，以便访客可以通过授权检查。  
+```php
+Gate::define('update-post', function (?User $user, Post $post) {
+    // ...
+});
+```
+
+- Symfony Dump Server
+> 通过引入扩展包 Laravel Dump Server 在 Laravel 应用中集成了 Symfony 的 dump-server 命令（php artisan dump-server）。  
+> 一旦服务器启动，所有对 dump 函数的调用结果将会输出到 dump-server 控制台窗口，而不是显示在浏览器中，从而允许开发者在不打乱 HTTP 响应输出的情况下检查某些值。
+
+- 通知本地化
+> 允许开发者通过本地化语言发送通知，甚至能够在通知队列中记住本地化设置。  
+```php
+// 为了实现这个功能，Illuminate\Notifications\Notification 类新增了一个 locale 方法来设置期望语言，应用会在通知被格式化时切换到 locale 设置语言，并在格式化完成后切换回之前的语言
+$user->notify((new InvoicePaid($invoice))->locale('es'));
+
+// 还可以通过 Notification 门面来本地化多个通知实体
+Notification::locale('es')->send($users, new InvoicePaid($invoice));
+```
+
+- URL 生成器 & 可调用语法
+> 除了只接收字符串外，Laravel 的 URL 生成器现在还可以在生成指向控制器动作的 URL 时接收「可调用」语法。  
+```php
+action([UserController::class, 'index']);
+```
+
+- 文件系统读写流
+> Laravel 的文件系统现在集成了 readStream 和 writeStream 方法。  
+```php
+Storage::disk('s3')->writeStream(
+    'remote-file.zip',
+    Storage::disk('local')->readStream('local-file.zip')
+);
+```
 
 ### Laravel 5.6 新特性
 要求 PHP 7.1.3+
