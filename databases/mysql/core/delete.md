@@ -44,9 +44,15 @@ delete 命令其实只是把记录的位置，或者数据页标记为了“可�
 
 扫描原表数据和构建临时文件。对于很大的表来说，这个操作是很消耗 IO 和 CPU 资源的。因此，如果是线上服务，你要很小心地控制操作时间。如果想要比较安全的操作的话，推荐使用 GitHub 开源的 gh-ost 来做。  
 
+### 常见问题
+1、使用 delete 误删数据怎么找回？  
+> 可以用 Flashback 工具通过闪回把数据恢复回来。  
+> Flashback 恢复数据的原理是修改 binlog 的内容，拿回原库重放，从而实现数据找回。
 
-
-
+2、delete 和 truncate 删除数据的区别是什么？  
+> delete 可以添加 where 条件删除部分数据，truncate 不能添加 where 条件只能删除整张表；  
+> delete 的删除信息会在 MySQL 的日志中记录，而 truncate 的删除信息不被记录在 MySQL 的日志中，因此 detele 的信息可以被找回而 truncate 的信息无法被找回；  
+> truncate 因为不记录日志所以执行效率比 delete 快。
 
 
 

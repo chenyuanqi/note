@@ -16,11 +16,12 @@
 > 从：sql 执行线程 —— 执行 relay log 中的语句  
 
 - MySQL 中存储引擎 MyISAM 与 InnoDB 的区别
-> InnoDB 支持事务，而 MyISAM 不支持事务
-> InnoDB 支持行级锁，而 MyISAM 支持表级锁
-> InnoDB 支持 MVCC, 而 MyISAM 不支持
-> InnoDB 支持外键，而 MyISAM 不支持
-> InnoDB 不支持全文索引，而 MyISAM 支持
+> 最大的区别是 InnoDB 支持事务，而 MyISAM 不支持事务  
+> InnoDB 支持行级锁，而 MyISAM 支持表级锁  
+> InnoDB 支持 MVCC, 而 MyISAM 不支持  
+> InnoDB 支持外键，而 MyISAM 不支持  
+> InnoDB 不支持 FULLTEXT 类型全文索引，而 MyISAM 支持  
+> InnoDB 主键查询性能高于 MyISAM，整体上 MyISAM 性能比 InnoDB 高  
 
 - MySQL 中索引方法 btree 和 hash 的区别
 > 1.在精确查找的情况下：hash 索引要高于 btree 索引，因为 hash 索引查找数据基本上能一次定位数据（大量 hash 值相等的情况下性能会有所降低，也可能低于 btree）,而 btree 索引基于节点上查找，所以在精确查找方面 hash 索引一般会高于 btree 索引。  
@@ -381,6 +382,16 @@ EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
 > 5.使用 show status，show processlist 等命令查看
 > 6.使用 explain 分析单条 SQL 语句
 
+- count(column) 和 count(\*) 有什么区别？  
+> count(column) 和 count(\*) 最大区别是统计结果可能不一致，count(column) 统计不会统计列值为 null 的数据，而 count(\*) 则会统计所有信息，所以最终的统计结果可能会不同。  
+> count 在 InnoDB 中是一行一行读取，然后累计计数的。  
 
+- 为什么 InnoDB 不把总条数记录下来，查询的时候直接返回呢？  
+> 因为 InnoDB 使用了事务实现，而事务的设计使用了多版本并发控制，即使是在同一时间进行查询，得到的结果也可能不相同，所以 InnoDB 不能把结果直接保存下来，因为这样是不准确的。
 
+- 在 InnoDB 引擎，count 性能消耗为什么是这样 count (字段) < count(主键 id) < count (1)≈count(\*) ？ 
+> 对于 count (主键 id) 来说，InnoDB 引擎会遍历整张表，把每一行的 id 值都取出来，返回给 server 层。server 层拿到 id 后，判断是不可能为空的，就按行累加。  
+> 对于 count (1) 来说，InnoDB 引擎遍历整张表，但不取值。server 层对于返回的每一行，放一个数字 “1” 进去，判断是不可能为空的，按行累加。  
+> 对于 count (字段) 来说，如果这个 “字段” 是定义为 not null 的话，一行行地从记录里面读出这个字段，判断不能为 null，按行累加；如果这个 “字段” 定义允许为 null，那么执行的时候，判断到有可能是 null，还要把值取出来再判断一下，不是 null 才累加。  
+> 对于 count (\*) 来说，并不会把全部字段取出来，而是专门做了优化，不取值，直接按行累加。  
 
