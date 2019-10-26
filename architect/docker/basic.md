@@ -132,15 +132,44 @@ docker run -p 127.0.0.1::80 -it ubuntu /bin/bash
 ```
 
 ### Docker 基本操作
+容器状态切换关系图如下：  
+![容器状态切换关系图](../../others/static/images/docker-container-status-change.png)  
+
 ```bash
 # 查看运行的容器
 docker ps
-# 停止容器
-docker stop container-id
+# 启动一个容器
+docker run -d container-id
 # 进入容器
 docker exec -it [CONTAINER-ID] /bin/sh
 # 退出
 exit
+
+
+# 创建一个容器
+docker container create container-id
+# 查看容器状态
+docker ps -l
+# 启动一个容器
+docker start container-id
+# 暂停一个容器
+docker pause container-id
+# 容器从暂停状态恢复
+docker unpause container-id
+# 停止容器
+docker stop container-id
+# 删除容器
+docker rm container-id
+# 删除所有已经停止的容器
+docker container prune
+# 查看容器是否存在
+docker ps -a | grep container-id
+
+# 查看容器占用资源
+docker stats
+docker top
+# 指定可使用 CPU 核
+docker update --cpus "1.5" --cpuset-cpus 0  $(docker ps -ql)
 ```
 
 
