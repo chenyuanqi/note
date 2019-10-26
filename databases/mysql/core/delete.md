@@ -54,7 +54,10 @@ delete 命令其实只是把记录的位置，或者数据页标记为了“可�
 > delete 的删除信息会在 MySQL 的日志中记录，而 truncate 的删除信息不被记录在 MySQL 的日志中，因此 detele 的信息可以被找回而 truncate 的信息无法被找回；  
 > truncate 因为不记录日志所以执行效率比 delete 快。
 
-
+mysql 有三种删除方式：  
+delete from t; 只删除表数据；  
+truncate table t; 清空表数据，但是保留表结构；  
+drop table t; 删除表数据和表结构。  
 
 
 
