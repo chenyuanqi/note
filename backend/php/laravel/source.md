@@ -218,7 +218,7 @@ register 的执行时机是在 Laravel Kernel 的内核绑定。
 Facade 核心实现原理就是提前把 Facade 注入到 Ioc 容器。  
 1、定义一个服务提供者的外观类，定义静态方法 getFacadeAccessor 返回 ioc 容器绑定的 key  
 2、绑定 ioc 容器    
-3、通过静态魔术方法 __callStatic 获取当前调用的方法  
+3、通过静态魔术方法 \_\_callStatic 获取当前调用的方法  
 ```php
 class UserFacade
 {
