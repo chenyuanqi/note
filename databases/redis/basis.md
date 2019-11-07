@@ -1,6 +1,7 @@
 
 ### 什么是 Redis
-「[Redis](https://redis.io/)」是一个开源的使用C语言编写、支持网络、可基于内存亦可持久化的日志型、Key-Value数据库，并提供多种语言的 API。
+「[Redis](https://redis.io/)」全称为 Remote Dictionary Server（远程数据服务），是一个开源的使用 C 语言编写、支持网络、可基于内存亦可持久化的日志型、基于内存且支持持久化的高性 Key-Value 数据库，并提供多种语言的 API。  
+
 
 ### Redis 的特点
 - 支持数据持久化
