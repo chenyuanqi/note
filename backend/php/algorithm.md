@@ -142,3 +142,81 @@ function str_reverse($str) {
 > set - 集合，保存不重复的元素  
 > map - 字典，关联数组，也叫字典或者键值对  
 > graph - 图，通常使用邻接矩阵和邻接表表示，前者易实现但是对于稀疏矩阵会浪费较多空间、后者使用链表的方式存储信息但是对于图搜索时间复杂度较高  
+
+### 常见算法题
+1、字符串反转的实现
+```php
+function strReverse($str, $encoding = 'utf-8') {
+    $result = '';
+    $len = mb_strlen($str);
+    for($i=$len-1; $i>=0; $i--){
+        $result .= mb_substr($str, $i, 1, $encoding);
+    }
+    
+    return $result;
+}
+
+echo strReverse('abccccdd');
+```
+
+2、获取最大子串长度及子串  
+```php
+function getLongestSubStr($str) {
+    $length = 0;
+    $result = '';
+    if (empty($str)) {
+        goto RESULT;
+    }
+
+    $arr = str_split($str);
+    $maxLen = strlen($str) - 1;
+    $tempArr = [];
+    $tempStr = $prevStr = '';
+    $tempLen = 0;
+    $sameFlag = false;
+    foreach($arr as $k => $v){
+        $tempFlag = $v === $prevStr;
+        $prevStr = $v;
+        $tempStr .= $v;
+
+        if ($sameFlag && !$tempFlag){
+            $tempStr = substr($tempStr, -1);
+        } elseif (!$sameFlag && $tempFlag) {
+            $tempStrResult = substr($tempStr, 0, -2);
+            $tempStrResult && array_push($tempArr, [$tempStrResult => strlen($tempStrResult)]);
+            $tempStr = substr($tempStr, -2);
+        } elseif ($k === $maxLen) {
+            $tempStr && array_push($tempArr, [$tempStr => strlen($tempStr)]);
+        }
+        
+        $sameFlag = $tempFlag;
+    }
+
+    asort($tempArr);
+    
+    $longestArr = end($tempArr);
+    $result     = array_keys($longestArr)[0];
+    $length     = array_values($longestArr)[0];
+
+    RESULT:
+    return [$length, $result];
+}
+
+getLongestSubStr('aaabcdddffsfsda'); // 5, sfsda
+```
+
+3、斐波那契数列的求解  
+```php
+function fibonacci($num) {
+    if ($num === 0) {
+        return 0;
+    }
+
+    if ($num === 1) {
+        return 1;
+    }
+
+    return fibonacci($num - 2) + fibonacci($num - 1);
+}
+```
+
