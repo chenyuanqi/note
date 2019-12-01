@@ -10,13 +10,19 @@ function bubble_sort($arr)
     }
 
     for ($i = 0; $i < $arr_length - 1; ++$i) {
+        $flag = false;
         for ($j = 0; $j < $arr_length - 1; ++$j) {
             $current = $arr[$j];
             $next    = $arr[$j + 1];
             if ($current > $next) {
                 $arr[$j]     = $next;
                 $arr[$j + 1] = $current;
+                $flag        = true;
             }
+        }
+
+        if (!$flag) {
+            break;
         }
     }
 

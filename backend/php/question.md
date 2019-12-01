@@ -438,6 +438,7 @@ function exportCsv(array $head, $data, $mark = 'attack_ip_info', $fileName = "te
 > php 中 $_SERVER 参数 HTTP_X_FORWARDED_FOR 和 REMOTE_ADDR 来获取客户端 IP。  
 > 在 PHP 中使用 $_SERVER ["REMOTE_ADDR"] 来取得客户端的 IP 地址，但如果客户端是使用代理服务器来访问，那取到的就是代理服务器的 IP 地址，而不是真正的客户端 IP 地址。要想透过代理服务器取得客户端的真实 IP 地址，就要使用 $_SERVER ["HTTP_X_FORWARDED_FOR"] 来读取。  
 
+
 ### 开发进阶
 - PHP 弱类型的实现
 > PHP 是弱类型，动态的语言脚本。在申明一个变量的时候，并不需要指明它保存的数据类型。  
@@ -452,6 +453,16 @@ function exportCsv(array $head, $data, $mark = 'attack_ip_info', $fileName = "te
 
 - PHP 框架 Laravel 和 Yii 路由原理对比
 > ...
+
+- CGI 和 FastCGI，PHP-CGI 和 PHP-FPM  
+> WEB 中，Web Server 一般指 Apache、Nginx、IIS、Lighttpd、Tomcat 等服务器，Web Application 一般指 PHP、Java、Asp.net 等应用程序。  
+> 
+> 一个完整的动态 PHP Web 访问流程：当 Web Server 收到 index.php 这个请求后，会启动对应的 CGI 程序，这里就是 PHP 的解析器。接下来 PHP 解析器会解析 php.ini 文件，初始化执行环境，然后处理请求，再以规定 CGI 规定的格式返回处理后的结果，退出进程，Web server 再把结果返回给浏览器。  
+> 
+> CGI：是 Web Server 与 Web Application 之间数据交换的一种协议。  
+> FastCGI：同 CGI，是一种通信协议，但比 CGI 在效率上做了一些优化。同样，SCGI 协议与 FastCGI 类似。  
+> PHP-CGI：是 PHP （Web Application）对 Web Server 提供的 CGI 协议的接口程序。  
+> PHP-FPM：是 PHP（Web Application）对 Web Server 提供的 FastCGI 协议的接口程序，额外还提供了相对智能一些任务管理。  
 
 ### 狗血的面试题
 千万级别并发、负载均衡、索引原理
