@@ -1,6 +1,15 @@
 
 ### PHP 扩展开发
+[PHP Internals Book](http://www.phpinternalsbook.com/index.html) 和 [PHP Internals](https://phpinternals.net/) 两个非官方站点提供稍微全面些的 PHP7 扩展开发的指导。  
 
+更多参考：  
+[深入理解 PHP 内核](http://www.php-internals.com/)  
+
+### 为什么需要 PHP 扩展开发
+
+- 当 PHP 的语法特性无法满足我们的要求时。比如在 PHP5.5 之前，没有 Generator，所以如果我们想要在 PHP 中使用协程，就必须在底层实现一个上下文切换的库。
+- 当我们需要使用一个 C/C++ 的库时。只有当你充分阅读并理解它的源码以后你才有可能用 PHP 重写这个库，而直接封装成 PHP 扩展你只往往需要理解它暴露的接口就可以了。简单高效。
+- 当 PHP 的执行速度真的成为我们项目的性能瓶颈时（比如 yaf 和 swoole 等扩展的存在）。
 
 ### PHP 扩展快速入门
 1、下载 PHP 源码到本地目录  
