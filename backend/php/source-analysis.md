@@ -56,7 +56,7 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|l", &haystack, &haystac
 ```
 
 - PHP 变量的实现
-> 在 PHP 的核心代码中，变量被称为 ZVAL。  
+> 在 PHP 的核心代码中，变量被称为 ZVAL（Zend value）。  
 > ZVAL 这个结构之所以那么重要是有原因的，不仅仅是因为 PHP 使用弱类型而 C 使用强类型
 ```c
 struct _zval_struct {
