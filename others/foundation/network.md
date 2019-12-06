@@ -87,3 +87,11 @@ HTTP 状态码
 
 [更多 HTTP 状态码参考](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status)  
 
+### 常见问题
+1、TCP（Transmission Control Protocol，传输控制协议）和 UDP（User Data Protocol，用户数据报协议）的区别  
+TCP 协议可靠；UDP 协议不可靠。  
+TCP 协议是面向连接；UDP 协议采用无连接。  
+TCP 协议应用在传输大量数据的场合；UDP 协议应用在少量数据的场合。  
+TCP 协议速度慢；UDP 协议速度快。  
+TCP 协议的发送方要确认接收方是否收到数据段（3次握手协议），TCP 协议采用窗口技术和流控制。  
+
