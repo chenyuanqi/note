@@ -220,3 +220,28 @@ function fibonacci($num) {
 }
 ```
 
+4、遍历指定目录下所有子目录和子文件  
+```php
+function scanDir($path){
+    $dirHandle = opendir($path);
+
+    $files = [];
+    while(($temp = readdir($dirHandle)) !== false){
+        if($temp === '.' || $temp === '..'){
+            continue;
+        }
+
+        $newPath = $path. DIRECTORY_SEPARATOR . $temp;
+        if(is_dir(!$newPath)){
+            $files[$temp] = scanDir($newPath);
+        } else {
+            $files[] = $temp;
+        }
+    }
+
+    closedir($handle);
+
+    return $files;
+} 
+```
+
