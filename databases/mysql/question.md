@@ -420,6 +420,12 @@ EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
 > 数据库层面优化：利用子查询优化超多分页场景，比如：SELECT a.* FROM 表 1 a, (select id from 表 1 where 条件 LIMIT 100000,20 ) b where a.id=b.id ，先快速定位需要获取的 id 段，然后再关联查询。MySQL 并不是跳过 offset 行，而是取 offset+N 行，然后返回放弃前 offset 行，返回 N 行，那当 offset 特别大的时候，效率就非常的低下，要么控制返回的总页数，要么对超过特定阈值的页数进行 SQL 改写，利用子查询先快速定位需要获取的 id 段，然后再关联查询，就是对分页进行 SQL 改写的具体实现；  
 > 程序层面优化：可以利用缓存把查询的结果缓存起来，下一次查询的时候性能就会非常高。  
 
+- 请写出 mysql 分页查找返回，并返回匹配总统计数？  
+```sql
+select sql_calc_found_rows column_name from table_name limit offset, size;
+select found_rows(); # 返回查询记录的总数
+```
+
 - 线上修改表结构有哪些风险？  
 > 在 MySQL 5.6 开始提供了 online ddl 功能，允许一些 DDL（create table/view/index/syn/cluster）语句和 DML 语句并发，在 5.7 版本对 online ddl 又有了增强，这使得大部分 DDL 操作可以在线进行，[详见这里](https://dev.mysql.com/doc/refman/5.7/en/innodb-create-index-overview.html)，这使得在线上修改表结构的风险变的更大，如果在业务开发过程中必须在线修改表结构，可以参考以下方案：  
 > 尽量在业务量小的时间段进行；  
