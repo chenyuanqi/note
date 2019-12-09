@@ -2,6 +2,7 @@
 ### 什么是 Redis
 「[Redis](https://redis.io/)」全称为 Remote Dictionary Server（远程数据服务），是一个开源的使用 C 语言编写、支持网络、可基于内存亦可持久化的日志型、基于内存且支持持久化的高性 Key-Value 数据库，并提供多种语言的 API。  
 
+Redis 性能优越，读的速度达 110000 次 /s，写的速度达 81000 次 /s；此外，Key 和 Value 的大小限制均为 512M，这阈值相当可观。
 
 ### Redis 的特点
 - 支持数据持久化
@@ -30,6 +31,7 @@
 > 读写性能优异，Redis 单机 qps（每秒的并发）可以达到的速度是 110000 次/s，写的速度是 81000 次/s，适合小数据量高速读写访问。  
 
 - Redis 的原子性
+Redis 提供了一些在一定程度上支持线程安全和事务的命令，例如 multi/exec、watch、inc 等。由于 Redis 服务器是单线程的，任何单一请求的服务器操作命令都是原子的，但跨客户端的操作并不保证原子性，所以对于同一个连接的多个操作序列也不保证事务。  
 > Redis 的所有操作都是原子性的，意思是要么成功执行要么失败完全不执行。  
 > 单个操作是原子性的。  
 > 多个操作也支持事务，即原子性，通过 MULTI 和 EXEC 指令包起来。  
@@ -282,8 +284,13 @@ redis> zrangebyscore country 2 3
 2) "japan"
 ```
 
-### Redis 的集群
-Redis 有 3 种集群策略
+### Redis 的高可用策略
+方案 1：主从模式  
+Redis 支持数据的备份，即 Master-Slave 模式，Slave 可使用 RDB 和缓存的 AOF 命令进行同步和恢复，Master 故障时，对应的 Slave 将通过选举升主，保障可用性。
+
+方案 2：集群
+Redis 还支持 Sentinel 和 Cluster（从 3.0 版本开始）等高可用集群方案。  
+Redis 有 3 种集群策略。
 
 - 主从
 > 1 台机器可写，作为主；另外 N 台可读，作为从，类似于 MySQL 的主从复制，不过 Redis 没有 BINLOG 机制。  
@@ -296,6 +303,12 @@ Redis 有 3 种集群策略
 
 - 集群
 > Redis3.0 以后增加了集群的概念，可以实现多主多从结构，实现正真的高可用
+
+方案 3：Twemproxy  
+Twemproxy 是一个使用 C 语言编写、以代理的方式实现的、轻量级的 Redis 代理服务器。它通过引入一个代理层，将应用程序后端的多台 Redis 实例进行统一管理，使应用程序只需要在 Twemproxy 上进行操作，而不用关心后面具体有多少个真实的 Redis 实例，从而实现了基于 Redis 的集群服务。当某个节点宕掉时，Twemproxy 可以自动将它从集群中剔除，而当它恢复服务时，Twemproxy 也会自动连接。由于是代理，Twemproxy 会有微小的性能损失。  
+
+方案 4：Codis  
+Codis 是一个分布式 Redis 解决方案，对于上层的应用来说，连接到 Codis Proxy 和连接原生的 Redis Server 没有明显的区别（部分命令不支持）， 上层应用可以像使用单机的 Redis 一样使用，Codis 底层会处理请求的转发，不停机的数据迁移等工作。  
 
 ### Redis 与 PHP
 「[phpredis](https://github.com/phpredis/phpredis)」是使用 c 写的 php 扩展，「[predis](https://github.com/nrk/predis)」是使用纯 php 写的第三方包。  
@@ -342,6 +355,11 @@ Redis 缓存失效策略有：定时删除策略，惰性删除策略，定期�
 > 每隔一段时间执行一次删除（在 redis.conf 配置文件设置 hz，1s 刷新的频率）过期 key 操作。它的优点是可以控制删除操作的时长和频率，来减少 CPU 时间占用，可以避免惰性删除时候内存泄漏的问题；缺点是对内存友好方面，不如定时策略，对 CPU 友好方面，不如惰性策略。  
 
 Redis 一般采用：惰性策略 + 定期删除策略两个相结合。
+
+### Redis 内存管理
+Redis 使用 C 语言编写，但为了提高内存的管理效率，并没有直接使用 malloc/free 函数，Redis 默认选择 jemalloc 作为内存分配器，以减小内存碎片率。  
+
+jemalloc 在 64 位系统中，将内存空间划分为小、大、巨大三个范围。每个范围内又划分了许多小的内存块单位。当 Redis 存储数据时，会选择大小最合适的内存块进行存储。同时，Redis 为 Key-Value 存储定制了两种对象，其中 Key 采用 SDS（Simple Dynamic String)，Value 采用 redisObject，为内部编码和回收内存的高效实现奠定了基础。
 
 ### Redis 疑难杂症
 - predis 与 phpredis 的区别
