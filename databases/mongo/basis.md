@@ -387,3 +387,13 @@ db.articles.aggregate( [
 当一个写操作修改了多个文档，每个文档的更新是具有原子性的，但是整个操作作为一个整体是不具有原子性的，并且与其他操作可能会有所交替。但是，您可以使用:update:[`](http://www.mongoing.com/docs/core/write-operations-atomicity.html#id1)$isolated`操作将多个文档单的写操作*隔离*成单个的写操作， 
 
 > update:`$isolated`操作将使写操作在集合上获得一个排他锁，甚至对于文档级别的锁存储引擎比如WiredTiger也是这样处理的。这也就是说在执行:update:`$isolated`操作运行期间会导致WiredTiger单线程运行。 
+
+### 常见问题
+1、mongo 和 mysql 的区别？  
+传统的关系数据库一般由数据库（database）、表（table）、记录（record）三个层次概念组成，MongoDB 是由数据库（database）、集合（collection）、文档对象（document）三个层次组成。mongo 有独特的自己的查询方式，而 mysql 使用的是传统的 sql 语句。mongo 不支持事务，而 mysql 的 innodb 存储引擎支持。  
+如果需要将 mongodb 作为后端 db 来代替 mysql 使用，即这里 mysql 与 mongodb 属于平行级别，那么，这样的使用可能有以下几种情况的考量：   (1) mongodb 所负责部分以文档形式存储，能够有较好的代码亲和性，json 格式的直接写入方便。(如日志之类)     
+(2) 从 datamodels 设计阶段就将原子性考虑于其中，无需事务之类的辅助。开发用如 nodejs 之类的语言来进行开发，对开发比较方便。    
+(3) mongodb 本身的 failover 机制，无需使用如 MHA 之类的方式实现。  
+
+
+
