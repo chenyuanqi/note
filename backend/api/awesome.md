@@ -19,4 +19,6 @@
 ### 公用 API
 [免费 API 集](https://github.com/fangzesheng/free-api)  
 [免费 API 试用](https://www.apishop.net/#/)  
+[webxml 服务](http://www.webxml.com.cn/zh_cn/index.aspx)  
 
+[聚合数据](https://www.juhe.cn/)  
