@@ -400,6 +400,10 @@ function exportCsv(array $head, $data, $mark = 'attack_ip_info', $fileName = "te
 }
 ```
 
+- session 和 cookie
+> 由于 HTTP 协议是无状态的协议，所以服务端需要记录用户的状态时，就需要用某种机制来识具体的用户，这个机制就是 Session。Session 是保存在服务端的，有一个唯一标识叫 Session ID，在服务端保存 Session 的方法有很多，比如内存、数据库、文件等。  
+> 每次 HTTP 请求的时候，客户端都会发送相应的 Cookie 信息到服务端。大多数的应用都是用 Cookie 来实现 Session 跟踪的，第一次创建 Session 的时候，服务端会在 HTTP 协议中告诉客户端，需要在 Cookie 里面记录一个 Session ID，以后每次请求把这个会话 ID 发送到服务器，从而识别用户。当客户端禁用 Cookie 时，一般会使用一种叫做 URL 重写的技术来进行会话跟踪，即每次 HTTP 交互，URL 后面都会被附加上一个诸如 id=xxxxx 这样的参数，服务端据此来识别用户。  
+
 - 简述 session 存储原理和实现 session 共享的方式以及防止 session_id 泄漏
 > 当用户第一次访问站点时，PHP 会用 session_start () 函数为用户创建一个 session ID，这就是针对这个用户的唯一标识，每一个访问的用户都会得到一个自己独有的 session ID，这个 session ID 会存放在响应头里的 cookie 中，之后发送给客户端。这样客户端就会拥有一个该站点给他的 session ID。  
 > 当用户第二次访问该站点时，浏览器会带着本地存放的 cookie (里面存有上次得到的 session ID) 随着请求一起发送到服务器，服务端接到请求后会检测是否有 session ID，如果有就会找到响应的 session 文件，把其中的信息读取出来；如果没有就跟第一次一样再创建个新的。  
