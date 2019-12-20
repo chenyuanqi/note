@@ -442,6 +442,17 @@ function exportCsv(array $head, $data, $mark = 'attack_ip_info', $fileName = "te
 > php 中 $_SERVER 参数 HTTP_X_FORWARDED_FOR 和 REMOTE_ADDR 来获取客户端 IP。  
 > 在 PHP 中使用 $_SERVER ["REMOTE_ADDR"] 来取得客户端的 IP 地址，但如果客户端是使用代理服务器来访问，那取到的就是代理服务器的 IP 地址，而不是真正的客户端 IP 地址。要想透过代理服务器取得客户端的真实 IP 地址，就要使用 $_SERVER ["HTTP_X_FORWARDED_FOR"] 来读取。  
 
+- GET 和 POST 的区别
+> 1、GET 的退回是无害的，POST 会再次请求
+> 2、GET 的 URL 会被 bookmark，POST 不会
+> 3、GET 会主动被 cache，POST 不会，可以手动设置
+> 4、GET 会被完整记录到历史记录中，POST 不会
+> 5、GET 的参数会暴露在 URL 上，POST 的参数在 request body，GET 不安全
+> 6、GET 的参数信息有长度限制，POST 没有
+> 7、GET 的参数数据类型只能为 ASCII 字符，POST 不限制
+> 8、GET 只能 URL 编码，POST 可以多种编码方式
+> 9、GET 发送一次 TCP 包（header 和 data 一起发送），POST 发送两次 TCP 包（header 先发送，后发送 data）
+
 
 ### 开发进阶
 - PHP 弱类型的实现
