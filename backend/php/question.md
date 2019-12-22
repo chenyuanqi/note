@@ -581,3 +581,8 @@ class Bmw extends Car
 
 Bmw::model(); // I am a Bmws!
 ```
+
+- laravel 的优雅体现在哪里？  
+> 
+
+
