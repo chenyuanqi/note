@@ -583,6 +583,6 @@ Bmw::model(); // I am a Bmws!
 ```
 
 - laravel 的优雅体现在哪里？  
-> 
+> Laravel 理念中强调的更多的是 Artisan，就是工匠，工匠的 craftmanship 那肯定是优雅，精美的。所以所谓优雅，指的是代码的整洁，易读性和易于管理性。  
 
 
