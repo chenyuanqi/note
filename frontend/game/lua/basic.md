@@ -583,3 +583,70 @@ end
 a1 = adder(9) 
 print(a1(16)) -- 25
 ```
+
+**模块与包**  
+模块类似于一个封装库，从 Lua 5.1 开始，Lua 加入了标准的模块管理机制，可以把一些公用的代码放在一个文件里，以 API 接口的形式在其他地方调用，有利于代码的重用和降低代码耦合度。  
+Lua 的模块是由变量、函数等已知元素组成的 table，因此创建一个模块很简单，就是创建一个 table，然后把需要导出的常量、函数放入其中，最后返回这个 table 就行。  
+```lua
+-- 文件名为 module.lua
+-- 定义一个名为 module 的模块
+module = {}
+
+-- 定义一个常量
+module.constant = "这是一个常量"
+
+-- 定义一个函数
+function module.func1()
+    io.write("这是一个公有函数！\n")
+end
+
+-- 声明为程序块的局部变量，即表示一个私有函数
+local function func2()
+    print("这是一个私有函数！")
+end
+
+function module.func3()
+    func2()
+end
+
+return module
+```
+
+由上可见，模块的结构就是一个 table 的结构，因此可以像操作调用 table 里的元素那样来操作调用模块里的常量或函数。  
+
+Lua 提供了一个名为 require 的函数用来加载模块。要加载一个模块，只需要简单地调用就可以了。  
+```lua
+-- test_module.php 文件
+-- module 模块为上文提到到 module.lua
+require("module") -- 或可定义别名变量 local m = require("module")
+
+print(module.constant) -- 这是一个常量
+
+module.func3() -- 这是一个私有函数！
+```
+
+对于自定义的模块，模块文件不是放在哪个文件目录都行，函数 require 有它自己的文件路径加载策略，它会尝试从 Lua 文件或 C 程序库中加载模块。  
+require 用于搜索 Lua 文件的路径是存放在全局变量 package.path 中，当 Lua 启动后，会以环境变量 LUA_PATH 的值来初始这个环境变量。如果没有找到该环境变量，则使用一个编译时定义的默认路径来初始化。当然，如果没有 LUA_PATH 这个环境变量，也可以自定义设置，在当前用户根目录下打开 .profile 文件（没有则创建，打开 .bashrc 文件也可以），例如把 “~/lua/” 路径加入 LUA_PATH 环境变量里：  
+```
+# 文件路径以 “;” 号分隔，最后的 2 个 “;;” 表示新加的路径后面加上原来的默认路径
+export LUA_PATH="~/lua/?.lua;;"
+```
+如果找过目标文件，则会调用 package.loadfile 来加载模块。否则，就会去找 C 程序库。搜索的文件路径是从全局变量 package.cpath 获取，而这个变量则是通过环境变量 LUA_CPATH 来初始。  
+
+Lua 和 C 是很容易结合的，使用 C 为 Lua 写包。与 Lua 中写包不同，C 包在使用以前必须首先加载并连接，在大多数系统中最容易的实现方式是通过动态连接库机制。  
+Lua 在一个叫 loadlib 的函数内提供了所有的动态连接的功能。这个函数有两个参数：库的绝对路径和初始化函数。  
+```lua
+local path = "/usr/local/lua/lib/libluasocket.so"
+local f = loadlib(path, "luaopen_socket")
+```
+loadlib 函数加载指定的库并且连接到 Lua，然而它并不打开库（也就是说没有调用初始化函数），反之他返回初始化函数作为 Lua 的一个函数，这样我们就可以直接在 Lua 中调用他。如果加载动态库或者查找初始化函数时出错，loadlib 将返回 nil 和错误信息。  
+```lua
+local path = "/usr/local/lua/lib/libluasocket.so"
+-- 或者 path = "C:\\windows\\luasocket.dll"，这是 Window 平台下
+local f = assert(loadlib(path, "luaopen_socket"))
+f()  -- 真正打开库
+```
+一般情况下，我们期望二进制的发布库包含一个与前面代码段相似的 stub 文件，安装二进制库的时候可以随便放在某个目录，只需要修改 stub 文件对应二进制库的实际路径即可。将 stub 文件所在的目录加入到 LUA_PATH，这样设定后就可以使用 require 函数加载 C 库了。  
+
+**元表（Metatable）**  
+
