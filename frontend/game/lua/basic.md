@@ -1292,6 +1292,66 @@ end
 print(unpackex({one = {"one", "two", "three"}, two = "T" , three = "TH"},{"one", "two", "three"}))
 ```
 
+**迭代**  
+迭代是 for 语句的一种特殊形式，可以通过 for 语句驱动迭代函数对一个给定集合进行遍历。
+```lua
+-- 迭代函数 enum
+local function enum(array)
+    local index = 1
+    -- 返回一个匿名的迭代函数
+    return function()
+        local ret = array[index]
+        index = index + 1
+        
+        return ret
+    end
+end
+
+local function foreach(array,action)
+    -- 每次调用迭代函数 enum 都得到一个值 (通过 element 变量引用)
+    -- 若该值为 nil, 则 for 循环结束
+    for element in enum(array)do
+        action(element)
+    end
+end
+
+foreach({1,2,3},print)
+```
+
+**协作线程**  
+通过 coroutine.create 可以创建一个协作线程，该函数接收一个函数类型的参数作为线程的执行体，返回一个线程对象。  
+通过 coroutine.resume 可以启动一个线程或者继续一个挂起的线程。该函数接收一个线程对象以及其他需要传递给该线程的参数。线程可以通过线程函数的参数或者 coroutine.yield 调用的返回值来获取这些参数。当线程初次执行时，resume 传递的参数通过线程函数的参数传递给线程，线程从线程函数开始执行；当线程由挂起转为执行时，resume 传递的参数以 yield 调用返回值的形式传递给线程，线程从 yield 调用后继续执行。  
+线程调用 coroutine.yield 暂停自己的执行，并把执行权返回给启动 / 继续它的线程；线程还可利用 yield 返回一些值给后者，这些值以 resume 调用的返回值的形式返回。  
+
+```lua
+--线程
+local function producer()
+    return coroutine.create(
+	    function(salt)
+	        local t = {1,2,3}
+	        for i = 1,#t do
+	            salt = coroutine.yield(t[i] + salt)
+	        end
+	    end
+    )
+end
+
+function consumer(prod)
+    local salt = 10
+    while true do
+        local running ,product = coroutine.resume(prod, salt)
+        salt = salt*salt
+        if running then
+            print(product or "END!")
+        else
+            break
+        end
+    end
+end
+
+consumer(producer())
+```
+
 **常用数据结构**  
 Lua 中的 table 不是一种简单的数据结构，它可以作为其它数据结构的基础，如数组、记录、线性表、队列和集合等，在 Lua 中都可以通过 table 来表示。  
 

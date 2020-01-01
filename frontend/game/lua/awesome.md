@@ -7,3 +7,5 @@
 [Lua Math 标准库](http://lua-users.org/wiki/MathLibraryTutorial)  
 [Lua Io 标准库](http://lua-users.org/wiki/IoLibraryTutorial)  
 [Lua Os 标准库](http://lua-users.org/wiki/OsLibraryTutorial)  
+
+[Lua Nginx 模块](https://github.com/openresty/lua-nginx-module)  
