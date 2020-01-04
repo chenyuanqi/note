@@ -156,6 +156,10 @@ multiple = '''\
 "{0} be nimble, {0} be quick, {0} jump over the {1}".format("Jack", "candle stick") # Jack be nimble, Jack be quick, Jack jump over the candle stick
 # 关键字参数
 "{name} wants to eat {food}".format(name="Bob", food="lasagna")  # Bob wants to eat lasagna
+# 取十进制小数点后的精度为 3 ，得到的浮点数为 '0.333'
+print('{0:.3f}'.format(1.0/3)) # 0.333
+# 填充下划线 (_) ，文本居中，将 '___hello___' 的宽度扩充为 11 
+print('{0:_^11}'.format('hello')) # ___hello___
 
 # 这里的 * 表示重复
 3 * 'un' + 'ium' # unununium
@@ -339,6 +343,13 @@ sorted(tel) # 经过排序的键的列表，['guido', 'irv', 'jack']
 'guido' in tel # True
 'jack' not in tel # False
 
+filled_dict = {"one": 1, "two": 2, "three": 3}
+filled_dict.keys() # 获取所有键，dict_keys(['one', 'two', 'three'])
+filled_dict.values() # 获取所有值，dict_values([3, 2, 1])
+filled_dict.get("one") # 用 get 来避免 KeyError，1
+filled_dict.setdefault("four", 3) # setdefault 方法只有当键不存在的时候插入新值
+filled_dict.update({"four": 4}) # 字典赋值，或filled_dict["four"] = 4
+
 # 遍历字典
 knights = {'gallahad': 'the pure', 'robin': 'the brave'}
 for k, v in knights.items():
@@ -418,6 +429,8 @@ for w in words:
 # 迭代一系列的数字
 for i in range(5):
 	print(i)
+else:
+	pass # for 结束继续其他操作
 # 扩展
 range(5, 10) # 5, 6, 7, 8, 9
 range(0, 10, 3) # 0, 3, 6, 9
@@ -443,9 +456,89 @@ for num in range(2, 10):
 
 while True:
 	pass # 什么也不做，可用于语法上需要但程序不需要做什么的时候
+else：
+	pass # while 结束后继续进行其它你想做的操作
 ```
 
-**函数**  
+**输入和输出**  
+程序的输出可以有多种形式：可以将数据以人类可读的形式打印到屏幕上，或者将其写入到文件中以供后续使用。  
+
+在 Python 中存在两种输出值的方法：表达式语句以及 print() 函数。（第三种方法是使用文件对象的 write() 方法；标准文件输出可以参考 sys.stdout 方法）  
+如果仅仅想要在调试时打印某些变量，而不进行格式化输出，那么可以使用 repr() 函数或者 str() 函数将任意值转化成字符串。str() 函数能够将值以人类可读的形式呈现，而 repr() 函数则是将值以解释器可读的形式呈现（如果没有与之对应的转换语法，则会产生 SyntaxError 异常）。若某个对象没有适用于人类可读的形式，则 str() 函数的返回值与 repr() 函数相同。诸如数值、或者是链表、字典这样的结构，上述两种函数各自有统一的呈现方式。但是对于字符串，上述两种函数各自有独特的呈现方式。  
+
+Python 提供了被称为 JSON (JavaScript Object Notation) 的流行数据交换格式。  
+序列化（dumps）：json 采用 Python 式的数据层级，并且转换成字符串的形式；  
+反序列化：从字符串转化成数据类型。  
+
+```python
+# f-strings 格式化字符串
+year = 2020
+event = 'Referendum'
+f'Results of the {year} {event}' # Results of the 2016 Referendum
+# {} 中 ： 后 .xf 表示四舍五入到 x 位，如果 : 后是整数则表示最小字符数
+# {} 中 !a 表示 ascii()，!s 表示 str()，!r 表示 repr()
+print(f'The value of pi is approximately {math.pi:.3f}.') # The value of pi is approximately 3.142
+
+# str.format() 格式化字符串
+yes_votes = 42_572_654 
+no_votes = 43_132_495
+percentage = yes_votes/(yes_votes+no_votes)
+'{:-9} YES votes  {:2.2%}'.format(yes_votes, percentage) #  42572654 YES votes  49.67%
+
+# 字符串转化
+s = 'Hello, world.'
+str(s) # Hello, world.
+repr(s) # 'Hello, world.'
+str(1/7) # 0.14285714285714285
+x = 10 * 3.25
+y = 200 * 200
+s = 'The value of x is ' + repr(x) + ', and y is ' + repr(y) # The value of x is 32.5, and y is 40000
+repr((x, y, ('spam', 'eggs'))) # (32.5, 40000, ('spam', 'eggs'))
+
+# 读写文件
+# mode 参数可以使用 'r' 表示只读模式；'w' 表示只写入模式；'a' 表示在文件末尾追加写入；'r+' 表示读写操作
+# mode 参数中 'b' 表示以 二进制模式 打开文件并且追加数据， 数据以字节的形式读写到文件中，但是这种模式应该被用来打开不包含文本的文件中
+f = open('workfile', 'w')
+
+# with 是非常适合用于处理文件对象
+# with 的优势在于，即使发生了 exception，文件操作序列结束后也可以自动关闭
+with open('workfile') as f:
+	read_data = f.read()
+
+# 使用 json 保存数据
+import json
+x = json.dumps([1, 'simple', 'list']) # '[1, "simple", "list"]'
+# f 是文本文件已打开的可写入文件对象
+json.dump(x, f)
+x = json.load(f)
+```
+
+**错误和异常（error）**  
+错误信息（至少）可以分为两类：语法错误（也称解析错误） 和 异常（语法正确却在运行的时候报错）。  
+
+Python 允许编程处理特定的异常。
+
+```python
+while True print('Hello world') # SyntaxError: invalid syntax
+10 * (1/0) # ZeroDivisionError: division by zero
+
+# 用 try/except 块处理异常状况
+try:
+    # 用 raise 抛出异常
+    raise IndexError("This is an index error")
+except IndexError as e:
+    pass    # pass是无操作，但是应该在这里处理错误
+except (TypeError, NameError):
+    pass    # 可以同时处理不同类的错误
+else:   # else 语句是可选的，必须在所有的 except 之后
+    print("All good!")   # 只有当 try 运行完没有错误的时候这句才会运行
+finally: # finally 语句是可选的，用于定义所有情况下都之行的操作
+    # 当异常产生在 try 子句中并未被 except 子句捕获（或异常在 except 或 else 子句中产生）时，异常将在 finally 子句被执行后再引发
+    # 当其他子句通过 break, continue or return 等语句离开 try 语句时，finally 子句也会被执行
+    pass
+```
+
+**函数（def）**  
 ```python
 # 打印斐波那契数列
 def fib(n):
@@ -535,14 +628,354 @@ f('spam')
 # 'spam and eggs'
 ```
 
+**类（class）**  
+类就是一组数据和函数的集合。  
+创建了一个类意味着创建了一个对象类型，同时允许创建此类型的实例；每个类实例都带有属性以维护其状态，同样也有方法（在它自己的类中定义）来修改这些状态。  
+
+namespace（命名空间） 是一个从名字到对象的映射。  
+大部分命名空间当前都由 Python 字典实现，但一般情况下基本不会去关注它们（除了要面对性能问题时）。  
+命名空间的案例：存放内置函数的集合（里面含有 abs() 这样的函数，和其他的内置名称）；模块中的全局名称；函数调用中的本地名称。  
+
+scope (作用域) 是一段 Python 程序的文本区域，处于其中的命名空间是可直接访问的。  
+如果某名称是在全局进行的声明，那么所有的引用和分配都会直接导向中间的这层包含模块的全局名称的作用域中。  
+要想让最内层的作用域重新绑定一个在外层出现过的变量，我们可以用 nonlocal 声明来完成；如果不声明 nonlocal (非本地)，这些变量则都是只读的（任何尝试写入这种变量的行为都将会创建一个 全新 的本地变量，不会对最外层的那个有丝毫影响。）  
+一般地，本地作用域引用着当前函数的本地名称；外层的函数引用的是和全局作用域一样的命名空间：模块的命名空间。类定义放置在本地作用域的另一个命名空间中。  
+
+```python
+def scope_test():
+    def do_local():
+        spam = "local spam"
+
+    def do_nonlocal():
+        nonlocal spam
+        spam = "nonlocal spam"
+
+    def do_global():
+        global spam
+        spam = "global spam"
+
+    spam = "test spam"
+    do_local()
+    print("After local assignment:", spam)
+    do_nonlocal()
+    print("After nonlocal assignment:", spam)
+    do_global()
+    print("After global assignment:", spam)
+
+scope_test()
+# After local assignment: test spam
+# After nonlocal assignment: nonlocal spam
+# After global assignment: nonlocal spam
+print("In global scope:", spam) # In global scope: global spam
+# 注意：本地的分配并未改变 scope_test 中绑定的 spam，而 nonlocal 标明过的分配则改变了 scope_test 绑定的 spam，global 则更改的是模块层面的绑定（global 之前没有绑定 spam）  
+```
+
+类的定义与函数定义（def statements）差不多，在它们生效前需要预先执行这些定义（也可以在  if 分支或函数内部声明类）。  
+类定义内的声明通常是函数定义，也有其他声明。在类中定义的函数通常有一个特有的参数列表，指代是作为方法调用的。类定义后，会创建一个新的命名空间作为本地作用域，从而所有的本地变量的指定都会进到这个新的作用域里。类定义正常结束时，一个新的类对象就被创建出来了，这是类定义在命名空间中最基本的一层包装。  
+
+类对象支持两种操作：属性引用和实例化。  
+属性引用（Attribute references ）使用的是 Python 中标准的属性引用语法： obj.name，每个类都有 \_\_doc\_\_ 属性（用于返回类中文档字符串）、\_\_self\_\_ 属性（返回类的实例对象）、\_\_func\_\_ 属性（和方法相对应的函数对象）等。  
+实例化类似函数的形式。
+
+类的继承。  
+当一个类对象被创建，它会记录它的基类。这将被用于解析对象的属性：如果一个需要的属性不存在于当前类中，紧接着就会去基类中寻找；如果该基类也是从其他类派生出来的，那么相同的过程也会递归地被应用到这些类中。  
+重写类的方法，一般用于扩展同名的基类方法，而非简单的替换。调用基类方法的方案：调用 BaseClassName.methodname(self, arguments) 即可。  
+类的多重继承中，继承的属性是深度优先，从左到右，而不是在继承结构中重叠的同一个类中搜索两次。
+
+Python 提供了两个判断继承关系的内建函数：
+
+- isinstance() 检查一个实例的类型：当且仅当 obj.\_\_class\_\_ 是 int 或其它从 int 派生的类时， isinstance(obj, int) 才会返回 True 。
+- issubclass() 检查类之间的继承关系：因为 bool 是 int 的一个子类，所以 issubclass(bool, int) 返回 True；然而，因为 float 不是 int 的派生类，所以 issubclass(float, int) 返回 False。
+
+```python
+class MyClass:
+    """我的类"""
+    i = 12345
+
+    """类被实例化时自动调用 __init__() 方法"""
+    def __init__(self):
+        print(self.i)
+
+    def f(self):
+        return 'hello, class'
+
+    # 类方法，被所有此类的实例共用，第一个参数是这个类对象
+    @classmethod
+    def class_func(cls):
+    	pass
+
+    # 静态方法，调用时没有实例或类的绑定
+    @staticmethod
+    def static_func():
+    	pass
+
+class MySon(MyClass):
+	def f(self):
+		# 这里调用父类，self 不可省略
+		tmp = MyClass.f(self)
+
+		return 'dad:' + tmp + ' son: hello, I am son.'
+
+x = MySon()
+print(x.f())
+```
+
+只能从对象内部访问的『私有』实例变量，在 Python 中不存在。  
+然而，在大多数 Python 代码中存在一个这样的约定：以一个下划线开头的命名（例如 \_spam ）会被处理为 API 的非公开部分（无论它是一个函数、方法或数据成员）。  
+
+**迭代器（iter）**  
+大部分容器对象都能被 for 所循环。  
+for 声明会调用容器对象的 iter() 函数，这个函数则返回一个迭代器对象；迭代器对象有 \_\_next\_\_() 方法，它会让容器中的元素一次返回一个。 \_\_next\_\_()  会抛出 StopIteration 异常来让 for 结束，也可以用 next() 函数来调用它的 \_\_next\_\_() 方法。  
+在类中，我们可以相应的迭代器行为。  
+
+```python
+class Reverse:
+    def __init__(self, data):
+        self.data = data
+        self.index = len(data)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.index == 0:
+            raise StopIteration
+        self.index = self.index - 1
+
+        return self.data[self.index]
+
+rev = Reverse('spam')
+for char in rev:
+	print(char)
+```
+
+**生成器（Generator）**  
+生成器是一个简单又强大的创建迭代器的工具。  
+生成器的 \_\_iter\_\_() 和 \_\_next\_\_() 方法都被自动隐式的创建了。每次 next() 调用生成器时，生成器就会从它断开的地方恢复（本地变量和执行条件都会被自动保存）。  
+
+生成器表达式用来一般用在在函数内需要写即用即删的数据的时候。  
+生成器表达式比起完整的生成器要更加紧凑但并不如它功能强大，不过比起列表表达式来说内存占用更少。  
+
+```python
+def reverse(data):
+    for index in range(len(data)-1, -1, -1):
+        yield data[index]
+
+for char in reverse('golf'):
+	print(char)
+
+# 生成器表达式
+sum(i*i for i in range(10)) # 285
+xvec = [10, 20, 30]
+yvec = [7, 5, 3]
+sum(x*y for x,y in zip(xvec, yvec)) # 260
+from math import pi, sin
+sin_table = {x: sin(x*pi/180) for x in range(0, 91)}
+```
+
+**装饰器（Decorator）**  
+装饰器就是在代码运行期间动态增加功能的方式。  
+
+装饰器本质上是一个 Python 函数或类，它可以让其他函数或类在不需要做任何代码修改的前提下增加额外功能，装饰器的返回值也是一个函数 / 类对象。  
+装饰器经常用于有切面需求的场景，比如：插入日志、性能测试、事务处理、缓存、权限校验等场景，装饰器是解决这类问题的绝佳设计。有了装饰器，我们就可以抽离出大量与函数功能本身无关的雷同代码到装饰器中并继续重用。概括的讲，装饰器的作用就是为已经存在的对象添加额外的功能。  
+
+```python
+from functools import wraps
+
+def beg(target_function):
+	# decorator 就是一个返回函数的高阶函数
+    @wraps(target_function)
+    def wrapper(*args, **kwargs):
+        msg, say_please = target_function(*args, **kwargs)
+        if say_please:
+            return "{} {}".format(msg, "Please! I am poor :(")
+        return msg
+
+    return wrapper
+
+
+@beg
+def say(say_please=False):
+    msg = "Can you buy me a beer?"
+    return msg, say_please
+
+
+print(say())  # Can you buy me a beer?
+print(say(say_please=True))  # Can you buy me a beer? Please! I am poor :(
+```
+
+**模块（module）**  
+Python 可以把定义放入一个文件中然后在一个脚本或交互式解释器实例中使用它，这个文件被叫做模块 （module）。  
+
+模块中的定义可以通过导入进入到其他模块或者主模块（在顶层和计算器模式下执行的脚本中可以访问的变量集合）。  
+一个模块是一个包含 Python 定义和声明的文件，文件是模块名加上 .py 后缀；在一个模块中，模块名（字符串类型）可以通过全局变量 \_\_name\_\_ 获取。  
+
+```python
+# fibo.py
+# 斐波那契数模块
+
+def fib(n):    # 打印斐波那契数直到 n
+    a, b = 0, 1
+    while a < n:
+        print(a, end=' ')
+        a, b = b, a+b
+    print()
+
+def fib2(n):   # 返回到 n 的斐波那契数
+    result = []
+    a, b = 0, 1
+    while a < n:
+        result.append(a)
+        a, b = b, a+b
+    return result
+
+# 同目录下另一个文件 temp.py
+import fibo
+
+fibo.fib(1000) # 0 1 1 2 3 5 8 13 21 34 55 89 144 233 377 610 987
+fibo.fib2(100) # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+print(fibo.__name__) # fibo
+```
+
+一个模块可以包含可执行声明包括函数定义，这些声明被用于初始化模块，它们只在模块被第一次导入时执行（作为脚本运行也会执行）。  
+
+每个模块都有其私有的符号表，模块中定义的所有函数将这个符号表作为全局符号表。因此，一个模块的作者可以在模块中使用全局变量而无需担心与其他模块的全部变量冲突。另一方面，如果你知道你在干什么，你同样可以使用 模块.变量 的方式来获取一个模块的全局变量。  
+
+模块可以导入其他模块。  
+将所有 import 语句放在模块（或者脚本，如果这个问题重要的话）的开头不是必须的，但习惯如此，被导入的模块名被放置于当前模块的全局符号表中。
+
+`注意：由于性能原因，每个模块在每个解释器会话中只会被导入一次。因此，如果你改变了你的模块，你必须重启解释器；或者你只想交互式地测试一个模块，你可以使用 importlib.reload()，如 import importlib; importlib.reload(modulename)。`
+
+```python
+# import 声明的一种变体可以把一个模块中的变量直接导入当前模块的符号表中
+# 这样做不会把模块名引入本地符号表中
+from fibo import fib, fib2
+# 还有一种导入声明的变体可以导入一个模块中定义的所有变量： from fibo import *
+# 但是 * 过于粗暴，它会为解释器引入一系列位置未知变量，从而有可能覆盖你已经定义的某些变量，通常不建议使用
+
+fib(500) # 0 1 1 2 3 5 8 13 21 34 55 89 144 233 377
+
+# 导入的别名问题
+# 如果模块名后紧跟 as, 那么 as 后的变量名会与被导入的模块名绑定
+import fibo as fib
+
+fib.fib(500)
+# 使用 from 时可以使用这个机制达到相同的效果
+from fibo import fib as fibonacci
+
+fibonacci(500)
+```
+
+当可之行模块被当作脚本时。  
+```python
+if __name__ == "__main__":
+    import sys
+    fib(int(sys.argv[1]))
+
+# 在命令行里之行即可： python fibo.py [number]
+```
+
+当一个模块被导入时，解释器首先寻找同名的内建模块。如果没有发现同名内建模块，解释器会根据 sys.path 提供的一系列路径下寻找文件。sys.path 根据下面这些位置进行初始化：  
+
+- 包含输入脚本的目录（如果没有指明文件则为当前目录）  
+- PYTHONPATH 一个目录的列表，语法与 shell 的 PATH 变量相同
+- 安装依赖默认路径
+
+为了加快模块载入速度，Python 将每个模块的编译版本以 module.\*version\*.pyc 的名称缓存在 \_\_pycache\_\_ 目录下，"version" 编码编译文件的格式，它通常包含 Python 版本号（如在 CPython 3.3 编译的 spam.py 文件缓存在 \_\_pycache\_\_/spam.cpython-33.pyc 中，这种命名方式允许不同发行版本和不同版本的 Python 编译文件共存）。  
+Python 检查源文件修改日期并与编译的文件进行比较以确认编译文件是否过时，需要重新编译，这是一个全自动过程。同样的，编译的模块不依赖于操作系统，所以相同的库可以在不同架构的系统之间分享。  
+Python 在两种情况下不检查缓存：首先，Python 总会重新编译且不会缓存从命令行直接导入模块；其次，如果没有源模块，Python 也不会检查缓存。为了支持无源文件（只有编译文件）发布，编译的模块必须位于源目录，且不能有一个源模块。  
+
+内置函数 dir() 用于按模块名搜索模块定义，它返回一个字符串类型的存储列表。dir() 的参数为空时，默认返回当前定义的命名。  
+`注意：dir() 不会列出内置函数和变量名，如果你想列出这些内容，它们在标准模块 builtins 中定义。`
+
+```python
+import fibo
+
+dir(fibo) # ['__name__', 'fib', 'fib2']
+dir() # ['__builtins__', '__name__', 'a', 'fib', 'fibo', 'sys']
+```
+
+**包**  
+包通常是使用『圆点模块名』的结构化模块命名空间，如名为 A.B 的模块表示了名为 A 的包中名为 B 的子模块。  
+
+假设你现在想要设计一个模块集（一个 "包"）来统一处理声音文件和声音数据。存在几种不同的声音格式（通常由它们的扩展名来标识，例如：.wav， .aiff，.au ），于是，为了在不同类型的文件格式之间转换，你需要维护一个不断增长的包集合。可能你还想要对声音数据做很多不同的操作（例如混音，添加回声，应用平衡 功能，创建一个人造效果），所以你要加入一个无限流模块来执行这些操作。  
+你的包可能会是这个样子（通过分级的文件体系来进行分组）：  
+```
+sound/                          Top-level package
+      __init__.py               Initialize the sound package
+      formats/                  Subpackage for file format conversions
+              __init__.py
+              wavread.py
+              wavwrite.py
+              aiffread.py
+              aiffwrite.py
+              auread.py
+              auwrite.py
+              ...
+      effects/                  Subpackage for sound effects
+              __init__.py
+              echo.py
+              surround.py
+              reverse.py
+              ...
+      filters/                  Subpackage for filters
+              __init__.py
+              equalizer.py
+              vocoder.py
+              karaoke.py
+              ...
+```
+
+为了让 Python 将目录当做内容包，目录中必须包含 \_\_init\_\_.py 文件（为了避免一个含有烂俗名字的目录无意中隐藏了稍后在模块搜索路径中出现的有效模块）。最简单的情况下，只需要一个空的 \_\_init\_\_.py 文件即可。  
+
+`注意：使用 from package import item 方式导入包时，这个子项（item）既可以是包中的一个子模块（或一个子包），也可以是包中定义的其它命名，像函数、类或变量。import 语句首先核对是否包中有这个子项，如果没有，它假定这是一个模块，并尝试加载它。如果没有找到它，会引发一个 ImportError 异常。类似 import item.subitem.subsubitem 这样的语法时，这些子项必须是包，最后的子项可以是包或模块，但不能是前面子项中定义的类、函数或变量。`
+
+```python
+# 用户可以每次只导入包里的特定模块，但是引用的时候必需通过完整的名称
+import sound.effects.echo
+
+sound.effects.echo.echofilter(input, output, delay=0.7, atten=4)
+
+# 另一种方式
+from sound.effects import echo
+
+echo.echofilter(input, output, delay=0.7, atten=4)
+
+# 另一种变体用于直接导入函数或变量
+from sound.effects.echo import echofilter
+
+chofilter(input, output, delay=0.7, atten=4)
+```
+
+使用 * 导入包时，可能会消耗很长时间或边界效应。对于包的作者来说唯一的解决方案就是给提供一个明确的包索引，执行 from package import * 时，如果包中的 \_\_init\_\_.py 代码定义了一个名为 \_\_all\_\_ 的列表，就会按照列表中给出的模块名进行导入。  
+```python
+# sound/effects/__init__.py
+
+__all__ = ["echo", "surround", "reverse"] # 意味着 from sound.effects import * 语句会从 sound 包中导入以上三个已命名的子模块
+# 如果没有定义 __all__ ，from sound.effects import * 语句不会从 sound.effects 包中导入所有的子模块
+# 无论包中定义多少命名，只能确定的是导入了 sound.effects 包（可能会运行 __init__.py 中的初始化代码）以及包中定义的所有命名会随之导入
+```
+
+包内引用。  
+如果包中使用了子包结构，可以按绝对位置从相邻的包中引入子模块。比如 sound.filters.vocoder 包需要使用 sound.effects 包中的 echo 模块，它可以 from sound.Effects import echo。也可以用这样的形式 from module import name 来写显式的相对位置导入，那些显式相对导入用点号标明关联导入当前和上级包。  
+`注意：无论显式或隐式相对位置导入都基于当前模块的命名，因为主模块的名字总是 "__main__"，Python 应用程序的主模块应该总是用绝对导入`。
+
+```python
+# surround 模块
+from . import echo
+from .. import formats
+from ..filters import equalizer
+```
+
 ### Python 代码风格
 [PEP 8](https://www.python.org/dev/peps/pep-0008/) 是大多数 Python 项目使用的代码风格指南，它提供了高可读性和养眼的代码风格，以下划重点。  
 
 - 缩减使用四个空格而不是制表符  
-- 每行不要超过 80 个字符  
+- 每行不要超过 79 个字符  
 - 使用空行分隔函数、类或者函数内较大的代码段  
 - 尽量将注释和代码放在一起  
 - 用 docstrings  
 - 用在操作符前后和逗号之后加空格，但是括号之内不需要： a= f(1, 2) + g(3, 4)   
 - 一致性的命名类与函数：惯例是用 CamelCase 命名类，用 lower_case_with_underscores 命名函数和方法  
+- 变量命名使用小写（多单词以 \_ 连接，不超过 3 个单词），保护型变量命名前加 \_，私有变量命名前加 \_\_  
 -  Python 默认使用 UTF-8，甚至纯 ASCII 在任何情况下都能最好地工作  
