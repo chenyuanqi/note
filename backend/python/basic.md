@@ -964,7 +964,7 @@ __all__ = ["echo", "surround", "reverse"] # 意味着 from sound.effects import 
 # surround 模块
 from . import echo
 from .. import formats
-from ..filters import equalizer
+from ..filters import equalizer # 从本模块所在的层级的上一层级引用(相对)，从本模块所在的层级的上上层级引用 from ...xxx import xxxx 以此类推
 ```
 
 ### Python 代码风格
@@ -978,4 +978,4 @@ from ..filters import equalizer
 - 用在操作符前后和逗号之后加空格，但是括号之内不需要： a= f(1, 2) + g(3, 4)   
 - 一致性的命名类与函数：惯例是用 CamelCase 命名类，用 lower_case_with_underscores 命名函数和方法  
 - 变量命名使用小写（多单词以 \_ 连接，不超过 3 个单词），保护型变量命名前加 \_，私有变量命名前加 \_\_  
--  Python 默认使用 UTF-8，甚至纯 ASCII 在任何情况下都能最好地工作  
+- Python 默认使用 UTF-8，甚至纯 ASCII 在任何情况下都能最好地工作  
