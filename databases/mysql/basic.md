@@ -72,6 +72,63 @@ mysql 事务主要用于处理操作量大，复杂度高的数据。比如说�
 > 4、MyISAM 是默认引擎，InnoDB 需要指定  
 > 5、InnoDB 不支持 FULLTEXT 类型的索引  
 
+### Mysql 存储过程和自定义函数
+存储过程是事先经过编译并存储在数据库中的一段 SQL 语句的集合。想要实现相应的功能时，只需要调用这个存储过程就行了（类似于函数，输入具有输出参数）。  
+```mysql
+-- 存储过程的创建示例
+delimiter $$
+CREATE PROCEDURE delete_matches(IN p_playerno INTEGER)
+BEGIN
+    DELETE FROM MATCHES WHERE playerno = p_playerno;
+END
+delimiter ;
+
+-- 存储过程调用示例
+call delete_matches(57);
+```
+存储过程的优点如下：  
+
+- 预先编译，而不需要每次运行时编译，提高了数据库执行效率；
+- 封装了一系列操作，对于一些数据交互比较多的操作，相比于单独执行 SQL 语句，可以减少网络通信量；
+- 具有可复用性，减少了数据库开发的工作量；
+- 安全性高，可以让没有权限的用户通过存储过程间接操作数据库；
+- 更易于维护
+
+存储过程的缺点是：  
+
+- 可移植性差，存储过程将应用程序绑定到了数据库上；
+- 开发调试复杂：没有好的 IDE；
+- 修改复杂，需要重新编译，有时还需要更新程序中的代码以更新调用
+
+
+mysql 5.0 开始支持函数，函数是存在数据库中的一段 sql 集合，调用函数可以减少很多工作量，减少数据在数据库和应用服务器上的传输，对于提高数据处理的效率。  
+```mysql
+-- 创建一个函数
+DELIMITER $$ -- 定界符
+-- 开始创建函数
+CREATE FUNCTION user_main_fn(v_id INT)
+RETURNS VARCHAR(50)
+BEGIN
+  -- 定义变量
+  DECLARE v_userName VARCHAR(50);
+  -- 给定义的变量赋值
+  SELECT f_userName INTO v_userName FROM t_user_main 
+  WHERE f_userId = v_id;
+  -- 返回函数处理结果
+  RETURN v_userName;
+END $$ -- 函数创建定界符
+DELIMITER;
+
+-- 使用函数
+SELECT user_main_fn(1) FROM DUAL;
+```
+
+存储过程与函数执行的本质都一样，区别如下：  
+
+- 函数只能返回一个变量的限制，而存储过程可以返回多个  
+- 一般存储过程实现的功能要复杂一点，而函数的实现的功能针对性比较强
+- 存储过程一般是作为一个独立的部分来执行，而函数可以作为查询语句的一个部分来调用
+
 ### Mysql 增删改查
 ```bash
 # 连接 mysql
