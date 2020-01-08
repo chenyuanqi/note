@@ -60,7 +60,7 @@
 [Python 之旅](http://funhacks.net/explore-python/)  
 [Python 进阶](http://interpy.eastlakeside.com/)  
 [Python 最佳实践](http://pythonguidecn.readthedocs.io/zh/latest/)  
-[Python 装饰器](https://www.zhihu.com/question/26930016/)  
+[Python 装饰器](https://zhuanlan.zhihu.com/p/65968462)  
 [Python 设计模式](https://github.com/faif/python-patterns)  
 [Python 代码分析](http://www.pythontutor.com/)  
 [Python 数据分析](https://github.com/BrambleXu/pydata-notebook)  
