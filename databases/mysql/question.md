@@ -419,6 +419,13 @@ EXPLAIN SELECT `surname`,`first_name` FORM `a`,`b` WHERE `a`.`id`=`b`.`id`
 - 有一个超级大表，如何优化分页查询？
 > 数据库层面优化：利用子查询优化超多分页场景，比如：SELECT a.* FROM 表 1 a, (select id from 表 1 where 条件 LIMIT 100000,20 ) b where a.id=b.id ，先快速定位需要获取的 id 段，然后再关联查询。MySQL 并不是跳过 offset 行，而是取 offset+N 行，然后返回放弃前 offset 行，返回 N 行，那当 offset 特别大的时候，效率就非常的低下，要么控制返回的总页数，要么对超过特定阈值的页数进行 SQL 改写，利用子查询先快速定位需要获取的 id 段，然后再关联查询，就是对分页进行 SQL 改写的具体实现；  
 > 程序层面优化：可以利用缓存把查询的结果缓存起来，下一次查询的时候性能就会非常高。  
+```sql
+# 分段扫描
+select id from table_name where id>73575000 order by id asc limit 0, 5000;
+select a2.id,a2.keyword,a2.url from (select id from table_name where id>73575000 order by id asc limit 0, 5000) a1, table_name a2 where a1.id=a2.id
+# 或者直接这样
+select id,keyword,url  from table_name where id>73575000 order by id asc limit 0, 5000
+```
 
 - 请写出 mysql 分页查找返回，并返回匹配总统计数？  
 ```sql

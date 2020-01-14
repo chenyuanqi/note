@@ -420,6 +420,23 @@ function exportCsv(array $head, $data, $mark = 'attack_ip_info', $fileName = "te
 > 2、设置 httpOnly 属性。httponly 是微软对 cookie 做的扩展，该值指定 Cookie 是否可通过客户端脚本访问，解决用户的 cookie 可能被盗用的问题，减少跨站脚本攻击。主流的大多数浏览器已经支持此属性。httpOnly 是 cookie 的扩展属性，并不包含在 servlet2.x 的规范里。  
 > 
 
+- session 跨域问题
+> a.com,blog.a.com,bbs.a.com 同一域名，假如这三个域名指向三个不同的服务器，但是同用一个用户数据库表。  
+> 那么在存储 session 之前需要设置 ini_set('session.cookie_domain', '.a.com');  
+> 每次一个子域名下登录之后，再去打开别的子域名的时候，如果在当前一级域名 .a.com 的 $\_COOKIE['PHPSESSID'], 当然也可以修改 session 在 cookie 里面保存的健名。只需要对 $\_COOKIE['PHPSESSID'] 做查询，如果能查询到，即做登录许可处理。  
+>
+> 比如 www.sina.com.cn 和 weibo.com 不同域名的情况下，可以使用 iframe+p3p 协议来解决。  
+```javascript
+var _frm = document.createElement("iframe");
+_frm.style.display="none";
+_frm.src = "http://www.b.com/setcookie.php?cookie_str=xxxxx";
+document.body.appendChild(_frm);
+```
+> 然后，在 www.b.com 的 setcookie.php 里做 p3p 声明头部  
+> header('P3P: CP="CURa ADMa DEVa PSAo PSDo OUR BUS UNI PUR INT DEM STA PRE COM NAV OTC NOI DSP COR"');  
+> 这样就能接受传过来的 $\_GET['cookie_str'] 参数
+
+
 - 如何果网站使用的 utf8 编码，为防止乱码出现，需要注意那些问题？
 > 1、数据库中库和表字段中都用 utf8_general_ci 编码    
 > 2、php 连接 mysql，指定数据库编码为 utf8 mysql_query (“set namesutf8”);  
