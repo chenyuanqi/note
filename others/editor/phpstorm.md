@@ -73,3 +73,17 @@ editor.zero.latency.typing=true
 
 * 重建缓存： `File > Invalidate Caches/Restart`, 也即重新生成缓存，然后重启，一般此问题会解决
 * 如果第一步没解决问题，那么到 plugin 中禁用掉`.ignore`插件，该插件存在的 bug 也会导致此问题，重启后观察解决情况
+
+### PHPStorm 常用快捷键
+自定义适用于自己的快捷键。
+
+- Duplicate Line or Selection: ctrl + d
+- Recent Files: ctrl + e
+- Replace: ctrl + h
+- Project: ctrl + k
+- File: ctrl + p
+- File Structure: ctrl + r
+- Jumpto Navigation Bar: ctrl + 向上箭头
+- Move Statement Up: ctrl + shift + 向上箭头
+- Move Statement Down: ctrl + shift + 向下箭头
+- Show Line Numbers: ctrl + shift + n
