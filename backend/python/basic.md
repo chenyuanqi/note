@@ -75,6 +75,27 @@ price + 100
 _ - 50 # 150
 ```
 
+### Python 工具
+**Jupyter Notebook**  
+[Jupyter Notebook](https://jupyter.org/index.html) 是现代 Python 的必学技术。   
+Jupyter Notebook 是什么呢？安装 Jupyter 的创始人 Fernando Perez 的说法，他最初的梦想是做一个综合 Ju（Julia）、Py（Python）和 R 三种科学运算语言的计算工具平台，所以将其命名为 Ju-Py-te-R。  
+发展到现状，Jupyter 已经成为一个几乎支持所有语言，能把软件代码、计算输出、解析文档、多媒体资源整合在一起的多功能科学运算平台。
+
+Jupyter 的优点如下：
+
+- 整合所有资源  
+- 交互性编程体验
+- 零成本重现结果
+
+```bash
+# Jupyter Notebook 安装
+pip install jupyterlab notebook
+
+# 在相关文件夹下运行起来
+jupyter notebook
+# 浏览器打开 http://localhost:8888/ 即可查看
+```
+
 ### Python3 基础
 Python 之父两年前就已宣布 Python 2.7 将于 2020 年 1 月 1 日终止支持。
 
@@ -178,6 +199,7 @@ word[0:2]  # 从 0 （包含） 到 2（不包含），Py
 word[:3]   # 从开始到 2 （不包含）的字符串，Pyt
 # 获取字符串长度
 len(word) # 6
+# 注意，Python 中的字符串是不可变的，不能随意更改字符串中字符的值（+= 拼接操作例外）
 ```
 
 **浅拷贝和深拷贝**  
@@ -302,6 +324,7 @@ print(x, y, z) # 12345 54321 'hello!'
 因为 tuple 作为没有名字的记录来使用在某些场景有一定的局限性，所以又有了一个 namedtuple 类型的存在，namedtuple 可以指定字段名，用来当做一种轻量级的类来使用。
 
 **集合（Set）**  
+集合的本质是哈希表。  
 集合是由多个无重复元素构成的无序整体，支持的基本功能包括成员检查以及重复元素的去除，同时支持求并集、交集、差集以及对称差集等操作。  
 
 ```python
@@ -542,6 +565,24 @@ finally: # finally 语句是可选的，用于定义所有情况下都之行的�
     # 当异常产生在 try 子句中并未被 except 子句捕获（或异常在 except 或 else 子句中产生）时，异常将在 finally 子句被执行后再引发
     # 当其他子句通过 break, continue or return 等语句离开 try 语句时，finally 子句也会被执行
     pass
+```
+
+用户还可以自定义异常。  
+不要滥用异常。通常情况下，使用系统自带的异常就可以了。异常处理，通常用在你不确定某段代码能否成功执行，也无法轻易判断的情况下，比如数 据库的连接、读取等等。正常的 flow-control 逻辑，不要使用异常处理，直接用条件语句解决就可以了。  
+```python
+class MyInputError(Exception):
+    """Exception raised when there're errors in input"""
+    def __init__(self, value): # 自定义异常类型的初始化 
+        self.value = value
+    def __str__(self): # 自定义异常类型的 string 表达形式 
+        return ("{} is invalid input".format(repr(self.value)))
+
+try:
+    raise MyInputError(1) # 抛出 MyInputError 这个异常 
+except MyInputError as err:
+    print('error: {}'.format(err)) 
+
+# 输出 error: 1 is invalid input
 ```
 
 **函数（def）**  
@@ -876,6 +917,7 @@ fibonacci(500)
 
 当可之行模块被当作脚本时。  
 ```python
+# 使用 import 语句时，__name__ 就会被赋值为该模块的名字；所以 __name__ == "__main__" 是避开 import 的执行
 if __name__ == "__main__":
     import sys
     fib(int(sys.argv[1]))
@@ -934,7 +976,7 @@ sound/                          Top-level package
               ...
 ```
 
-为了让 Python 将目录当做内容包，目录中必须包含 \_\_init\_\_.py 文件（为了避免一个含有烂俗名字的目录无意中隐藏了稍后在模块搜索路径中出现的有效模块）。最简单的情况下，只需要一个空的 \_\_init\_\_.py 文件即可。  
+为了让 Python 将目录当做内容包，目录中必须包含 \_\_init\_\_.py 文件（为了避免一个含有烂俗名字的目录无意中隐藏了稍后在模块搜索路径中出现的有效模块）。最简单的情况下，只需要一个空的 \_\_init\_\_.py 文件即可（事实上，Python3 并非强制要求）。  
 
 `注意：使用 from package import item 方式导入包时，这个子项（item）既可以是包中的一个子模块（或一个子包），也可以是包中定义的其它命名，像函数、类或变量。import 语句首先核对是否包中有这个子项，如果没有，它假定这是一个模块，并尝试加载它。如果没有找到它，会引发一个 ImportError 异常。类似 import item.subitem.subsubitem 这样的语法时，这些子项必须是包，最后的子项可以是包或模块，但不能是前面子项中定义的类、函数或变量。`
 
@@ -974,6 +1016,25 @@ from . import echo
 from .. import formats
 from ..filters import equalizer # 从本模块所在的层级的上一层级引用(相对)，从本模块所在的层级的上上层级引用 from ...xxx import xxxx 以此类推
 ```
+
+通常，项目内的模块/包引用，可以直接使用 . 号引用项目的相对路径。  
+这时候，就需要系统的环境变量里添加项目路径或者修改系统环境变量的第一项为项目根目录的绝对路径。  
+```python
+import sys
+
+print(sys.path) # ["", "xxx"]
+sys.path[0] = "project root path"
+```
+但是，显然这不是最佳的解决方案。  
+
+比较好的方案是修改 PYTHONHOME。  
+> Python 的 Virtual Environment（虚拟运行环境）。  
+> Python 可以通过 Virtualenv 工具，非常方便地创建一 个全新的 Python 运行环境。  
+> 建议对于每一个项目来说，最好要有一个独立的运行环境来保持包和模块的纯净性。  
+> 
+> 在一个 Virtual Environment 里，你能找到一个文件叫 activate，在这个文件的末尾，填上下面的内容：  
+> export PYTHONPATH="project root path"  
+> 这样，每次你通过 activate 激活这个运行时环境的时候，它就会自动将项目的根目录添加 到搜索路径中去。
 
 ### Python 垃圾回收机制
 python 采用的是引用计数机制为主，标记-清除和分代收集两种机制为辅的策略。  
