@@ -121,7 +121,7 @@ EXPLAIN 列的解释：
 > uniquesubquery — 在子查询中使用 eqref   
 > refornull — 对 null 进行索引的优化的 ref  
 > fulltext — 使用全文索引  
-> ref — 使用非唯一索引查找数据  
+> ref — 使用非唯一索引查找数据，在联合索引中常见  
 > eq_ref — 在 join 查询中使用主键或唯一索引关联  
 > const — 将一个主键放置到 where 后面作为条件查询， MySQL 优化器就能把这次查询优化转化为一个常量，如何转化以及何时转化，这个取决于优化器，这个比 eq_ref 效率高一点  
 

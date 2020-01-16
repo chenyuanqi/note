@@ -153,7 +153,7 @@ redis> decrby age 2
 
 - 哈希（hash）  
 > Redis hash 是一个 string 类型的 field 和 value 的映射表，hash 特别适合用于存储对象，能够存储 key 对多个属性的数据  
-> 应用场景： 存储用户信息，存储结构化对象数据  
+> 应用场景： 存储用户信息（优化用户信息的获取），存储结构化对象数据（如购物车中商品信息和数量）  
 > ![redis_hash_command](./static/redis_hash_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
@@ -228,7 +228,7 @@ redis> lrange demo 0 3
 - 集合（set）
 > Redis 集合是 string 类型的无序集合  
 > 集合成员是唯一的，这就意味着集合中不能出现重复的数据  
-> 应用场景：关注和共同关注  
+> 应用场景：关注和共同关注，黑名单  
 > ![redis_set_command](./static/redis_set_command.png)   
 ```bash
 # 查看帮助（查看某个命令 help COMMAND）
