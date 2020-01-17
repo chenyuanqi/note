@@ -96,8 +96,30 @@ jupyter notebook
 # 浏览器打开 http://localhost:8888/ 即可查看
 ```
 
+**Virtualenv**  
+virtualenv 是用来为一个应用创建一套 “隔离” 的 Python 运行环境，解决了不同应用间多版本的冲突问题。  
+
+```bash
+# centos\linux can install virtualenvwrapper
+pip install virtualenv
+# 查看版本
+virtualenv --version
+
+# 创建项目
+mkdir myproject_path
+cd myproject_path
+# 创建一个独立的 Python 运行环境，命名为 venv（--no-site-packages 是系统 Python 环境中的所有第三方包都不会复制过来）
+# 参数 -p 指定 python 版本，值有 python2、python3
+virtualenv --no-site-packages venv
+# 用 source 进入该环境（win: source venv/Scripts/activate）
+source venv/bin/activate
+# 退出当前的 venv 环境
+deactivate 
+```
+
 ### Python3 基础
 Python 之父两年前就已宣布 Python 2.7 将于 2020 年 1 月 1 日终止支持。
+[Python2.7 与 Python3.x 的主要差异](http://chenqx.github.io/2014/11/10/Key-differences-between-Python-2-7-x-and-Python-3-x/)  
 
 ```python
 # 这是一个注释
