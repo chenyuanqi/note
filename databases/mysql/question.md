@@ -100,11 +100,22 @@ grep'INSERT INTO `t`' dump.sql
 
 - Explain 列的解释
 > EXPLAIN 显示了 MySQL 如何使用索引来处理 SELECT 语句以及连接表，可以帮助选择更好的索引和写出更优化的查询语句。  
-```mysql
+```
+mysql> EXPLAIN SELECT 1;
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra          |
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+
+|  1 | SIMPLE      | NULL  | NULL       | NULL | NULL          | NULL | NULL    | NULL | NULL |     NULL | No tables used |
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+----------------+
+1 row in set, 1 warning (0.01 sec)
+
 EXPLAIN 列的解释：  
 | 列 | 描述 |  
 | :-----:  | :----:  |  
+| id | 在一个大的查询语句中每个 `SELECT` 关键字都对应一个唯一的 `id` |  
+| select_type | `SELECT`关键字对应的那个查询的类型 |  
 | table	| 显示这一行的数据是关于哪张表的。 |  
+| partitions | 匹配的分区信息 |  
 | type | 这是重要的列，显示连接使用了何种类型。从最好到最差的连接类型为 const、eq_ref、ref、range、index和ALL。|  
 | possible_keys | 显示可能应用在这张表中的索引。如果为空，没有可能的索引。可以为相关的域从WHERE语句中选择一个合适的语句。|  
 | key |	实际使用的索引。如果为NULL，则没有使用索引。很少的情况下，MySQL 会选择优化不足的索引。这种情况下，可以在SELECT语句中使用USE INDEX（indexname） 来强制使用一个索引或者用IGNORE INDEX（indexname）来强制 MySQL 忽略索引。 |  
