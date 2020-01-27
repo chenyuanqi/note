@@ -94,6 +94,22 @@ pip install jupyterlab notebook
 # 在相关文件夹下运行起来
 jupyter notebook
 # 浏览器打开 http://localhost:8888/ 即可查看
+
+# 安装主题（https://github.com/dunovank/jupyter-themes）
+pip install jupyterthemes
+# 查看主题列表
+jt -l
+# 设置主题
+jt -t oceans16
+# 设置主题，带参数（-t是设置主题，-f设置代码的字体，-nf设置notebook的字体）
+jt -t monokai -f roboto -nf robotosans -tf robotosans -N -T -cellw 70% -dfs 10 -ofs 10
+# 恢复默认主题
+jt -r
+
+# Markdown 文件自动生成目录&自动补全代码
+python -m pip install jupyter_contrib_nbextensions
+jupyter contrib nbextension install --user --skip-running-check
+# 安装完成后，在 Nbextensions 选项卡里勾选 Table of Contents 以及 Hinterland
 ```
 
 **Virtualenv**  
