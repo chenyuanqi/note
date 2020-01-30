@@ -65,6 +65,10 @@ git commit -m"commit detailed message."
 git commit -am"commit detailed message."
 # 使用一次新的commit，替代上一次提交
 # 如果代码没有任何新变化，则用来改写上一次commit的提交信息
+# "amend" 是「修正」的意思，对最新一条 `commit` 进行修正
+# 在提交时，如果加上 `--amend` 参数，Git 不会在当前 `commit` 上增加 `commit`，而是会把当前 `commit` 里的内容和暂存区（stageing area）里的内容合并起来后创建一个新的 `commit`，用这个新的 `commit` 把当前 `commit` 替换掉
+# 注意：--amend 并不是直接修改原 commit 的内容，而是生成一条新的 commit
+git add [file]
 git commit --amend -m [message]
 
 # 建立追踪关系，在现有分支与指定的远程分支之间
@@ -236,6 +240,7 @@ git checkout .
 git reset [file]
 
 # 重置暂存区与工作区，与上一次commit保持一致
+# 丢弃最新的提交
 git reset --hard
 
 # 重置当前分支的指针为指定commit，同时重置暂存区，但工作区不变

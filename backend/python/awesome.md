@@ -120,3 +120,214 @@ Namespaces are one honking great idea -- let's do more of those!
 做也许好过不做，但不假思索就动手还不如不做（动手之前要细思量）  
 如果你无法向人描述你的方案，那肯定不是一个好方案；反之亦然（方案测评标准）  
 命名空间是一种绝妙的理念，我们应当多加利用（倡导与号召）  
+
+### 这样的 Python 很优雅
+1、变量交换  
+```python
+a, b = b, a
+```
+
+2、循环遍历区间元素  
+```python
+# xrange 返回的是生成器对象，生成器比列表更加节省内存
+# 不过需要注意的是 xrange 是 python2 中的写法，python3 只有 range 方法，特点和 xrange 是一样的
+for i in range(6):
+    print(i)
+```
+
+3、带有索引位置的集合遍历  
+遍历集合时如果需要使用到集合的索引位置时，直接对集合迭代是没有索引信息的。  
+```python
+colors = ['red', 'green', 'blue', 'yellow']
+for i, color in enumerate(colors):
+    print(i, '--->', color)
+```
+
+4、字符串连接  
+字符串连接时，普通的方式可以用 + 操作  
+```python
+names = ['raymond', 'rachel', 'matthew']
+# 使用 + 操作时，每执行一次 + 操作就会导致在内存中生成一个新的字符串对象
+# 使用 join 方法整个过程只会产生一个字符串对象
+print(', '.join(names))
+```
+
+5、打开 / 关闭文件  
+执行文件操作时，最后一定不能忘记的操作是关闭文件，即使报错了也要 close。  
+```python
+with open('test.txt') as f:
+    data = f.read()
+```
+
+6、列表推导式  
+能够用一行代码简明扼要地解决问题时，绝不要用两行。   
+```python
+[i for i in range(10)]
+```
+
+7、善用装饰器  
+装饰器可以把与业务逻辑无关的代码抽离出来，让代码保持干净清爽，而且装饰器还能被多个地方重复利用。  
+```python
+import urllib.request as urllib
+
+def cache(func):
+    saved = {}
+
+    def wrapper(url):
+        if url in saved:
+            return saved[url]
+        else:
+            page = func(url)
+            saved[url] = page
+            return page
+
+    return wrapper
+
+@cache
+def web_lookup(url):
+	# 一个爬虫网页的函数，如果该 URL 曾经被爬过就直接从缓存中获取，否则爬下来之后加入到缓存，防止后续重复爬取
+    return urllib.urlopen(url).read()
+```
+
+8、合理使用列表  
+列表对象（list）是一个查询效率高于更新操作的数据结构，比如删除一个元素和插入一个元素时执行效率就非常低，因为还要对剩下的元素进行移动。  
+```python
+from collections import deque
+
+# deque 是一个双向队列的数据结构，删除元素和插入元素会很快
+names = deque(['raymond', 'rachel', 'matthew', 'roger'])
+names.popleft()
+names.appendleft('mark')
+```
+
+9、序列解包  
+```python
+p = 'vttalk', 'female', 30, 'python@qq.com'
+name, gender, age, email = p
+```
+
+10、遍历字典的 key 和 value  
+```python
+# 方法一
+# 速度没那么快，因为每次迭代的时候还要重新进行 hash 查找 key 对应的 value
+for k in d:
+    print k, '--->', d[k]
+
+# 方法二
+# Python2 遇到字典非常大的时候，会导致内存的消耗增加一倍以上；iteritems 返回迭代器对象，可节省更多的内存
+# Python3 的 items 等值于 iteritems
+for k, v in d.items():
+    print k, '--->', v
+```
+
+11、链式比较操作  
+```python
+age = 18
+if 18 < age < 60:
+    print("yong man")
+```
+
+12、if/else 三目运算  
+```python
+# 能够用 if/else 清晰表达逻辑时，就没必要再额外新增一种方式来实现
+text = '男' if gender == 'male' else '女'
+```
+
+13、真值判断  
+检查某个对象是否为真值时，还显示地与 True 和 False 做比较就显得多此一举，不专业。  
+```python
+if attr: # attr == True
+    do_something()
+
+if values: # len(values) != 0
+    do_something()
+```
+
+14、for/else 语句  
+for else 是 Python 中特有的语法格式，else 中的代码在 for 循环遍历完所有元素之后执行。  
+```python
+for i in mylist:
+    if i == theflag:
+        break
+    process(i)
+else:
+    raise ValueError("List argument missing terminal flag.")
+```
+
+15、字符串格式化  
+很难说用 format 比用 % s 的代码量少，但是 format 更易于理解。  
+```python
+s1 = "foofish.net"
+s2 = "vttalk"
+# s3 = "welcome to %s and following %s" % (s1, s2)
+s3 = "welcome to {blog} and following {wechat}".format(blog="foofish.net", wechat="vttalk")
+```
+
+16、列表切片  
+获取列表中的部分元素最先想到的就是用 for 循环根据条件提取元素，这也是其它语言中惯用的手段，而在 Python 中还有强大的切片功能。  
+`注意：列表元素的下标不仅可以用正数表示，还是用负数表示，最后一个元素的位置是 -1，从右往左，依次递减。`
+```python
+items = range(10)
+# 第1到第4个元素的范围区间
+sub_items = items[1:4]
+# 奇数
+odd_items = items[1::2]
+# 拷贝
+copy_items = items[::] # 或者 items[:]
+```
+
+17、善用生成器  
+生成器的好处就是无需一次性把所有元素加载到内存，只有迭代获取元素时才返回该元素，而列表是预先一次性把全部元素加载到了内存。此外用 yield 代码看起来更清晰。  
+```python
+# 用生成器生成费波那契数列
+def fib(n):
+    a, b = 0, 1
+    while a < n:
+        yield a
+        a, b = b, a + b
+
+for i in fib(9):
+    print(i)
+```
+
+18、获取字典元素  
+```python
+d = {'name': 'foo'}
+# 字典 key 不存在，设置默认值
+d.get("name", "unknow")
+```
+
+19、预设字典默认值  
+通过 key 分组的时候，不得不每次检查 key 是否已经存在于字典中。  
+```python
+data = [('foo', 10), ('bar', 20), ('foo', 39), ('bar', 49)]
+groups = {}
+for (key, value) in data:
+    if key in groups:
+        groups[key].append(value)
+    else:
+        groups[key] = [value]
+
+#　第一种方式
+groups = {}
+for (key, value) in data:
+    groups.setdefault(key, []).append(value) 
+
+# 第二种方式
+from collections import defaultdict
+groups = defaultdict(list)
+for (key, value) in data:
+    groups[key].append(value)
+```
+
+20、字典推导式  
+字典推导式是 python2.7 新增的特性，可读性增强了很多，类似的还是列表推导式和集合推导式。  
+```python
+numbers = [1, 2, 3]
+my_dict = {number: number * 2 for number in numbers}
+print(my_dict)  # {1: 2, 2: 4, 3: 6}
+
+# 还可以指定过滤条件
+my_dict = {number: number * 2 for number in numbers if number > 1}
+print(my_dict)  # {2: 4, 3: 6}
+```
