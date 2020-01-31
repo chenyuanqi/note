@@ -331,3 +331,60 @@ print(my_dict)  # {1: 2, 2: 4, 3: 6}
 my_dict = {number: number * 2 for number in numbers if number > 1}
 print(my_dict)  # {2: 4, 3: 6}
 ```
+
+### Python 奇技淫巧
+1、isinstance  
+isinstance 函数可用于判断实例的类型，其实它的第二个参数可以是多个数据类型组成的元组。  
+类似的函数还有字符串的 startswith 方法和 endswith 方法。  
+```python
+isinstance(x, (int, float))
+# 等价于
+isinstance(x, int) or isinstance(x, float)
+
+s.startswith(('"""', "'''"))
+# 等价于
+s.startswith("'''") or s.startswith('"""')
+```
+
+2、用 http.server 共享文件  
+通过浏览器方便局域网共享文件。  
+```python
+# python3
+python3 -m http.server
+# python2
+python -m SimpleHTTPServer
+```
+
+3、zip 函数实现字典键值对互换  
+```python
+lang = {"python":".py", "java":".java"}
+dict(zip(lang.values(), lang.keys())) # {'.java': 'java', '.py': 'python'}
+```
+
+4、查找列表中出现次数最多的数字  
+```python
+test = [1, 2, 3, 4, 2, 2, 3, 1, 4, 4, 4, 5]
+print(max(set(test), key=test.count))
+```
+
+5、使用 \_\_slots\_\_ 节省内存  
+特殊的 \_\_slots\_\_ 变量，用来限制该 class 实例能添加的属性。  
+```python
+class MyClass(object):
+    def __init__(self, name, identifier):
+        self.name = name
+        self.identifier = identifier
+        self.set_up()
+
+print(sys.getsizeof(MyClass)) # 1016
+
+class MyClass(object):
+    __slots__ = ['name', 'identifier']
+
+    def __init__(self, name, identifier):
+        self.name = name
+        self.identifier = identifier
+        self.set_up()
+
+print(sys.getsizeof(MyClass)) # 888
+```
