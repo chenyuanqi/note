@@ -1,5 +1,5 @@
 
-### 常见问题
+### 常见问题及 Python 进阶
 1、int() 强制转换浮点数     
 在 int（）的强制转换浮点数时候，不管是正数还是负数，只取整数部分。  
 `注意：这里不是向上或者向下取整，也不是四舍五入。`
@@ -117,4 +117,69 @@ class BaseController(object):
 a = A()
 print(callable(a))  # True
 a()  # __call__
+```
+
+10、\*args 和 \*\*kwargs
+\*args 和 \*\*kwargs 主要⽤于函数定义，可以将不定数量的参数（预先并不知道, 函数使⽤者会传递多少个参数）传递给⼀个函数。  
+\*args 是⽤来发送⼀个⾮键值对的可变数量的参数列表给⼀个函数。  
+\*\*kwargs 允许你将不定长度的键值对, 作为参数传递给⼀个函数。   
+标准参数与 \*args、\*\*kwargs 在使⽤时的顺序 func(fargs, \*args, \*\*kwargs)。  
+```python
+def test_var_args(f_arg, *argv): 
+    print("first normal arg:", f_arg)
+    for arg in argv:
+        print("another arg through *argv:", arg)
+
+
+test_var_args('yasoob', 'python', 'eggs', 'test')
+# first normal arg: yasoob
+# another arg through *argv: python 
+# another arg through *argv: eggs 
+# another arg through *argv: test
+
+
+def greet_me(**kwargs):
+    for key, value in kwargs.items(): 
+        print("{0} == {1}".format(key, value))
+
+
+greet_me(name="yasoob") 
+# name == yasoob
+
+
+def test_args_kwargs(arg1, arg2, arg3): 
+    print("arg1:", arg1) 
+    print("arg2:", arg2) 
+    print("arg3:", arg3)
+
+
+# ⾸先使⽤ *args
+args = ("two", 3, 5)
+test_args_kwargs(*args)
+# 现在使⽤ **kwargs:
+kwargs = {"arg3": 3, "arg2": "two", "arg1": 5} 
+test_args_kwargs(**kwargs)
+```
+
+11、调试（Debugging）  
+利⽤好调试，能⼤⼤提⾼你捕捉代码 Bug，[参考连接](https://docs.python.org/3/library/pdb.html)。  
+
+- 从命令⾏运⾏
+在命令⾏使⽤ Python debugger 运⾏⼀个脚本，它会触发 debugger 在脚本的第⼀⾏指令处停⽌执⾏。这在脚本很短时会很有帮助，你可以通过(Pdb)模式接着查看变量信息，并且逐⾏调试。  
+```bash
+python -m pdb my_script.py
+```
+
+- 从脚本内部运⾏
+在脚本内部设置断点，这样就可以在某些特定点查看变量信息和各种执⾏时信息了，这⾥将使⽤ pdb.set_trace() ⽅法来实现。  
+```python
+import pdb
+
+
+def make_bread(): 
+    pdb.set_trace()
+    return "I don't have time"
+
+
+print(make_bread())
 ```
