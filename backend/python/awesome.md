@@ -122,9 +122,25 @@ Namespaces are one honking great idea -- let's do more of those!
 命名空间是一种绝妙的理念，我们应当多加利用（倡导与号召）  
 
 ### 这样的 Python 很优雅
-1、变量交换  
+1、简洁之美：一行代码  
 ```python
+# 变量交换  
 a, b = b, a
+
+# 反转列表
+[1,2,3][::-1] # [3,2,1]
+
+# 合并两个字典
+{**{'a':1,'b':2}, **{'c':3}} # {'a': 1, 'b': 2, 'c': 3}
+
+# 列表去重
+set([1,2,2,3,3,3]) # {1, 2, 3}
+
+# 求多个列表中的最大值
+max(max([ [1,2,3], [5,1], [4] ], key=lambda v: max(v))) # 5
+
+# 生成逆序序列
+list(range(10,-1,-1)) # [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
 ```
 
 2、循环遍历区间元素  
@@ -154,13 +170,57 @@ print(', '.join(names))
 
 5、打开 / 关闭文件  
 执行文件操作时，最后一定不能忘记的操作是关闭文件，即使报错了也要 close。  
+
+使用上下⽂管理器，它允许你在有需要的时候，精确地分配和释放资源。
 ```python
 with open('test.txt') as f:
     data = f.read()
+
+# 基于类的实现
+# ⼀个上下⽂管理器的类，最起码要定义 __enter__ 和 __exit__ ⽅法
+class File(object):
+    def __init__(self, file_name, method):
+        self.file_obj = open(file_name, method)
+
+    def __enter__(self):
+        return self.file_obj
+
+    def __exit__(self, type, value, traceback):
+        self.file_obj.close()
+# 通过定义 __enter__ 和 __exit__ ⽅法，我们可以在 with 语句⾥使⽤它
+with File('demo.txt', 'w') as opened_file:
+    opened_file.write('Hola!')
+#  __exit__ 函数接受三个参数，它们都是必须的
+# with 语句先暂存了 File 类的 __exit__ ⽅法
+# 然后它调⽤ File 类的 __enter__ ⽅法
+# __enter__ ⽅法打开⽂件并返回给 with 语句
+# 打开的⽂件句柄被传递给 opened_file 参数
+# 我们使⽤ .write() 来写⽂件
+# with 语句调⽤之前暂存的 __exit__ ⽅法
+# __exit__ ⽅法关闭了⽂件
+# 
+# 如果发⽣异常，Python 会将异常的 type,value 和 traceback 传递给 __exit__ ⽅法，让__exit__⽅法来决定如何关闭⽂件以及是否需要其他步骤
+# 如果__exit__返回的是True，那么这个异常就被优雅地处理了
+# 如果__exit__返回的是True以外的任何东西，那么这个异常将被with语句抛出
+
+# 还可以⽤装饰器(decorators)和⽣成器(generators)来实现上下⽂管理器
+from contextlib import contextmanager
+
+# contextmanager 会被调⽤并传⼊函数名（open_file）作为参数
+@contextmanager
+def open_file(name):
+    f = open(name, 'w')
+    yield f # 创建了⼀个⽣成器
+    # contextmanager 函数返回⼀个以 GeneratorContextManager 对象封装过的⽣成器
+    f.close()
+# GeneratorContextManager 被赋值给 open_file 函数，我们实际上是在调⽤ GeneratorContextManager 对象
+with open_file('some_file') as f:
+    f.write('hola!')
 ```
 
 6、列表推导式  
-能够用一行代码简明扼要地解决问题时，绝不要用两行。   
+能够用一行代码简明扼要地解决问题时，绝不要用两行。  
+列表推导式的格式：variable = [out_exp for out_exp in input_list if out_exp == 2] 
 ```python
 [i for i in range(10)]
 ```
@@ -278,6 +338,9 @@ copy_items = items[::] # 或者 items[:]
 
 17、善用生成器  
 生成器的好处就是无需一次性把所有元素加载到内存，只有迭代获取元素时才返回该元素，而列表是预先一次性把全部元素加载到了内存。此外用 yield 代码看起来更清晰。  
+
+⽣成器也是⼀种迭代器，但是只能对其迭代⼀次。因为它们并没有把所有的值存在内存中，⽽是在运⾏时⽣成值。  
+通过遍历来使⽤它们，要么⽤⼀个“for”循环，要么将它们传递给任意可以进⾏迭代的函数和结构。⼤多数时候⽣成器是以函数来实现的，它们并不返回⼀个值，⽽是 yield(暂且译作“⽣出”) ⼀个值。  
 ```python
 # 用生成器生成费波那契数列
 def fib(n):
@@ -330,6 +393,51 @@ print(my_dict)  # {1: 2, 2: 4, 3: 6}
 # 还可以指定过滤条件
 my_dict = {number: number * 2 for number in numbers if number > 1}
 print(my_dict)  # {2: 4, 3: 6}
+```
+
+21、函数缓存 (Function caching)  
+函数缓存允许我们将⼀个函数对于给定参数的返回值缓存起来。  
+当⼀个I/O密集的函数被频繁使⽤相同的参数调⽤的时候，函数缓存可以节约时间。在 Python 3.2 版本以前我们只有写⼀个⾃定义的实现；在 Python 3.2 以后版本，有个 lru_cache 的装饰器，允许我们将⼀个函数的返回值快速地缓存或取消缓存。  
+```python
+from functools import lru_cache
+
+@lru_cache(maxsize=32)
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n-1) + fib(n-2)
+
+print([fib(n) for n in range(10)])
+# 清空缓存
+fib.cache_clear()
+```
+
+22、对象自省  
+⾃省(introspection)，在计算机编程领域⾥，是指在运⾏时来判断⼀个对象的类型的能⼒。Python 中所有⼀切都是⼀个对象。  
+```python
+my_list = [1, 2, 3]
+dir(my_list) # 列出了⼀个对象所拥有的属性和⽅法
+# Output: ['__add__', '__class__', '__contains__', '__delattr__', '__delitem__',
+# '__delslice__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__',
+# '__getitem__', '__getslice__', '__gt__', '__hash__', '__iadd__', '__imul__',
+# '__init__', '__iter__', '__le__', '__len__', '__lt__', '__mul__', '__ne__',
+# '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__reversed__', '__rmul__',
+# '__setattr__', '__setitem__', '__setslice__', '__sizeof__', '__str__',
+# '__subclasshook__', 'append', 'count', 'extend', 'index', 'insert', 'pop',
+# 'remove', 'reverse', 'sort']
+dir() # 不传⼊参数，那么它会返回当前作⽤域的所有名字
+
+# type 函数返回⼀个对象的类型
+print(type('')) # <type 'str'>
+
+# id() 函数返回任意不同种类对象的唯⼀ ID
+name = "Yasoob"
+print(id(name)) # 139972439030304
+
+# inspect 模块获取活跃对象的信息
+import inspect
+print(inspect.getmembers(str)) # 比如查看⼀个对象的成员
+# [('__add__', <slot wrapper '__add__' of ... ...
 ```
 
 ### Python 奇技淫巧
