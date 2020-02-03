@@ -10,8 +10,8 @@ def get_url(url):
     """
         1、构造请求代理 ip 网站链接
 
-        @param url 国内高匿代理的链接
-        @return 生成要爬取目标网址的链接
+        :param url 国内高匿代理的链接
+        :return 生成要爬取目标网址的链接
     """
     url_list = []
     for i in range(1,100):
@@ -25,8 +25,8 @@ def get_content(url):
     """
         2、获取网页内容
 
-        @param url 目标网站链接
-        @return 网页内容
+        :param url 目标网站链接
+        :return 网页内容
     """
     user_agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.22 Safari/537.36 SE 2.X MetaSr 1.0'
     headers = {'User-Agent': user_agent}
@@ -41,8 +41,8 @@ def get_info(content):
     """
         3、提取网页中 ip 地址和端口号信息
 
-        @param content 接收从 get_content 函数传来的网页内容
-        @return 使用 etree 解析出 ip 和端口号，将端口号和 ip 写入 data
+        :param content 接收从 get_content 函数传来的网页内容
+        :return 使用 etree 解析出 ip 和端口号，将端口号和 ip 写入 data
     """
     datas_ip = etree.HTML(content).xpath('//table[contains(@id,"ip_list")]/tr/td[2]/text()')
     datas_port = etree.HTML(content).xpath('//table[contains(@id,"ip_list")]/tr/td[3]/text()')
@@ -58,9 +58,9 @@ def verify_ip(ip, port):
     """
         4、验证ip有效性
 
-        @param ip
-        @param port
-        @return 使用 ProxyHandler 建立代理，使用代理 ip 访问某网址，查看是否得到响应；如数据有效，则保存到 data2.txt 文件
+        :param ip
+        :param port
+        :return 使用 ProxyHandler 建立代理，使用代理 ip 访问某网址，查看是否得到响应；如数据有效，则保存到 data2.txt 文件
     """
     user_agent ='Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.22 Safari/537.36 SE 2.X MetaSr 1.0'
     headers = {'User-Agent':user_agent}
