@@ -225,6 +225,50 @@ add_to(42)
 # Output: [42]
 ```
 
+13、协程  
+协程，又称微线程，纤程，英文名 Coroutine。
+一个线程就是执行一个子程序，子程序调用是通过栈实现的（子程序或者称为函数，在所有语言中都是层级调用）。  
+子程序调用总是一个入口，一次返回，调用顺序是明确的；协程的调用和子程序不同，协程看上去也是子程序，但执行过程中，在子程序内部可中断（有点类似 CPU 的中断），然后转而执行别的子程序，在适当的时候再返回来接着执行。  
+协程的特点在于是一个线程执行，和多线程相比，最大的优势就是协程极高的执行效率。因为子程序切换不是线程切换，而是由程序自身控制，因此，没有线程切换的开销，和多线程比，线程数量越多，协程的性能优势就越明显。第二大优势就是不需要多线程的锁机制，因为只有一个线程，也不存在同时写变量冲突，在协程中控制共享资源不加锁，只需要判断状态就好了，所以执行效率比多线程高很多。  
+因为协程是一个线程执行，那怎么利用多核 CPU 呢？最简单的方法是多进程 + 协程，既充分利用多核，又充分发挥协程的高效率，可获得极高的性能。  
+Python 对协程的支持还非常有限，用在 generator 中的 yield 可以一定程度上实现协程。虽然支持不完全，但已经可以发挥相当大的威力了。
+```python
+import time
+
+def consumer():
+    r = ''
+    while True:
+        n = yield r
+        if not n:
+            return
+        print('[CONSUMER] Consuming %s...' % n)
+        time.sleep(1)
+        r = '200 OK'
+
+def produce(c):
+    c.next()
+    n = 0
+    while n < 5:
+        n = n + 1
+        print('[PRODUCER] Producing %s...' % n)
+        r = c.send(n)
+        print('[PRODUCER] Consumer return: %s' % r)
+    c.close()
+
+if __name__=='__main__':
+    c = consumer()
+    produce(c)
+
+# 注意到 consumer 函数是一个 generator（生成器），把一个 consumer 传入 produce 后：
+# 首先调用 c.next () 启动生成器（启动协程）；
+# 然后，一旦生产了东西，通过 c.send (n) 切换到 consumer 执行（send 发送数据给 consumer 处理）；
+# consumer 通过 yield 拿到消息，处理，又通过 yield 把结果传回；
+# produce 拿到 consumer 处理的结果，继续生产下一条消息；
+# produce 决定不生产了，通过 c.close () 关闭 consumer，整个过程结束。
+# 
+# 整个流程无锁，由一个线程执行，produce 和 consumer 协作完成任务，所以称为 “协程”，而非线程的抢占式多任务。
+```
+
 
 999、Python 三大利器：迭代器，生成器，装饰器  
 #### 1 寻找第n次出现位置
