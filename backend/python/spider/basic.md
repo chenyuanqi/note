@@ -49,6 +49,9 @@ for name,value in response.headers.items(): # 响应首部
 	print("%s:%s" % (name, value))
 response.content # 响应内容
 
+# 指定编码类型
+response.encoding = 'utf-8'
+
 # 构建请求查询参数
 args = {"p": 4, "s": 20}
 response = requests.get("http://fav.foofish.net", params = args)
@@ -69,12 +72,22 @@ requests.get('http://example.org', proxies=proxies)
 # 请求线程一直阻塞，直到有响应返回才处理后面的逻辑，超时设置是必须的
 r = requests.get("http://www.google.coma", timeout=5)
 
+# 当一个网站不安全，需要你用证书验证时
+response = requests.get('https://www.12306.cn', verify=False) 
+# 不加这个关键字参数的话会出现验证错误问题，因为这个网站的协议不被信任
+
 # 构建 POST 请求数据 - 作为表单数据传输给服务器
 payload = {'key1': 'value1', 'key2': 'value2'}
 r = requests.post("http://httpbin.org/post", data=payload)
 # 构建 POST 请求数据 - 作为 json 格式的字符串格式传输给服务器
 payload = {'some': 'data'}
 r = requests.post('http://httpbin.org/post', json=payload)
+
+# 上传文件
+files = {'picture': open('baidu.png', 'rb')}
+response = requests.post('http://httpbin.org/post', files=files)
+print(response.text)
+
 # Response 中的响应体
 # content 是 byte 类型，适合直接将内容保存到文件系统或者传输到网络中
 r = requests.get("https://pic1.zhimg.com/v2-2e92ebadb4a967829dcd7d05908ccab0_b.jpg")
@@ -89,12 +102,32 @@ re.compile('xxx').findall(r.text)
 r = requests.get('https://www.v2ex.com/api/topics/hot.json')
 r.json() # [{'id': 352833, 'title': '...'}]
 
+# 获取头部
+print(r.headers)
+# 获取cookie
+print(r.cookies)
+
 # Session
 session  = requests.Session() # 构建会话
 session.post(login_url, data={username, password}) #　登录 url
 # 登录后才能访问的 url
 r = session.get(home_url)
 session.close()
+
+# 请求异常处理
+import requests
+from requests.exceptions import ReadTimeout, ConnectTimeout, HTTPError, ConnectionError, RequestException
+# 捕捉异常
+try:
+    response = requests.get('http://httpbin.org/get', timeout=0.1) # 规定时间内未响应就抛出异常
+    print(response.text)
+except ReadTimeout as e:
+    print('请求超时')
+except ConnectionError as e:
+    print('连接失败')
+except RequestException as e:
+    print('请求失败')
+
 ```
 
 **HTML 文本解析库 BeautifulSoup**  
@@ -325,3 +358,17 @@ m.group("number") # 123
 re.match(r"a.*b", "aaabcb").group() # aaabcb
 re.match(r"a.*?b", "aaabcb").group() # aaab
 ```
+
+### 爬虫小技巧
+1、写脚本的时候记得带 request headers，特别是 host 和 user-agent 这俩个字段（通常带这两个就足够了，比如某些网站如果没有带上 ua，会一直拿不到 html），这个就是体现在对 http 协议理解不够。
+
+2、注意请求参数被放到 cookies 的情况。  
+
+3、ip 的访问频率，基本的职业素养是不要影响别人正常运营。  
+处理的方式主要是：每一次请求时变更 ua，在 request headers 里带上 referer，设置时延，通过改变代理 ip 的方式等。  
+
+4、验证码的问题，可以通过机器学习训练出可以识别 xx 网的验证码，也可以购买打码平台接口等。
+
+5、
+
+
