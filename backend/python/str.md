@@ -158,6 +158,11 @@ from math import pi
 
 在 2.x 中，字符串被分为 unicode 和 str 两种类型，本质上 str 是一串字节序列，unicode 是字符（符号）；
 ```python
+# 编码和解码
+string = 'a string'
+bstring = string.encode('ascii') # b'a string'
+bstring.decode('ascii') # a string
+
 # UnicodeEncodeError
 def main():
     name = u'大蟒蛇'
