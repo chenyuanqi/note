@@ -20,7 +20,7 @@ java -jar selenium-server-standalone-2.x.x.jar
 
 ### 2、基本使用
 ```python
-from selenium importwebdriver
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
