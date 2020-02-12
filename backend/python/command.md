@@ -25,3 +25,16 @@ python -m this
 
 ### 命令行编写示例
 ...
+
+### 其他
+
+**生成可执行文件**  
+```bash
+pip install --upgrade pyinstaller
+
+# 单文件模式
+pyinstaller -F script.py
+
+# 将所有文件打包到一个可执行文件
+pyinstaller --onefile script.py
+```
