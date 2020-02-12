@@ -116,6 +116,7 @@ class SobookSpider:
             option = webdriver.ChromeOptions()
             option.add_argument('headless')
             driver = webdriver.Chrome(ChromeDriverManager().install(), options=option)
+            # driver = webdriver.Chrome(ChromeDriverManager().install())
             driver.get(url)
             # 输入关键字
             input = driver.find_element_by_id('search')
@@ -136,7 +137,8 @@ class SobookSpider:
                     print(i + 1, link[0].get_text().strip(), link[0]['href'])
                 else:
                     title = content.select('h1')
-                    print(i + 1, title[0].get_text().strip(), driver.current_url)
+                    if title:
+                        print(i + 1, title[0].get_text().strip(), driver.current_url)
         finally:
             # 关闭浏览器
             driver.close()
@@ -192,5 +194,5 @@ def main():
 
 
 if __name__ == '__main__':
-    keyword = '可怕的中年'
+    keyword = input('请输入关键词检索相关书籍：')
     main()
