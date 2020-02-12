@@ -13,7 +13,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 
 class SobookSpider:
-    def __init(self):
+    def __init__(self):
         pass
 
     def search_jiumo(self):
