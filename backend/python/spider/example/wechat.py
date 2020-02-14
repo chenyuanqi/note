@@ -161,10 +161,17 @@ class WechatSpider:
             self.from_html()
         elif mode == 'merge':
             self.merge_pdf()
+        elif mode == 'direct' and url and title:
+            self.export_pdf(url, title)
 
 
 def main():
-    mode = input("请选择模式（url、html、merge）：")
+    spider = WechatSpider()
+    spider.start()
+
+
+if __name__ == '__main__':
+    mode = input("请选择模式（direct、url、html、merge）：")
     if mode == 'url':
         url = input('请输入要爬取的 url（请确保包含微信公众号汇总历史连接）：').strip()
     elif mode == 'html':
@@ -173,13 +180,11 @@ def main():
             exit()
     elif mode == 'merge':
         merge_name = input('请输入合并 pdf 的名字：')
+    elif mode == 'direct':
+        title = input('请输入要爬取的标题：').strip()
+        url = input('请输入要爬取的 url：').strip()
     else:
-        print('请重新输入 url、html、merge')
+        print('请重新输入 direct、url、html、merge')
         exit()
-    
-    spider = WechatSpider()
-    spider.start()
 
-
-if __name__ == '__main__':
     main()
