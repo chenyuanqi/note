@@ -9,7 +9,7 @@ sudo apt-get install -y nodejs
 npm install -g n
 # 更新到文档版本
 n stable 
-# 或者更新到最新版本
+# 或者更新到最新版本 npm install npm@latest -g
 n latest
 ```
 
