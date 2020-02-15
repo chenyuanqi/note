@@ -8,6 +8,9 @@ Electron 中引入一个很重的机制，主进程和渲染进程，关于主�
 用 Electron 写项目的时候，你也不用担心代码的调试问题，Electron 中引入来谷歌浏览器的开发者工具，只需要一段很少的代码就在项目中配置谷歌浏览器调试工具。  
 Electron 给我们提供来很丰富的 API，这些 API 在你编码的过程中将会给你减去不少的代码量。  
 
+[Electron 官网](https://www.electronjs.org/)  
+[Electron 文档](https://wizardforcel.gitbooks.io/electron-doc/content/)  
+
 ### Electron 环境搭建
 搭建 Electron 环境前，需要先安装 Nodejs。  
 ```bash
@@ -26,12 +29,16 @@ npm install --platform=win32 Electron
 ### Electron 原理
 Electron 是一个 Chromium + Node.js + NativeApis 的项目，这个项目集成的这些组件是 Electron 的核心 Chromium 是 Google 为发展 Chrome 浏览器而启动的开源项目，Chromium 相当于 Chrome 的工程版或称实验版（尽管 Chrome 自身也有 β 版阶段），新功能会率先在 Chromium 上实现，待验证后才会应用在 Chrome 上，故 Chrome 的功能会相对落后但较稳定。Electron API 就像 Node 一样，被设计成支持用户开发模块和应用程序。  
 
+electron 主要分为主进程和渲染进程。  
+
 **主进程**  
 ipcMain 是 Electron 的主进程的 EventEmitter 的实例，当在主进程中使用时，它处理从渲染器进程（网页）发送出来的异步和同步信息。 从渲染器进程发送的消息将被发送到该模块。  
 
 - 发送消息时，事件名称为 channel
 - 回复同步信息时，需要设置 event.returnValue
 - 将异步消息发送回发件人，需要使用 event.sender.send (...)
+
+electron 运行 package.json 中的 main 字段标明脚本的进程称为主进程；在主进程创建 web 页面来展示用户页面，一个 electron 有且只有一个主进程；electron 使用 Chromium 来展示 web 页面，每个页面运行在自己的渲染进程中。  
 
 **渲染进程**  
 ipcRenderer 是渲染进程的 EventEmitter 的实例。 你可以使用它提供的一些方法从渲染进程（web 页面）发送同步或异步的消息到主进程。也可以接收主进程回复的消息。
@@ -99,4 +106,25 @@ BrowserWindowProxy 操纵子浏览器窗口，使用 window.open 创建一个新
 const {shell} = require('Electron')
 // 在用户的默认浏览器中打开 URL 
 shell.openExternal('https://github.com')
+```
+
+### 快速开始
+克隆一个官方仓库，快速启动一个项目
+```bash
+# 克隆示例项目的仓库
+git clone https://github.com/electron/electron-quick-start
+
+# 进入这个仓库
+cd electron-quick-start
+
+# 安装依赖并运行
+npm install && npm start
+```
+
+使用 electron-forge 搭建一个 electron 项目。  
+```bash
+npm install -g electron-forge 
+electron-forge init my-new-app 
+cd my-new-app
+npm start
 ```
