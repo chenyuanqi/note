@@ -154,6 +154,10 @@ class WechatSpider:
                 else:
                     print('非图文文章，继续~')
 
+    @output_path.setter
+    def output_path(self, path):
+        self.output_path = path
+
     def start(self):
         if mode == 'url' and url:
             self.from_url()
@@ -167,6 +171,8 @@ class WechatSpider:
 
 def main():
     spider = WechatSpider()
+    # 设置输出文件夹
+    spider.output_path = 'd:\download\pdf'
     spider.start()
 
 

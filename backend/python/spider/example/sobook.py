@@ -41,6 +41,8 @@ class SobookSpider:
             for i, content in enumerate(content_list):
                 link = content.select('a')
                 print(i + 1, link[0].get_text(), link[0]['href'])
+        except IndexError:
+            print("搜索无结果~")
         finally:
             # 关闭浏览器
             driver.close()
