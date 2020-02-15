@@ -30,7 +30,7 @@ class SobookSpider:
             # 模拟回车
             input.send_keys(Keys.ENTER)
             # 显示等待
-            wait = WebDriverWait(driver, 3)
+            wait = WebDriverWait(driver, 6)
             # 显式等待指定某个条件，然后设置最长等待时间。如果在这个时间还没有找到元素，那么便会抛出异常
             wait.until(EC.presence_of_element_located((By.XPATH, '//ul/li')))
             # 页面响应内容
@@ -59,7 +59,7 @@ class SobookSpider:
             # 模拟回车
             input.send_keys(Keys.ENTER)
             # 显示等待
-            wait = WebDriverWait(driver, 3)
+            wait = WebDriverWait(driver, 6)
             # 显式等待指定某个条件，然后设置最长等待时间
             wait.until(EC.presence_of_element_located((By.ID, 'books')))
             # 页面响应内容
@@ -90,7 +90,7 @@ class SobookSpider:
             input.send_keys(keyword)
             input.send_keys(Keys.ENTER)
             # 显示等待
-            wait = WebDriverWait(driver, 3)
+            wait = WebDriverWait(driver, 10)
             # 显式等待指定某个条件，然后设置最长等待时间
             wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'container')))
             # 页面响应内容
@@ -106,6 +106,8 @@ class SobookSpider:
             for i, content in enumerate(content_list):
                 link = content.select('a')
                 print(i + 1, content.get_text().strip().replace('\n', '').replace('\r', ''), link[0]['href'])
+        except:
+            print('epubw 搜索异常~')
         finally:
             # 关闭浏览器
             driver.close()
