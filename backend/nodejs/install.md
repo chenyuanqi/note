@@ -261,3 +261,39 @@ npm scripts 可以构建非常复杂的任务，但是 npm scripts 也会带来�
 
 如果需要底层系统命令支撑，又实在找不到跨平台的包，也可以在它里面，使用 shelljs 来调用系统命令，甚至不仅仅局限于 Node 的包，在 script 里面调用 python 脚本和 bash 脚本也一样溜，相信我，npm scripts 会给你打开一片新天地，大家有时间也可以研究下 [npmasbuildtool](https://github.com/marcusoftnet/npmasbuildtool/blob/master/package.json) 的 scripts 清单
 
+**包执行工具 - npx**  
+npx 是 npm 自带的非常酷炫的功能，直接执行依赖包里的二进制文件，比如：  
+```
+# 先安装一个 cowsay
+npm install cowsay -D
+# 包里的二进制文件会被放到 node_modules/.bin 目录下
+ll node_modules/.bin/
+# total 0
+# lrwxr-xr-x 1 16:34 cowsay -> ../cowsay/cli.js
+# lrwxr-xr-x 1 16:34 cowthink -> ../cowsay/cli.js
+
+# 直接通过 npx 来调用 cowsay 里的二进制文件
+npx cowthink Node 好玩么
+ _____________
+( Node 好玩么 )
+ -------------
+        o   ^__^
+         o  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+```
+甚至我们 `npm i webpack -D` 以后，可以直接 npx http-server 把静态服务开起来。  
+
+**包发布 - npm publish**  
+如何发布一个包呢？  
+首先你要有一个 npm 的账号和 Github 账号，可以分别到 npmjs.com 和 github.com 注册，各自都注册且验证邮箱后（Github 还需要配置 ssh key），这些都搞定后，就可以准备开发和发布 NPM 包了，整个流程很简单，总共都不超过 10 步：  
+1、本地（或者从 Github 上）创建创建一个空项目，拉到本地  
+2、增加 .gitignore 忽略文件和 README  
+3、npm init 生成 package.json  
+4、编写功能代码，增加到目录 /lib（也可以增加一个 bin 文件夹存放脚本）  
+5、npm install 本地包进行测试  
+6、npm publish 发布包  
+7、npm install 线上包进行验证  
+8、修改代码发布一个新版本  
+
