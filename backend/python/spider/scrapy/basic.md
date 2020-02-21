@@ -281,6 +281,71 @@ HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 ### Scrapy 进阶应用
 **Selector 的用法**  
+Scrapy 提供了自己的数据提取方法，即 Selector（选择器）。Selector 是基于 lxml 来构建的，支持 XPath 选择器、CSS 选择器以及正则表达式，功能全面，解析速度和准确度非常高。  
+```python
+# 直接使用
+# Selector 是一个可以独立使用的模块
+# 可以直接利用 Selector 这个类来构建一个选择器对象，然后调用它的相关方法如 xpath()、css()等来提取数据
+from scrapy import Selector
+
+body = '<html><head><title>Hello World</title></head><body></body></html>'
+selector = Selector(text=body)
+title = selector.xpath('//title/text()').extract_first()
+print(title)
+```
+
+Scrapy Shell 模式。  
+这个过程其实是，Scrapy 发起了一次请求，请求的 URL 就是刚才命令行下输入的 URL，然后把一些可操作的变量传递给我们，如 request、response 等。进入 Scrapy Shell 之后，我们将主要操作 response 这个变量来进行解析。  
+```bash
+scrapy shell http://doc.scrapy.org/en/latest/_static/selectors-sample1.html
+response.url
+# 调用 response.selector 返回的内容就相当于用 response 的 body 构造了一个 Selector 对象
+result = response.selector.xpath('//a')
+result
+result.xpath('./img')
+
+# 提取出 a 节点元素，就可以利用 extract() 方法
+result.extract()
+# 选取节点的内部文本和属性
+response.xpath('//a/text()').extract()
+response.xpath('//a/@href').extract()
+# 如果只匹配到一个元素，这样获取是有索引越界的风险的
+response.xpath('//a[@href="image1.html"]/text()').extract()[0]
+# 我们应该这样
+response.xpath('//a[@href="image1.html"]/text()').extract_first()
+# 甚至，可以加个默认值
+response.xpath('//a[@href="image1"]/text()').extract_first('Default Image')
+```
+
+Scrapy 的选择器同时还对接了 CSS 选择器，使用response.css()方法可以使用 CSS 选择器来选择对应的元素。  
+```python
+# 选取所有的 a 节点
+response.css('a')
+# 提取出节点
+response.css('a').extract()
+# 也可以使用extract_first()方法提取列表的第一个元素
+response.css('a[href="image1.html"] img').extract_first()
+# 获取文本和属性需要用::text和::attr()的写法
+response.css('a[href="image1.html"]::text').extract_first()
+response.css('a[href="image1.html"] img::attr(src)').extract_first()
+
+# CSS 选择器和 XPath 选择器一样可以嵌套选择
+# 先用 XPath 选择器选中所有a节点，再利用 CSS 选择器选中img节点，再用 XPath 选择器获取属性
+response.xpath('//a').css('img').xpath('@src').extract()
+```
+
+Scrapy 的选择器还支持正则匹配。  
+`注意：response 对象不能直接调用 re() 和 re_first() 方法。`  
+```python
+# 我们给 re()方法传了一个正则表达式，其中 (.*) 就是要匹配的内容
+response.xpath('//a/text()').re('Name:\s(.*)')
+
+# 如果同时存在两个分组，那么结果依然会被按序输出
+response.xpath('//a/text()').re('(.*?):\s(.*)')
+
+# 类似 extract_first() 方法，re_first() 方法可以选取列表的第一个元素
+response.xpath('//a/text()').re_first('(.*?):\s(.*)')
+```
 
 **Spider 的用法**
 
