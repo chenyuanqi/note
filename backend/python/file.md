@@ -407,3 +407,23 @@ def hash_cry32(s):
 print(hash_cry32(1))  # c4ca4238a0b923820dcc509a6f75849b
 print(hash_cry32('hello'))  # 5d41402abc4b2a76b9719d911017c592
 ```
+
+#### 12 文件异常
+文件找不到会引发 FileNotFoundError，指定了未知的编码会引发 LookupError，而如果读取文件时无法按指定方式解码会引发 UnicodeDecodeError，我们在 try 后面跟上了三个 except 分别处理这三种不同的异常状况。  
+
+```python
+def main():
+    try:
+        with open('致橡树.txt', 'r', encoding='utf-8') as f:
+            print(f.read())
+    except FileNotFoundError:
+        print('无法打开指定的文件!')
+    except LookupError:
+        print('指定了未知的编码!')
+    except UnicodeDecodeError:
+        print('读取文件时解码错误!')
+
+
+if __name__ == '__main__':
+    main()
+```
