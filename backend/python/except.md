@@ -197,3 +197,181 @@ name = getattr(test, 'name', 'default')
 4、不要使用异常来控制流程，那样你的程序会无比难懂和难维护。  
 5、如果有需要，切记使用 finally 来释放资源。  
 6、如果有需要，请不要忘记在处理异常后做清理工作或者回滚操作。  
+
+### Python 错误及解决办法
+1、SyntaxError 语法错误  
+（1）引号没有成对出现：SyntaxError:EOL while scanning string literal  
+```python
+string = 'hello world
+```
+字符串切记要放在引号中，单引号双引号无所谓。  
+当一个字符串中包含单引号或双引号时，很容易出现引号不配对的情况。  
+
+（2）圆括号没有成对出现：SyntaxError:unexpected EOF while parsing  
+```python
+result = (1024+(512*2)/128
+# 或者
+print('hello world'
+```
+使圆括号成对出现。  
+在书写复杂的表达式或调用函数时会经常遇到这个问题。  
+
+（3）错误使用自操作运算符 ++ 或 -- 等：SyntaxError:invalid syntax  
+```python
+v = 64
+v++ # 正确示例：v += 1
+```
+在 Python 语言中，没有类似 C 语言的 ++ 或 -- 等自操作运算符。  
+与之类似功能的用法是 += 或 -= 运算符。  
+
+（4）试图使用等号（=）判断两个运算量是否相等：SyntaxError:invalid syntax  
+```python
+if v=64:
+    print('hello world')
+```
+在 Python 语言中,使用两个等号（==）作为判断两个运算量是否相等的关系运算符，而等号（=）是赋值运算符。  
+
+（5）错误使用 Python 语言关键字作为变量名：SyntaxError: can't assign to keyword  
+```python
+False = 1
+```
+不要使用 Python 语言关键字作为变量名、函数名或类名等。  
+在 Python Shell 窗口中，使用 help('keywords') 指令可以查看 Python 语言的关键字列表。  
+
+（6）忘记在 if/elif/else/while/for/def/class 等语句末尾添加冒号（:）：SyntaxError:invalid syntax  
+```python
+a = '12345'
+for i  in a
+    print(i)
+```
+在 if/elif/else/while/for/def/class 等语句末尾添加冒号（:）即可。  
+牢记语法规则，多多练习多多敲代码。  
+
+（7）错误地使用了中文标点符号：SyntaxError: invalid character in identifier  
+```python
+print('hello'，'world')
+# 错误原因：逗号是中文标点符号
+
+for i in range(10)：
+# 错误原因：冒号是中文标点符号
+```
+除了字符串中可以有中文外，其它任何情况均使用英文状态进行编辑。  
+
+2、IndentationError 缩进错误  
+报错信息：IndentationError：unindent does not match any outer indentation level  
+或者：IndentationError：expected an indented block  
+```python
+a = 2
+while a < 0:
+        print('hello')
+    a -= 1
+else:
+    print('0.0')
+```
+上述代码中 while 语句体内的代码缩进没有对齐。  
+正确使用缩进排版代码。当代码是从其它地方复制并粘贴过来的时候，这个错误较多见。  
+
+3、NameError 名字错误  
+当变量名、函数名或类名等书写错误，或者函数在定义之前就被调用等情况下，就会导致名字错误。  
+报错信息：NameError: name 'pirnt' is not defined  
+```python
+pirnt('hello world')
+# 错误原因：print 拼写错误
+
+sayhi()
+def sayhi():
+    pass
+# 错误原因：在函数定义之前对函数进行调用
+
+pd.read_excel(r'file.xlsx')
+# 错误原因：在调用 pandas 方法前并未导入 pandas 库或者并未起别名为 pd
+```
+正确书写变量名、函数名或类名等，在使用变量前先进行赋值，将函数的定义放在函数调用之前，在使用第三方库前先进行导入、调包等等。即保证某个名字（标识符）先存在，才能被使用。  
+
+4、TypeError 类型错误  
+（1）整数和字符串不能进行连接操作：TypeError: Can't convert 'int' object to str implicitly 或 TypeError: unsupported operand type(s) for + : 'float' and 'str'  
+```python
+print('score:'+100)
+print(9.8 + 'seconds')
+```
+在整数、浮点数或布尔值与字符串进行连接操作之前，先使用str()函数将其转换为字符串类型。  
+
+（2）调用函数时参数的个数不正确，或者未传递参数：TypeError: input expected at most 1 arguments,got 2 或 TypeError: say() missing 1 required positional argument:'words'  
+```python
+input('输入姓名','年龄')
+# 错误原因：试图给 input() 函数提供第 2 个参数
+
+def say(words):
+    print(words)
+say()
+# 错误原因：调用函数时未传递参数
+```
+记住函数用法，了解函数的参数定义，使用正确的方法调用函数即可。  
+
+5、KeyError 键错误  
+使用不存在的键名访问字典中的元素，就会发生这个错误。  
+报错信息：KeyError: 'c'  
+```python
+d = {'a':1,'b':2}
+print(d['c'])
+```
+在访问字典中的元素时，先用 in 关键字检测要访问的键名是否存在，或者是使用字典和 get() 方法安全地访问字典元素。  
+
+6、 IndexError 索引错误  
+当访问列表的索引超出列表范围时，就会出现索引错误。  
+报错信息：IndexError: list index out of range  
+```python
+a = [1,2,3]
+print(a[3])
+# 错误原因：列表 a 中不存在第 4 个索引。列表的索引从 0 开始编号。
+```
+通过len()函数获取列表的长度，然后判断要访问的索引是否超出列表范围。  
+
+7、UNboundLocalError 未初始化本地变量错误  
+在函数中，如果对未声明的全局变量进行修改操作，将会遇到这个错误。  
+报错信息：UnboundLocalError: local variable 's' referenced before assignment  
+```python
+s = 1
+
+def test():
+    s += 1
+    print(s)
+
+test()
+# 错误原因：在函数内对未声明的全局变量 s 进行了自增操作
+# Python 将变量 s 视为一个本地的局部变量，但该变量未初始化
+```
+在函数内使用全局变量时，使用 global 关键字对其进行声明即可。  
+
+8、AttributeError 属性错误  
+报错信息：AttributeError: 'tuple' object has no attribute 'append' 或 AttributeError: 'DataFrame' object has no attribute 'col'  
+```python
+t = (1,2,3)
+t.append(4)
+# 错误原因：元祖不可变
+
+df = pd.read_excel(r'data.xlsx')
+df.col
+# 错误原因：DataFrame 没有 col 属性，应该为 columns
+```
+正确书写类的属性名，不要发生书写错误。  
+深刻理解元祖，列表的区别，可将元祖转换为列表添加元素。  
+
+9、ModuleNotFoundError 模块不存在  
+报错信息：ModuleNotFoundError: No module named 'pandas'  
+```python
+import pandas as pd
+# 没有导入成功，报上面错误
+```
+这种报错常见于两种场景中，  
+第一、未下载、安装该模块；  
+第二、将调用的模块路径与被调用的模块路径不一致等。  
+第一种情况直接下载安装即可，在cmd中，pip install xxx；第二种情况电脑中可能存在多个版本的 Python，建议保留一个常用的即可。  
+
+10、FileNotFoundError 文件不存在  
+报错信息：FileNotFoundError: File b'E:\test\test_data.csv' does not exist  
+```python
+pd.read_csv('E:\test\test_data.csv')
+# 错误原因：路径中包含'\t'，系统错误地认为是制表符
+```
+在确保该路径下确实存在所写文件后，在读取文件路径前面加'r'，表示只读，作为文件路径读取；或者使用双斜杠'\ \'来进行转义，形如：'E:\ \test\ \test_data.csv'。偶尔也会发生文件名、路径的确写错，犯一些低级错误。  
