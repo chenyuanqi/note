@@ -10,6 +10,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 
 class SobookSpider:
@@ -72,6 +73,8 @@ class SobookSpider:
             for i, content in enumerate(content_list):
                 link = content.select('a')
                 print(i + 1, link[0].h3.get_text(), link[0]['href'])
+        except TimeoutException:
+            print("智奇搜书超时~")
         finally:
             # 关闭浏览器
             driver.close()
@@ -143,6 +146,8 @@ class SobookSpider:
                     title = content.select('h1')
                     if title:
                         print(i + 1, title[0].get_text().strip(), driver.current_url)
+        except TimeoutException:
+            print("三秋书屋超时~")
         finally:
             # 关闭浏览器
             driver.close()
