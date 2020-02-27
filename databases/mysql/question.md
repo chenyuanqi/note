@@ -499,6 +499,17 @@ select found_rows(); # 返回查询记录的总数
 > 降低数据库中普通账号的权限级别；  
 > 开启 binlog，方便追溯数据。  
 
+- Mysql 如何确保数据不丢失？  
+> 日志先行，io 顺序写，异步操作，做到了高效操作。  
+> 对数据页，先在内存中修改，然后使用 io 顺序写的方式持久化到 redo log 文件；然后异步去处理 redo log，将数据页的修改持久化到磁盘中，效率非常高，整个过程，其实就是 MySQL 里经常说到的 WAL 技术，WAL 的全称是 Write-Ahead Logging，它的关键点就是先写日志，再写磁盘。  
+> 
+> 两阶段提交确保 redo log 和 binlog 一致性。  
+> 为了确保 redo log 和 binlog 一致性，此处使用了二阶段提交技术，redo log 和 binlog 的写分了 3 步走：  
+> 1、携带 trx_id，redo log prepare 到磁盘  
+> 2、携带 trx_id，binlog 写入磁盘  
+> 3、携带 trx_id，redo log commit 到磁盘  
+> 上面 3 步骤，可以确保同一个 trx_id 关联的 redo log 和 binlog 的可靠性。  
+
 - MySQL 服务器 CPU 飙升应该如何处理？  
 > 使用 show full processlist; 查出慢查询，为了缓解数据库服务器压力，先使用 kill 命令杀掉慢查询的客户端；  
 > 然后再去项目中找到执行慢的 SQL 语句进行修改和优化。  
