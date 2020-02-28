@@ -11,6 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementNotInteractableException
 
 
 class SobookSpider:
@@ -176,6 +177,39 @@ class SobookSpider:
                 link = content.select('.book-card .book-content a')
                 if link:
                     print(i + 1, link[0].get_text().strip(), url + link[0]['href'])
+        except ElementNotInteractableException:
+            print('LoreFree 节点未发现')
+        finally:
+            # 关闭浏览器
+            driver.close()
+
+    def search_yabook(self):
+        url = 'https://yabook.org/'
+        try:
+            option = webdriver.ChromeOptions()
+            option.add_argument('headless')
+            driver = webdriver.Chrome(ChromeDriverManager().install(), options=option)
+            # driver = driver = webdriver.Chrome(ChromeDriverManager().install())
+            driver.get(url)
+            # 输入关键字
+            input = driver.find_element_by_name('keyboard')
+            input.send_keys(keyword)
+            input.send_keys(Keys.ENTER)
+            # 显示等待
+            wait = WebDriverWait(driver, 6)
+            # 显式等待指定某个条件，然后设置最长等待时间
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'main')))
+            # 页面响应内容
+            html = driver.page_source
+            bs4 = BeautifulSoup(html, 'lxml')
+            content_list = bs4.select('.post .postblock')
+            print('雅书搜索结果如下：')
+            for i, content in enumerate(content_list):
+                link = content.select('.postblock .posttitle a')
+                if link:
+                     print(i + 1, link[0].get_text().strip(), url + link[0]['href'])
+        except ElementNotInteractableException:
+            print('LoreFree 节点未发现')
         finally:
             # 关闭浏览器
             driver.close()
@@ -195,6 +229,9 @@ class SobookSpider:
 
         print("LoreFree 搜索ing...")
         self.search_lorefree()
+
+        print("雅书搜索ing...")
+        self.search_yabook()
 
 
 def main():
