@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import NoSuchElementException
 
 
 class SobookSpider:
@@ -177,8 +178,8 @@ class SobookSpider:
                 link = content.select('.book-card .book-content a')
                 if link:
                     print(i + 1, link[0].get_text().strip(), url + link[0]['href'])
-        except ElementNotInteractableException:
-            print('LoreFree 节点未发现')
+        except (ElementNotInteractableException, NoSuchElementException) as e:
+            print('LoreFree 节点未发现', e)
         finally:
             # 关闭浏览器
             driver.close()
