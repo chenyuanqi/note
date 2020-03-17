@@ -41,3 +41,75 @@ RBAC 就是用户通过角色与权限进行关联。
 
 **RBAC 数据库设计**  
 ![RBAC 数据库设计](../../../others/static/images/rbac-design-03.png)  
+
+### RBAC 简单实践
+1、数据表及主要字段设计
+```
+用户表 users：id
+角色表 roles：id，rules（规则id,规则id...）
+用户角色关系表 user_role_relations：uid，rid
+规则表 rules：id，pid，action
+```
+
+2、简要实现代码
+```php
+public function canAccess($user: User, $action = '/')
+{
+    if (static::isAdministrator($user)){
+    	return true;
+    }
+
+    $roles = static::getUserRoles($user);
+    if ($roles){
+    	$rules = static::getUserRules($roles);
+    	if (in_array($action, $rules, true)){
+    		return true;
+    	}
+    }
+
+    return false;
+}
+
+public function getRulesTree()
+{
+    $rules = Rules::select(['id', 'pid', 'action'])->orderBy(['pid' => 'asc'])->get()->toArray();
+    $tree  = function($arr, $pid = 0) use (&$tree) {
+	    $result = [];
+	    foreach($arr as $item){
+	        if ($item['pid'] === $pid){
+	            if ($son = $tree($arr, $item['id'])){
+	                $item['children'] = $son;
+	            }
+	            
+	            $result[] = $item;
+	        }
+	    }
+	    
+	    return $result;
+	};
+
+	return $tree($rules);
+}
+
+public function getUserRoles($user: User)
+{
+	$relations = UserRoleRelations::select(['rid'])->where(['uid' => $user->id])->get();
+	if($relations instanceof UserRoleRelations){
+		$rids = $relations->pluck('rid');
+		return Roles::where('id', 'in', $rids)->get();
+	}
+
+    return null;
+}
+
+public function getUserRules($roles: Roles[])
+{
+	$ruleIds = [];
+	$rules   = $roles->pluck('rules');
+	foreach ($rules as $key => $rule) {
+		$ruleIds = array_merge($ruleIds, explode(',', $rule));
+	}
+
+	return $ruleIds ? Rules::where('id', 'in', $ruleIds)->get()->pluck('action') : [];
+}
+```
