@@ -150,6 +150,8 @@ class SobookSpider:
                         print(i + 1, title[0].get_text().strip(), driver.current_url)
         except TimeoutException:
             print("三秋书屋超时~")
+        except NoSuchElementException:
+            print("三秋书屋节点找不到")
         finally:
             # 关闭浏览器
             driver.close()
