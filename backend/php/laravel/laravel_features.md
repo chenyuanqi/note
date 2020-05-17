@@ -1,5 +1,11 @@
 
 ### Laravel 版本发布路线
+- Laravel 7.* - 2020 年 3 月份
+> 一般发行版，Bug 修复直到 2020 年 9 月份，安全修复直到 2021 年 3 月份。
+
+- Laravel 6.5 - 2019 年 11 月份
+> 一般发行版，提供 6 个月的 Bug 修复支持，一年的安全修复支持
+
 - Laravel 6.0 LTS - 2019 年 9 月份
 > LTS 长久支持版本，Bug 修复直到 2021 年 9 月份，安全修复直到 2022 年 9 月份。
 
@@ -13,7 +19,7 @@
 > 一般发行版，提供 6 个月的 Bug 修复支持，一年的安全修复支持
 
 - Laravel 5.5 LTS – 2017 年 8 月份
-> LTS 长久支持版本，会从这一刻开始停止 Laravel 5.1 的 Bug 修复，安全修复直到 2018 年 7 月份
+> LTS 长久支持版本，会从这一刻开始停止 Laravel 5.1 的 Bug 修复，安全修复直到 2018 年 7 月份。
 
 - Laravel 5.4 – 2017 年 1 月份
 > 一般发行版，提供 6 个月的 Bug 修复支持，一年的安全修复支持
@@ -29,6 +35,17 @@
 
 - Laravel 的开始  
 > 2011 年 6 月 9 日，Laravel 的创始人 Taylor Otwell 发布第一个测试版本
+
+### Laravel 7.* 新特性
+Laravel 7 通过引入 Laravel Sanctum，路由速度改进，自定义 Eloquent 强制转换 (casts)， Blade 组件标签，流畅的字符串操作，开发人员专用的 HTTP 客户端， 第一方 CORS 支持， 路由模型绑定作用域改进， 存根自定义， 数据库队列改进， 多邮箱驱动， 查询时间强制转换 (casts)，新的 artisan test 命令，以及各种其他错误修复和可用性改进，对 Laravel 6.x 继续进行了改善。
+
+[Laravel 7.\* 发行说明](https://learnku.com/docs/laravel/7.x/releases/7444)  
+
+### Laravel 6.5 新特性
+Laravel 6.5 在 LazyCollection 中增加了一个新的 remember 功能。此外，该版本还包括一些新的字符串辅助函数、自定义的 unless blade 条件和一些新的查询构造器方法。  
+
+[Laravel 6.5 新功能](https://learnku.com/laravel/t/36245)  
+
 
 ### Laravel 6.0 新特性
 Laravel 6.0 的发布标志着 laravel 框架开始使用语义化版本，此外，该版本还包含了对 Laravel Vapor 的支持、优化了授权响应、任务中间件、懒集合、子查询优化以及很多其它细节优化。要求 PHP 7.2+。  
