@@ -39,6 +39,7 @@
 [PHP 开发者实践](https://ryancao.gitbooks.io/php-developer-prepares/content/)  
 [深入理解 PHP 内核](http://php-internals.com/)  
 [Zephir 开发 PHP 扩展](https://zephir-lang.com/)  
+[QueryList 渐进式采集爬虫](https://querylist.cc/)  
 
 ### 社区生态
 [PHP trends](https://phptrends.com/)  
