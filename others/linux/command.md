@@ -145,6 +145,13 @@ cp [OPTION] SRC DEST
 # 复制本地到远程： scp [-r] local_path user_name@ip:remote_path
 # 复制远程到本地： scp [-r] user_name@ip:remote_path local_path
 
+# yum install lrzsz/apt-get install lrzsz
+# 从服务器传文件到本地
+sz file_name
+# 从本地上传文件到服务器
+rz 
+
+
 # 移动文件或重命名
 mv [OPTION] SOURCE DEST
 # -i：交互式
