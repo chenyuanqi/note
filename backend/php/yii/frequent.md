@@ -17,6 +17,20 @@ use yii\helpers\HtmlPurifier;
 
 echo Html::encode($view_hello_str) // 可以原样显示<script></script>代码  
 echo HtmlPurifier::process($view_hello_str)  // 可以过滤掉<script></script>代码
+
+// 调试输出
+if (!function_exists('dd')) {
+    function dd(...$params)
+    {
+        foreach ($params as $param)  {
+            \yii\helpers\VarDumper::dump($param, 10, true);
+            echo '<pre>';
+        }
+        exit(1);
+    }
+}
+// 获取当前 model query 查询语句
+$query->createCommand()->getRawSql();
 ```
 
 ### 常用 AR
