@@ -288,6 +288,10 @@ server {
     proxy_set_header X-Forwarded-For   $remote_addr; # HTTP的请求端真实的IP
     proxy_set_header X-Forwarded-Proto $scheme;      # 为了正确地识别实际用户发出的协议是 http 还是 https
   }
+
+  location /node/ {
+    proxy_pass http://127.0.0.1:9502;
+  }
 }
 
 # 复杂一些的配置

@@ -1,4 +1,5 @@
 
+
 ### 跨域问题
 有时候会遇到一些接口不支持跨域，这时候可以简单的添加 add_headers 来支持 cors 跨域。
 ```
@@ -9,6 +10,7 @@ server {
   add_header 'Access-Control-Allow-Origin' '*';
   add_header 'Access-Control-Allow-Credentials' 'true';
   add_header 'Access-Control-Allow-Methods' 'GET,POST,HEAD';
+  add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,X-XSRF-TOKEN';
 
   location / {
     proxy_pass http://127.0.0.1:3000;
