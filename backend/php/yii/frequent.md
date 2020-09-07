@@ -58,8 +58,8 @@ $query = User::find() ->select([ new Expression('count(*) as count , count(disti
 // 关于使用事务
 Yii::$app->db->transaction(function() {
     $order = new Order($customer);
-    $order->save();
-    $order->addItems($items);
+    
+    return $order->save();
 });
 // 这相当于下列冗长的代码：
 $transaction = Yii::$app->db->beginTransaction();
@@ -72,6 +72,42 @@ try {
     $transaction->rollBack();
     throw $e;
 }
+
+// 是否新记录
+$model->isNewRecord;
+// 获取主键值
+$model->getOldPrimaryKey();
+
+// 分页
+$count = $query->count();
+$pagination = new Pagination(['totalCount' => $count]);
+$pageSize = $params['limit'] ?? 10;
+$pagination->setPageSize($pageSize);
+$data = $query->offset($pagination->offset)->limit($pagination->limit)->orderBy(['create_time' => SORT_DESC])->all();
+
+// 批量删除
+$result = ProductChannelConfig::deleteAll(['sub_product_id' => $config->sub_product_id]);
+
+// 批量添加
+$batchTerms = [];
+$termFields = ['price_item_id', 'term', 'term_unit', 'create_time', 'update_time'];
+foreach ($terms as $term) {
+    $batchTerms[] = [
+        'price_item_id' => $priceItemId,
+        'term'          => $term,
+        'term_unit'     => $termUnit,
+        'create_time'   => $currentDate,
+        'update_time'   => $currentDate,
+    ];
+}
+$result = ProductTermConfig::getDb()->createCommand()
+                   ->batchInsert(ProductTermConfig::tableName(), $termFields, $batchTerms)
+                   ->execute();
+
+// 批量更新
+$attributes = ['status' => ProductWhiteInfo::STATUS_VALID];
+$conditions = ['and', ['sub_product_id' => $productId], ['in', 'user_id', [1, 2, 3]]];
+ProductWhiteInfo::updateAll($attributes, $conditions);
 ```
 
 ### 常用 Model
@@ -173,6 +209,7 @@ public function behaviors()
             'class' => TimestampBehavior::className(),
             'createdAtAttribute' => 'created_at',
             'updatedAtAttribute' => 'updated_at',
+            'value'              => date('Y-m-d H:i:s'),
         ],
     ];
 }
@@ -242,6 +279,28 @@ public function getLastLearnTimesArray()
     rsort($times);
 
     return array_values($times);
+}
+
+// 一对一 $query->with('entry');
+/**
+ * 获取入口
+ *
+ * @return \yii\db\ActiveQuery
+ */
+public function getEntry()
+{
+    return $this->hasOne(Entry::className(), ['Entry.xx' => 'model.xx']);
+}
+
+// 一对多 $query->with('channels');
+/**
+ * 获取渠道
+ *
+ * @return \yii\db\ActiveQuery
+ */
+public function getChannels()
+{
+    return $this->hasMany(ProductChannelConfig::className(), ['ProductChannelConfig.xx' => 'model.xx']);
 }
 ```
 
