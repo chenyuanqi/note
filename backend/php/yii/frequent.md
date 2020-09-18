@@ -1,6 +1,9 @@
 
 ### 常用代码
 ```php
+// 获取配置 params.php
+Yii::$app->params['oss']['AccessKeyId'];
+
 // 获取 post 传参 (结果是 array)
 // Yii::$app->request->post()
 Yii::$app->request->bodyParams 
