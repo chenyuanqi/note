@@ -38,7 +38,9 @@ $query->createCommand()->getRawSql();
 
 ### 常用 AR
 ```php
-//  is not null条件查询
+// is null
+$query->andWhere(['or', ['overdue_days' => 0], ['overdue_days' => null]]);
+// is not null条件查询
 $query->andWhere(['not', ['state' => null]])
 
 // 多条件组合
@@ -52,11 +54,15 @@ User::find()->where(['and', ['xxx' => 0, 'yyy' => 2], ['>', 'zzz', $time]]);
 // 使用 find_in_set
 User::find() ->where(new Expression('FIND_IN_SET(:status, status)'))->addParams([':status' => 1])->all();
 
+// 查询作为条件
+$query->andWhere(new Expression('trade_no IN (SELECT trade_no FROM device_info WHERE source_channel=:channel)'))
+      ->addParams(['channel' => $params['channel']]);
+
 // 模糊查询，第 4 个参数是否自动给关键词前后加"%"
 $query = User::find() ->where(['LIKE', 'name', $keyword.'%', false]);
 
 //避免 select 里面的子查询被识别成字段
-$query = User::find() ->select([ new Expression('count(*) as count , count(distinct mobile) as mnumber') ]);
+$query = User::find() ->select([ new Expression('count(*) as count , count(distinct mobile) as number') ]);
 
 // 关于使用事务
 Yii::$app->db->transaction(function() {
