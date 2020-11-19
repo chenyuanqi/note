@@ -39,9 +39,9 @@ $query->createCommand()->getRawSql();
 ### 常用 AR
 ```php
 // is null
-$query->andWhere(['or', ['overdue_days' => 0], ['overdue_days' => null]]);
+$query->andWhere(['OR', ['overdue_days' => 0], ['IS', 'overdue_days', null]]);
 // is not null条件查询
-$query->andWhere(['not', ['state' => null]])
+$query->andWhere(['IS NOT', 'state', null]])
 
 // 多条件组合
 $logQuery->andWhere([
