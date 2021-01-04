@@ -104,3 +104,38 @@ systemctl status NetworkManager.service # 验证网络管理器服务的状态
 > txqueuelen 表示传送列队（Transfer Queue）长度  
 > interrupt 表示该网卡的 IRQ 中断号  
 > Base address 表示 I/O 地址  
+
+### telnet
+telnet 命令是我们最常用的网络调试命令之一。  
+```bash
+# 安装
+yum install telnet
+
+# 一个服务程序对外开启了侦听服务，我们都可以使用 telnet ip port 来连接上去
+# 即通过 telnet 命令去检测指定 ip 地址和端口号的侦听服务是否存在
+telnet 120.55.94.78 8888
+telnet www.baidu.com 80
+```
+
+### tcpdump
+tcpdump 是 Linux 系统提供一个非常强大的抓包工具。  
+```bash
+# 安装
+yum install tcpdump
+
+## 仅显示经过端口 8888 上的数据包（包括tcp:8888和udp:8888）
+tcpdump -i any 'port 8888'
+
+## 仅显示经过端口是 tcp:8888 上的数据包
+tcpdump -i any 'tcp port 8888'
+
+## 仅显示从源端口是 tcp:8888 的数据包
+tcpdump -i any 'tcp src port 8888'
+
+## 仅显示源端口是 tcp:8888 或目标端口是 udp:9999 的包 
+tcpdump -i any 'tcp src port 8888 or udp dst port 9999'
+
+## 仅显示地址是127.0.0.1 且源端口是 tcp:9999 的包 ，以 ASCII 和十六进制显示详细输出，
+## 不显示 ip 地址和端口号的别名
+tcpdump -i any 'src host 127.0.0.1 and tcp src port 9999' -XX -nn -vv
+```
