@@ -139,3 +139,15 @@ tcpdump -i any 'tcp src port 8888 or udp dst port 9999'
 ## 不显示 ip 地址和端口号的别名
 tcpdump -i any 'src host 127.0.0.1 and tcp src port 9999' -XX -nn -vv
 ```
+
+### netcat
+netcat 因为功能强大，被称为网络工具中的瑞士军刀，nc 是 netcat 的简称。  
+```bash
+
+# 查看远程端口是否打开
+nc -zv [host or ip] [port]
+
+# 访问 redis
+nc localhost 6379
+
+```
