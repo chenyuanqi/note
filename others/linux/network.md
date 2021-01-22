@@ -143,11 +143,49 @@ tcpdump -i any 'src host 127.0.0.1 and tcp src port 9999' -XX -nn -vv
 ### netcat
 netcat 因为功能强大，被称为网络工具中的瑞士军刀，nc 是 netcat 的简称。  
 ```bash
+# 用 nc 来当聊天服务器
+nc -l 9090 # -l 参数表示 nc 将监听某个端口
+# 客户端连接
+nc 10.211.55.5 9090
+
+# 发送 http 请求
+nc 183.232.231.172 80
 
 # 查看远程端口是否打开
 nc -zv [host or ip] [port]
 
 # 访问 redis
 nc localhost 6379
-
 ```
+
+### netstat
+netstat 很强大的网络工具，可以用来显示套接字的状态。  
+```bash
+# 列出所有套接字
+netstat -a
+
+# 只列出 TCP 套接字
+netstat -at
+
+# 只列出 UDP 连接
+netstat -au
+
+# 只列出处于监听状态的连接
+netstat -l
+# 组合-t来过滤处于 listen 状态的 TCP 连接
+netstat -lt
+# 禁用端口 和 IP 映射(常用端口都被映射为了名字，比如 22 端口输出显示为 ssh)
+netstat -ltn
+# 显示进程
+netstat -ltnp
+
+# 显示所有的网卡信息
+netstat -i
+
+# 显示 8080 端口所有处于 ESTABLISHED 状态的连接
+netstat -atnp | grep ":8080" | grep ESTABLISHED
+
+# 统计处于各个状态的连接个数
+netstat -ant | awk '{print $6}' | sort | uniq -c | sort -n
+```
+

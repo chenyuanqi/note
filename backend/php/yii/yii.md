@@ -92,3 +92,70 @@ public function sendHeaders()
     ],
 ]
 ```
+
+### Yii 闲置会话控制
+闲置会话超时时设置 15 分钟，自动退出登陆。
+```php
+# main.php 配置
+'user' => [
+    'identityClass' => backend\models\Account::className(),
+    'enableSession' => true,
+],
+'session' => [
+    'name' => 'BACKEND_FIN_CREDIT',
+    'timeout' => 86400, //session过期时间，单位为秒
+    // cookie 有效时间，15 分钟过期
+    'cookieParams' => [
+        'lifetime' => 900
+    ],
+],
+
+# User 模型
+/**
+ * 获取用户 session 值
+ *
+ * @param $key
+ *
+ * @return mixed|null
+ */
+public function getSession($key)
+{
+    $key = 'account_' . $this->getId() . "_{$key}";
+
+    return Yii::$app->session->get($key, 0);
+}
+
+/**
+ * 设置用户 session 值
+ *
+ * @param $key
+ * @param $timeout
+ */
+public function setSession($key, $timeout)
+{
+    $key = 'account_' . $this->getId() . "_{$key}";
+
+    return Yii::$app->session->set($key, time() + $timeout);
+}
+
+# 登录处理
+$duration = Yii::$app->session->cookieParams['lifetime'];
+return Yii::$app->user->login($this->getUser(), $duration);
+
+# 登陆后
+$identity = Yii::$app->getUser()->getIdentity();
+$identity->setSession('userSessionTimeout', Yii::$app->session->cookieParams['lifetime']);
+
+# 权限控制 AccessControl
+// yii/web/User
+$user = $this->getUser();
+$identity = $user->getIdentity();
+// 未登录
+if (!$identity instanceof Account) {
+    throw new AuthenticationException();
+} else if ($identity->getSession('userSessionTimeout') >= time()) {
+    $duration = Yii::$app->session->cookieParams['lifetime'];
+    $user->switchIdentity($identity, $duration);
+    $identity->setSession('userSessionTimeout', $duration);
+}
+```
