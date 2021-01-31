@@ -82,6 +82,26 @@
 > 一般来说，502 与 php-fpm.conf 的设置有关，也与 php 的执行程序性能有关，网站的访问量大，而 php-cgi 的进程数偏少。针对这种情况的 502 错误，只需增加 php-cgi 的进程数。具体就是修改/usr/local/php/etc/php-fpm.conf文件，将其中的max_children值适当增加。  
 > 504 请求没有到可以执行的 php-fpm，与 nginx.conf 的配置也有关系。  
 
+- php 常见状态码
+```
+502
+502 表示网关错误，当 PHP-CGI 得到一个无效响应，网关就会输出这个错误
+php.ini 的 memory_limit 过小
+php-fpm.conf 中 max_children、max_requests 设置不合理
+php-fpm.conf 中 request_terminate_timeout、max_execution_time 设置不合理
+php-fpm 进程处理不过来，进程数不足、脚本存在性能问题
+
+504
+504 表示网关超时，PHP-CGI 没有在指定时间响应请求，网关将输出这个错误
+Nginx+PHP 架构，可以调整 FastCGI 超时时间，fastcgi_connect_timeout、fastcgi_send_timeout、fastcgi_read_timeout
+
+500
+php 代码问题，文件权限问题，资源问题
+
+503
+超载或者停机维护
+```
+
 ### http 协议
 HTTP 是一个客户端终端（用户）和服务器端（网站）请求和应答的标准（TCP）。通过使用 Web 浏览器、网络爬虫或者其它的工具，客户端发起一个 HTTP 请求到服务器上指定端口（默认端口为 80）。我们称这个客户端为用户代理程序（user agent）。应答的服务器上存储着一些资源，比如 HTML 文件和图像。我们称这个应答服务器为源服务器（origin server）。在用户代理和源服务器中间可能存在多个“中间层”，比如代理服务器、网关或者隧道（tunnel）。  
 
