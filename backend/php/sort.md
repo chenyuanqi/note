@@ -127,9 +127,20 @@ function selection_sort($arr)
             }
         }
         if ($min != $i) {
+            // 方式：交换位置
             $temp = $arr[$i];
             $arr[$i] = $arr[$min];
             $arr[$min] = $temp;
+
+            // 方式：插入位置
+            /*$temp = $arr[$min];
+            for ($t = $min - 1; $t >= 0; --$t) {
+                if ($arr[$t] <= $temp) {
+                    break;
+                }
+                $arr[$t+1] = $arr[$t];
+            }
+            $arr[$i] = $temp;*/
         }
     }
 
