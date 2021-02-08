@@ -4,7 +4,8 @@
 name 名称
 record 记录
 info 信息
-param 参数
+param 参数（客户端）
+arg 参数（服务端）
 
 list 清单
 item 项
@@ -18,12 +19,15 @@ next 下一个
 number/No 编号
 type 类型
 right 权限
+status 状态
 
 parent 父级
 children 子级
 
+path 路径
 dir 目录
 file 文件
+filename 文件名
 ```
 
 
@@ -43,6 +47,8 @@ add 添加
 edit 编辑
 copy 复制
 delete 删除
+enable 启用
+disable 禁用
 
 validate 校验
 contain 包含
