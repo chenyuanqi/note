@@ -9,87 +9,83 @@
 ### 数据结构 - 数组
 数组（Array）是一种线性表数据结构。它用一组连续的内存空间，来存储一组具有相同类型的数据。
 ```php
-class OriginalArray 
+class OriginalArray
 {
-	private $data;
-	// 容量
-	private $capacity;
-	private $length = 0;
+    private $data;
+    // 容量
+    private $capacity;
+    private $length = 0;
 
-	public function __construct(int $capacity)
-	{
-        if($capacity <= 0) {
+    public function __construct(int $capacity)
+    {
+        if ($capacity <= 0) {
             throw new Exception('容量值必须为大于 0 的正整数');
         }
 
         $this->data = array_pad([], $capacity, null);
         $this->capacity = $capacity;
-	}
+    }
 
-	public function find($index)
-	{
-		if ($this->checkOutOfRange($index)) {
-			throw new Exception("索引值超出数组范围");
-		}
+    public function find($index)
+    {
+        if ($this->checkOutOfRange($index)) {
+            throw new Exception("索引值超出数组范围");
+        }
 
         // data[index]_address = base_address + i * data_type_size
-		return $this->data[$index];
-	}
+        return $this->data[$index];
+    }
 
-	public function insert(int $index, $value)
-	{
-		if ($this->checkOutOfRange($index)) {
-			throw new Exception("索引值超出数组范围");
-		} else if ($this->checkIfFull()) {
-			throw new Exception("数组容量已达上限");
-		} else if (!is_null($this->find($index))) {
-			throw new Exception("索引下已存在数据");
-		}
-
-		$this->data[$index] = $value;
-		++$this->length;
-	}
-
-	public function udpate(int $index, $value)
-	{
+    public function insert(int $index, $value)
+    {
         if ($this->checkOutOfRange($index)) {
-			throw new Exception("索引值超出数组范围");
-		} else if (is_null($this->find($index))) {
-			throw new Exception("索引下不存在数据");
-		}
+            throw new Exception("索引值超出数组范围");
+        } else if ($this->checkIfFull()) {
+            throw new Exception("数组容量已达上限");
+        }
 
-		$this->data[$index] = $value;
-	}
+        if (!is_null($this->find($index))) {
+            for ($i = $this->length - 1; $i > $index; --$i) {
+                $this->data[$i + 1] = $this->data[$i];
+            }
+        }
+        $this->data[$index] = $value;
+        ++$this->length;
+    }
 
-	public function delete(int $index)
-	{
-		if (!is_null($this->find($index))) {
-			$this->data[$index] = null;
-		    --$this->length;
-		}
-	}
+    public function delete(int $index)
+    {
+        if (!is_null($this->find($index))) {
+            for ($i = $index; $i < $this->length - 1; ++$i) {
+                $this->data[$i] = $this->data[$i + 1];
+            }
+            $this->data[$this->length - 1] = null;
+            --$this->length;
+        }
+    }
 
-	public function print()
-	{
-		if ($this->length === 0) {
-			echo 'Empty Array' . PHP_EOL;
-			return ;
-		}
+    public function print()
+    {
+        if ($this->length === 0) {
+            echo 'Empty Array' . PHP_EOL;
 
-		for ($i=0; $i < $this->length; $i++) { 
-			var_dump($this->data[$i]);
-		}
-	}
+            return;
+        }
 
-	public function checkIfFull()
-	{
-		return $this->length === $this->capacity;
-	}
+        for ($i = 0; $i < $this->length; $i++) {
+            var_dump($i, $this->data[$i]);
+        }
+    }
 
-	private function checkOutOfRange($index)
-	{
-		return $index < 0 || $index >= $this->capacity;
-	}
+    public function checkIfFull()
+    {
+        return $this->length === $this->capacity;
+    }
+
+    private function checkOutOfRange($index)
+    {
+        return $index < 0 || $index >= $this->capacity;
+    }
 }
 
 $arr = new OriginalArray(6);
