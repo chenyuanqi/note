@@ -79,7 +79,7 @@ function binarySearch($arr, $value)
 		} else if ($arr[$mid] < $value) {
 			$low = $mid + 1;
 		} else {
-			if ($mid === 0 || $arr[$mid + 1] !== $value) {
+			if ($mid === $high || $arr[$mid + 1] !== $value) {
 			    return $mid;
 			}
 			
