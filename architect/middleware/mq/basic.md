@@ -27,7 +27,7 @@ RabbitMQ 的路由配置，在生产者（Producer）和队列（Queue）之间�
 4、[RocketMQ](http://rocketmq.cloud/zh-cn/ )  
 RocketMQ 是阿里巴巴在 2012 年开源的消息队列产品，后来捐赠给 Apache 软件基金会，2017 正式毕业，成为 Apache 的顶级项目。阿里内部也是使用 RocketMQ 作为支撑其业务的消息队列，经历过多次 “双十一” 考验，性能、稳定性和可靠性都是值得信赖的。  
 优点：性能好，稳定可靠，有活跃的中文社区，特点响应快  
-缺点：兼容性较差，但随意影响力的扩大，该问题会有改善  
+缺点：兼容性较差，但随影响力的扩大，该问题会有改善  
 
 5、[Kafka](http://kafka.apache.org/documentation/)    
 Kafka 最早是由 LinkedIn 开发，目前也是 Apache 的顶级项目。Kafka 最初的设计目的是用于处理海量的日志。    
