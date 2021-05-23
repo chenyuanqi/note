@@ -8,18 +8,81 @@ Go 语言的优势大抵有以下：
 - 代码简洁、格式清晰统一、方便协作与阅读；
 - 具备性能强劲但是开发效率不输给一些动态语言，适合编写一些瓶颈业务。
 
+**Go 可以做什么**  
+云计算、DevOps、区块链、人工智能、存储引擎及 Web 服务器等。
+
+### Go 安装
+[安装包地址](https://golang.google.cn/dl/)，各环境下载对应的安装包。  
+
+**Windows**  
+下载最新的 zip 文件。如果你的电脑是 64 位的系统，你将需要 go#.#.#.windows-amd64.zip（这里的  #.#.# 是 Go 的最新版本号）。
+解压缩  go#.#.#.windows-amd64.zip 文件到你选择的位置（c:\Go 这个位置是个不错的选择）。
+下载最新的 zip 文件。如果你的电脑是 64 位的系统，你将需要 go#.#.#.windows-amd64.zip ，这里的  #.#.# 是 Go 的最新版本号。
+解压缩  go#.#.#.windows-amd64.zip 文件到你选择的位置。 c:\Go 这个位置是个不错的选择。  
+
+在系统中设置两个环境变量：
+1、GOPATH 同样的指向的是你的工作目录（这个变量看起来像 c:\users\goku\work\go 这个样子）  
+2、添加 c:\Go\bin  到系统的 PATH 环境变量  
+打开一个 cmd 命令终端，输入 go version。  
+
+**Linux/OSX**  
+```bash
+# Ubuntu 安装
+# 下载
+wget https://studygolang.com/dl/golang/go1.12.5.linux-amd64.tar.gz
+tar -zxvf go1.12.5.linux-amd64.tar.gz
+sudo mv go /usr/local/
+# 配置 
+export GOROOT=/usr/local/go # 安装目录
+export GOPATH=$HOME/go # 工作环境
+export GOBIN=$GOPATH/bin # 可执行文件存放
+export PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH # 添加 PATH 路径
+# 测试
+go version
+
+# MacOS 安装
+# 下载安装包并运行安装包
+```
+
+**文件树结构**  
+Go 安装目录（$GOROOT）的文件夹结构应该如下所示：  
+
+README.md, AUTHORS, CONTRIBUTORS, LICENSE
+
+- /bin：包含可执行文件，如：编译器，Go 工具
+- /doc：包含示例程序，代码工具，本地文档等
+- /lib：包含文档模版
+- /misc：包含与支持 Go 编辑器有关的配置文件以及 cgo 的示例
+- /os_arch：包含标准库的包的对象文件（.a）
+- /src：包含源代码构建脚本和标准库的包的完整源代码（Go 是一门开源语言）
+- /src/cmd：包含 Go 和 C 的编译器和命令行脚本
+
+
 ### Hello Golang
 ```golang
 package main
 
-import 'fmt'
+import "fmt"
 
 func main() {
-	fmt.Println('hello, golang')
+    fmt.Println("hello, golang")
 }
 ```
 
 ### Go 基础
+Go 基础包括环境安装、语言结构、基础结构和数据类型、数字和切片、map，流程控制、函数、struct 和 method、interface 和 反射、Goroutine、channel、常用包的使用（包括文件读取、时间和日期、Xml 和 Json 等格式解析、字符串处理、正则、锁和 sync 包、网络处理等）。
+
+**注释**  
+注释 是为了增加代码的可读性。  
+```golang
+// 单行注释
+
+/*
+多行注释 1
+多行注释 2
+多行注释 3
+*/
+```
 
 **变量**  
 变量的定义和声明不是一个概念。  
@@ -50,13 +113,16 @@ var (
     a, b = 1, 200
 )
 
-// 简短定义（必须显式提供初始化值，不能提供数据类型且只能用于函数内部）
+// 自动推导类型：简短定义（必须显式提供初始化值，不能提供数据类型且只能用于函数内部）
 x := 123
 
 // 多变量赋值（先计算右边的值，然后批量对左边进行赋值）
 // 注意：未使用的变量会引发错误
 a, b := 1, 2
 a, b = b+1, a+2
+
+// 匿名变量（丢弃数据不进行处理，_ 匿名变量配合函数返回值使用才显示其价值）
+_, _, c, d := 120, 110, "你好", "朋友"
 
 // 动态修改字符串变量（仅支持字符串，可设置非导出成员）
 var BuildTime string
@@ -85,6 +151,8 @@ func main() {
 **常量**  
 常量的定义跟变量差不多，我们可以进行类型推断，可以同时定义多个，可以在函数内部定义，也可以在包块内定义。  
 为什么使用常量？作为魔法数字（数字或者字符串），让代码具备更好的阅读性。  
+一般定义常量使用大写字母，常量里面的值确定好后，后面是不允许修改的；常量可以参与程序的计算，不允许左值赋值。  
+在程序开发中，我们用常量存储一直不会发生变化的数据，例如：π，身份证号码等。像这类的数据，在整个程序中运行中都是不允许发生改变的。
 ```golang
 const x int32 = 100 // 指定常量类型，则左右类型必须一致
 const s uintptr = unsafe.Sizeof(0) // 必要时，可进行类型转换
@@ -93,11 +161,77 @@ const (
     a int = 1 * int(unsafe.Sizeof("abc"))
     b
 )
+
+// 计算圆的面积和周长
+// 面积 PI*r*r  math.Pow(r,2)
+// 周长 2*PI*r
+// 常量必须定义
+const PI float64 = 3.14
+var r float64
+fmt.Scan(&r)
+// 面积
+s := PI * r * r
+// 周长
+l := 2 * PI * r
+// fmt.Println(PI)
+fmt.Printf("面积:%.2f\n", s)
+fmt.Printf("周长:%.2f\n", l)
+
+const MAX = "你瞅啥"
+// fmt.Println(MAX)
+// fmt.Printf("%T\n",MAX) // string
+// go 语言常量的地址 不允许访问
+// fmt.Printf("%p",&MAX) // err
+
+// 所谓字面常量（literal），是指程序中硬编码的常量，比如
+-12
+3.14159265358979323846  // 浮点类型的常量
+3.2+12i                 // 复数类型的常量
+true                    // 布尔类型的常量
+"foo"                   // 字符串常量
+// 编程语言源程序中表示固定值的符号叫做字面量，也称字面常量
+// Go 的字面量可以出现在两个地方：一是用于常量和变量的初始化，二是用在表达式中作为函数调用实参
+// 变量初始化语句中如果没有显式地指定变量类型，则 Go 编译器会结合字面量的值自动进行类型推断
+// Go 中的字面量只能表达基本类型的值，Go 不支持用户自定义字面量
 ```
 
 常量有全局的，这样的好处就在于，我们在多个文本当中若想调整的话，只需要在定义常量的地方调整就行了。常量也可以是局部的，使用常量替换掉以后可阅读性就会好很多，同时我们在编码当中强调的观点是把逻辑和数据分离。  
 
 严格意义上来说，没有运行期常量的概念，常量会被直接展开到你需要用的地方，既然没有运行期常量，所以它没有地址，不能会对常量取地址。换句话说，常量是数据，把数据放在某个地方才会有地址吧，那个地方有地址，也就是说虚拟空间有地址但数据本身没有地址。
+
+**输入和输出**  
+在 GO 语言中进行输出，用到两个函数：Print() 和 Println()。这两个函数的区别是 Print() 函数不换行，Println() 换行输出。
+```golang
+// 双引号内容原样输出
+fmt.Print("a", a)
+
+c:="你瞅啥"
+// %s是一个占位符 表示输出一个字符串类型
+fmt.Printf("%s",c)
+
+a := 10
+b := 3.14559
+// %d是一个占位符 表示输出一个整型数据
+// %f是一个占位符 表示输出一个浮点型数据
+// %f默认保留六位小数  因为浮点型数据不是精准的数据 六位是有效的
+// %.2f保留小数位数为两位  会对第三位小数进行四舍五入
+// \n表示一个转义字符 换行
+fmt.Printf("%d %.2f\n", a, b)
+```
+
+在 GO 中我们用到了 “fmt” 这个包中的 Scanf() 函数来接收用户键盘输入的数据。
+当程序执行到 Scanf() 函数后，会停止往下执行，等待用户的输入，输入完成后程序继续往下执行。
+```golang
+func main0701() {
+    var a int
+    // 通过键盘为变量赋值
+    // & 是一个运算符  取地址运算符
+    fmt.Scan(&a)
+    // 内存地址 0xc042058080  是一个十六进制整型数据
+    // fmt.Println(&a)
+    fmt.Println(a)
+}
+```
 
 **枚举与 iota**  
 枚举是非常常见的类型，通常情况下指的是一种一连串或者连续性的定义，它的总数是固定的，比如星期、月份、容量、颜色。它是有一定的规律并且可以用一连串顺序数字代替。  
@@ -115,11 +249,18 @@ const (
 )
 ```
 
+iota 枚举格式如果写在一行中值则相等，如果换行则值在上一行加一。  
+常量声明可以使用 iota 常量生成器初始化，它用于生成一组以相似规则初始化的常量，但是不用每行都写一遍初始化表达式。（注意：在一个 const 声明语句中，在第一个声明的常量所在的行，iota 将会被置为 0，然后在每一个有常量声明的行加一）
 - 借助 iota 实现常量组自增值
 - 可使用多个 iota，各自单独计数
 iota 实际上是常量组里面实现自增的操作，严格来说和枚举没多大关系。  
 iota 是编译器，为我们产生连续性数字。其实质是一个计数器，它从零开始计数，每行添加一。它是给编译器看的占位符，告诉编译器在一组里递增数字，每一组 iota 会重新进行计算。iota 可以作为表达式里面其中的操作数。  
 ```golang
+const (
+    a    = iota // 0
+    b, c = iota, iota // 1 1
+)
+
 const (
     _ = 1 << (10 * iota)
     KB
@@ -137,12 +278,56 @@ const (
 - 中断须显式恢复
 
 **基本类型与空值**  
+[![Golang 基本类型](https://z3.ax1x.com/2021/05/23/gXutZ8.png)](https://imgtu.com/i/gXutZ8)
 相比 C 语言，Golang 有明确的基本类型。Golang 基本类型除了很明确的类型以外，其中比较特殊的有几个，其中 uintptr 用来存储地址的整数，rune 用来存储编码的码点，int32 有点类似 UCS-2 方式，但是不完全一样，毕竟不是对等关系。
 ```golang
 x := 0x123456 // 56 34 12 00 00 00 00 00
 p := (*[8]byte)(unsafe.Pointer(&x))
 fmt.Printf("%x\n", p[1]) //打印第 1 位输出 34
+
+// 布尔类型的变量取值要么是真（true）, 要么是假 (false)
+// 作用：布尔类型主要用于条件判断
+//布尔类型 值为 true 或者为 false
+// var a bool // 默认值为false
+// bool 类型一般用于条件判断
+// a = true
+// fmt.Println(a)
+// 自动推到类型创建bool类型变量
+a := false // bool
+
+// 浮点型数据 分为 单精度浮点型 float32（小数位数为 7 位） 双精度浮点型 float64（小数位数为 15 位）
+// float64 比 float32 更精准（通过自动推到类型创建的浮点型变量 默认类型为 float64）
+a := 123.456
+fmt.Printf("%T\n", a)
+
+// byte 字符类型 同时也是 uint8 的别名
+// 所有的字符都对应 ASCII 中的整型数据，比如 ‘0’对应的 48、 ‘A’对应的 65、‘a’ 对应的 97
+// 所谓字符类型是用单引号括起来的单个字符
+var a byte ='\t'
+fmt.Println(a)
+// 第二种方式
+var a byte
+a = 97
+fmt.Printf("a=%c",a) // 输出必须 %c,否则还是整数输出
+
+// 用单引号括起来的单个字符是字符类型，用双引号括起来的字符是字符串类型
+// 定义字符串 str := "a"
+// len 函数  用来计算字符串中字符个数（不包含 \0，返回值为 int 类型）
+// a := "hello"
+// 在 go 语言中一个汉字占 3 个字符 
+a := "learnku函数"
+var count int
+count = len(a)
+fmt.Println(count) // 13
+// 字符串连接使用 + 
+str1 := "马大师上线了"
+str2 := "接化发，年轻人不讲武德，闪电五连鞭"
+str3 := str1 + str2
+fmt.Println(str3) // 马大师上线了接化发，年轻人不讲武德，闪电五连鞭
 ```
+字符和字符串的区别：  
+字符使用单引号，往往只包含一个字符（转义字符 \n 除外）；字符串使用双引号，由一个或多个字符组成，他们都是隐藏了一个结束符 \0。  
+
 
 除指针外，函数、接口、字典、切片、通道默认值为 nil。
 
@@ -157,7 +342,10 @@ var a []int = nil
 println(unsafe.Sizeof(a)) // 24
 ```
 
-**引用类型**  
+fmt 格式化输入输出，使用格式如下：  
+[![fmt 格式化输入输出格式](https://z3.ax1x.com/2021/05/23/gXl5tO.png)](https://imgtu.com/i/gXl5tO)
+
+**复合（引用）类型**  
 所谓引用类型，是指其内部结构，而非分配于托管堆。  
 
 - slice、map、channel
@@ -176,3 +364,276 @@ m := make(map[string]int)
 new 只负责按照右边的类型来分配一块内存，这块内存有可能在栈上，也有可能在堆上。
 
 new 返回指针，make 返回实例。  
+
+**运算符与类型转换**   
+[![算术运算符](https://z3.ax1x.com/2021/05/23/gXUP0J.png)](https://imgtu.com/i/gXUP0J)  
+```golang
+a := 10
+b := 5
+fmt.Println(a + b) //30
+fmt.Println(a - b) //-10
+fmt.Println(a * b) //200
+// 两个整数相除等到的结果也是整型
+// 在除法计算时 除数不能为0
+fmt.Println(a / b)
+
+a := 10
+b := 2
+// 取余运算符除数不能为 0
+// 取余运算符不能对浮点型使用
+c := a % b
+fmt.Println(c)
+
+func main() {
+
+// 自增自减运算符
+// 可以对浮点型进行自增自减运算，但是不能对常量进行自增自减运算
+a := 10
+// const a =10
+// a = a + 1
+// a++ // 自增 在变量本身加一
+// a-- // 自减
+// 自增自减不能出现在表达式中
+// a = a++ + a--
+// 二义性 
+// 在不同操作系统中运算方式不同，结果可能会产生偏差
+// a = a++ * a-- - a-- // err
+// b := a-- // err
+fmt.Println(a)
+// fmt.Println(b)
+```
+Go 语言中不允许隐式转换，所有类型转换必须显式声明（强制转换），而且转换只能发生在两种相互兼容的类型之间。  
+在类型转换时建议低类型转成高类型，保证数据精度；建议整型转成浮点型（int8 -> int16 ->int32 ->int64；float32 ->float64；int64 -> float64）。
+```golang
+a, b, c := 0, 0, 0
+fmt.Scan(&a, &b, &c)
+sum := a + b + c
+fmt.Println(sum)
+// 类型转换:数据类型(变量) / 数据类型(表达式)
+// fmt.Println(float64(sum / 3))
+fmt.Printf("%.2f", float64(sum)/3)
+
+// 数据类型转换，数据溢出
+var a int = 1234
+fmt.Println(int8(a)) // -46
+fmt.Println(int32(a)) // 1234
+
+// 将浮点型转成整型：保留数据整数部分，丢弃小数部分
+var a float64 = 3.999
+b := int(a) // 3
+fmt.Println(b)
+```
+
+赋值运算符  = ，var int num=9;num=num+1; 这里的 = 号是赋值运算符，不是数学义意上的相等。  
+常见的赋值运算符如下，前面我们使用的 = 是普通赋值，+=，-= 等我们称为 “复合赋值运算符”。  
+[![赋值运算符](https://z3.ax1x.com/2021/05/23/gX57TA.png)](https://imgtu.com/i/gX57TA)  
+```golang
+// a := 10
+// b := 20
+// c := a + b
+// c += 20 // c = c + 20
+// c -= 20
+// c *= 20
+// c /= 20 // 30
+// c = 20
+// c %= 3 // c = c % 3
+var c int = 10
+// 将表达式右侧进行结果计算在进行赋值运算符
+c %= (2 + 3)
+// c = c % 5 // ok
+// c = c % 2 + 3 // err
+fmt.Println(c)
+```
+
+关系运算符我们又称为比较运算符，关系运算的结果是布尔类型的。
+[![关系运算符](https://z3.ax1x.com/2021/05/23/gXoAUA.png)](https://imgtu.com/i/gXoAUA)  
+```golang
+a := 'a'
+b := 'A'
+fmt.Println(a > b)
+fmt.Println(a != b)
+```
+
+有逻辑运算符连接的表达式叫做逻辑表达式，逻辑表达式的结果是 bool 类型，逻辑运算符两边放的一般都是关系表达式或者 bool 类型的值。  
+[![逻辑运算符](https://z3.ax1x.com/2021/05/23/gXoyP1.png)](https://imgtu.com/i/gXoyP1)  
+```golang
+a := 10
+b := 20
+// c := a > b // flase
+// 逻辑非 !，非真为假，非假为真
+fmt.Println(!(a > b))
+
+a := 10
+b := 20
+//逻辑与  &&，同真为真，其余为假
+c := a < b && false
+fmt.Println(c)
+
+a := 10
+b := 20
+// 逻辑或  ||，同假为假，其余为真
+fmt.Println(a < b || a > b)
+
+a := 10
+b := 20
+// 逻辑与高于逻辑或
+fmt.Println(a > b && b > a || a > 0)
+```
+
+[![其他运算符](https://z3.ax1x.com/2021/05/23/gXTMz6.png)](https://imgtu.com/i/gXTMz6)  
+
+在 Go 语言中，一元运算符（一些只需要一个操作数的运算符称为一元运算符（或单目运算符））拥有最高的优先级，二元运算符的运算方向均是从左至右。由上至下代表优先级由高到低：  
+[![运算符优先级](https://z3.ax1x.com/2021/05/23/gXTYod.png)](https://imgtu.com/i/gXTYod)  
+
+
+**流程控制**  
+GO 语言有顺序结构、选择结构、循环结构。  
+顺序结构：程序按顺序执行，不发生跳转；  
+选择结构：依据是否满足条件，有选择的执行相应功能；  
+循环结构：依据条件是否满足，循环多次执行某段代码。  
+```golang
+// 选择结构 if（if-else if: 可以处理范围，可以嵌套使用，执行效率低）
+var score int
+fmt.Scan(&score)
+if score > 700 {
+    fmt.Println("我要上清华")
+} else if score > 680 {
+    fmt.Println("我要上北大")
+} else if score > 650 {
+    fmt.Println("我要上人大")
+} else {
+    fmt.Println("我要上波大")
+}
+
+// 选择结构 switch（switch: 一般用于等值比较，执行效率高、可以将多个满足相同条件的值放在一起，不建议嵌套使用）
+var score int
+fmt.Scan(&score)
+switch score / 10 {
+case 10:
+    // case 后面跟着的代码执行完毕后，直接跳出整个 switch 结构，相当于每个 case 后面都跟着 break (终止)
+    // 如果我们想执行完成某个 case 后，强制执行后面的 case, 可以使用 fallthrough
+    fallthrough
+case 9:
+    fmt.Println("A")
+case 8:
+    fmt.Println("B")
+case 7:
+    fmt.Println("C")
+case 6:
+    fmt.Println("D")
+default:
+    fmt.Println("E")
+}
+
+// 循环结构
+sum := 0
+for i := 1; i <= 100; i++ {
+    // 计算 1-100 偶数的和
+    if i%2 == 0 {
+        sum+=i
+    }
+}
+var i int = 0
+for {
+    // 在有些程序循环中，不知道程序执行次数，只有条件满足时程序停止
+    if i >= 5 {
+        // 跳出语句跳出当前循环
+        break
+    }
+    fmt.Println(i)
+    i++
+}
+sum := 0
+for i := 0; i <= 100; i++ {
+    if i%2 == 1 {
+        // 结束本次循环，继续下次循环
+        // 如果在程序中入到 continue 后剩余代码不会执行，会回到循环的位置
+        continue
+    }
+    sum += i
+}
+fmt.Println(sum)
+// goto 会跳到所定义的标志位
+goto FLAG
+fmt.Println("hello world3")
+fmt.Println("hello world4")
+FLAG:
+fmt.Println("hello world5")
+fmt.Println("hello world6")
+```
+
+
+**函数**  
+函数就是将一堆代码进行重用的一种机制。函数就是一段代码，一个函数就像一个专门做这件事的人，我们调用它来做一些事情，它可能需要我们提供一些数据给它，它执行完成后可能会有一些执行结果给我们。要求的数据就叫参数，返回的执行结果就是返回值。  
+```golang
+// func 函数名(参数列表)(返回值列表){
+//     代码体
+// }
+// 函数定义，只能定义一次
+// 在整个项目中函数名是唯一的，不能重名
+func add(s1 int, s2 int) {
+    sum := s1 + s2
+    fmt.Println(sum)
+}
+// 调用函数
+add(1, 2)
+```
+
+普通函数列表与不定参数列表。  
+
+函数嵌套调用。  
+
+匿名函数。  
+
+递归函数。  
+
+
+**工程管理**  
+GO 语言规定通用管理：  
+为了更好的管理项目中的文件，要求将文件都要放在相应的文件夹中。  
+
+- src 目录：用于以代码包的形式组织并保存 Go 源码文件。（比如：.go .c .h .s 等）
+- pkg 目录：用于存放经由 go install 命令构建安装后的代码包（包含 Go 库源码文件）的 “.a” 归档文件。
+- bin 目录：与 pkg 目录类似，在通过 go install 命令完成安装后，保存由 Go 命令源码文件生成的可执行文件。
+
+以上目录称为工作区，工作区其实就是一个对应于特定工程的目录。  
+目录 src 用于包含所有的源代码，是 Go 命令行工具一个强制的规则，而 pkg 和 bin 则无需手动创建，如果必要 Go 命令行工具在构建过程中会自动创建这些目录。  
+
+只要配置了 gopath，同一个 packge 的方法，是可以调用的（注意：同一个目录下不能定义不同的 package）。  
+
+包中成员以名称⾸字母⼤⼩写决定访问权限（*注意：同一个目录下不能定义不同的 package*）：  
+
+- public: ⾸字母⼤写，可被包外访问
+- private: ⾸字母⼩写，仅包内成员可以访问
+
+```golang
+// test.go
+package main
+import "fmt"
+func Test() {
+    fmt.Println("test file.")
+}
+// main.go
+package main
+import "fmt"
+func main() {
+    fmt.Println("main file.")
+    Test()
+}
+```
+要使用包，必须要进行导入，可以通过关键字进行 import 进行导入，它会告诉编译器你想引用该包内的代码。如果导入的是标准库中的包（GO 语言自带，例如:”fmt” 包）会在安装 Go 的位置找到。 Go 开发者创建的包会在 GOPATH 环境变量指定的目录里查找。所以，import 关键字的作用就是查找包所在的位置。  
+注意：  
+1、如果编译器查遍 GOPATH 也没有找到要导入的包，那么在试图对程序执行 run 或者 build 的时候就会出错；  
+2、如果导入包之后，未调用其中的函数或者类型将会报出编译错误。  
+```golang
+// 导入单个包
+import "fmt"
+// 导入多个包
+import (
+    "users"
+    "goods"
+)
+// 调用 src/users.go 中的方法
+users.GetInfo()
+```
+
