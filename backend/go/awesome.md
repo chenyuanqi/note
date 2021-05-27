@@ -1,6 +1,8 @@
 
 ### Go 官方
 [官网](https://golang.org/)  
+[Google Go 镜像下载](https://golang.google.cn/dl/)  
+[Go 镜像下载](https://gomirrors.org/)  
 
 Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月。Go 语言的维护周期终止在落后两个主要版本时，如：Go 1.5 会在 Go 1.7 发布时停止支持；Go 1.6 会在 Go 1.8 发布时停止支持。  
 [版本迭代](https://golang.org/doc/devel/release.html)  
@@ -12,6 +14,13 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 [go 命令教程](https://github.com/hyper0x/go_command_tutorial)  
 [go 旅程](https://tour.golang.org/)  
 [go example](https://gobyexample.com/)  
+
+[Go 常见问题](https://learnku.com/go/wikis/38175)  
+[50 个 Go 新手易犯的错误](https://learnku.com/go/wikis/49781)  
+
+[Go 编码指南](https://learnku.com/go/wikis/38174)  
+[Go 编码规范](https://learnku.com/go/wikis/38426)  
+[Go 最佳实践](https://learnku.com/go/wikis/38430)    
 
 ### 运行 Go
 [go play](https://play.golang.org/)  
