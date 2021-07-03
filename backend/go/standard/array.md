@@ -47,7 +47,7 @@ func modify(a [5]int) {
     // 对传递过来的数组，惨改第—个元素的值
     fmt.Println("modify a = ", a)
 }
-a:=[ 5]int{ 1, 2,3, 4, 5}
+a:=[5]int{ 1, 2,3, 4, 5}
 modify(a) // 数组传递过去
 fmt.Println("a 还是那个 a: a = ", a) // Go 变量作用域，所以 a 没有被改变
 
