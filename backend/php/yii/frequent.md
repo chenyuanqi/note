@@ -137,7 +137,9 @@ public function rules()
 
     [['target_id'], 'integer'],
 
-    [['score'], 'number', 'min' => 1, 'max' => 10, 'integerOnly' => true],
+    [['score'], 'number', 'min' => 1, 'max' => 10, 'integerOnly' => true,  'when' => function ($model){
+        return AccountModel::PLATFORM_WEIBO == $model->platform;
+    }, 'message'=> '值必须为整数', 'max'=> '100', 'min'=> '10','tooBig'=> '值太大了', 'tooSmall' => '值太小了'],
 
 	[['salt'], 'string', 'length' => 32],
 
