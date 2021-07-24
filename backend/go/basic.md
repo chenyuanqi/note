@@ -504,6 +504,13 @@ if score > 700 {
 } else {
     fmt.Println("我要上波大")
 }
+/*
+注意：
+条件语句不需要使用圆括号将条件包含起来 ()；
+无论语句体内有几条语句，花括号 {} 都是必须存在的；
+左花括号 { 必须与 if 或者 else 处于同一行；
+在 if 之后，条件语句之前，可以添加变量初始化语句，使用 ; 间隔，比如 if score := 100; score > 90 {}
+*/
 
 // 选择结构 switch（switch: 一般用于等值比较，执行效率高、可以将多个满足相同条件的值放在一起，不建议嵌套使用）
 var score int
@@ -519,11 +526,34 @@ case 8:
     fmt.Println("B")
 case 7:
     fmt.Println("C")
-case 6:
+case 6, 5:
     fmt.Println("D")
 default:
     fmt.Println("E")
 }
+// 或者这样
+score := 100
+switch {
+case score >= 90:
+    fmt.Println("Grade: A")
+case score >= 80 && score < 90:
+    fmt.Println("Grade: B")
+case score >= 70 && score < 80:
+    fmt.Println("Grade: C")
+case score >= 60 && score < 70:
+    fmt.Println("Grade: D")
+default:
+    fmt.Println("Grade: F")
+}
+/*
+注意：
+和条件语句一样，左花括号 { 必须与 switch 处于同一行；
+单个 case 中，可以出现多个结果选项（通过逗号分隔）；
+与其它语言不同，Go 语言不需要用 break 来明确退出一个 case；
+只有在 case 中明确添加 fallthrough 关键字，才会继续执行紧跟的下一个 case；
+可以不设定 switch 之后的条件表达式，在这种情况下，整个 switch 结构与多个 if...else... 的逻辑作用等同。
+*/
+
 
 // 循环结构
 sum := 0
@@ -553,6 +583,51 @@ for i := 0; i <= 100; i++ {
     sum += i
 }
 fmt.Println(sum)
+// 多重赋值
+a := []int{1, 2, 3, 4, 5, 6} 
+for i, j := 0, len(a) – 1; i < j; i, j = i + 1, j – 1 { 
+    a[i], a[j] = a[j], a[i] 
+}
+fmt.Println(a)
+// 迭代集合（数组、切片、字典）
+for k, v := range a {
+    fmt.Println(k, v)
+}
+// 忽略索引 / 键
+for _, v := range a {
+    fmt.Println(v)
+}
+// 忽略值
+for k := range a {
+    fmt.Println(k)
+}
+// 基于判断的循环，类似 while
+sum := 0
+i := 0
+for i < 100 {
+    i++
+    sum += i
+}
+fmt.Println(sum)
+/*
+注意：
+和条件语句、分支语句一样，左花括号 { 必须与 for 处于同一行；
+不支持 whie 和 do-while 结构的循环语句；
+可以通过 for-range 结构对可迭代集合进行遍历；
+支持基于条件判断进行循环迭代；
+允许在循环条件中定义和初始化变量，且支持多重赋值；
+Go 语言的 for 循环同样支持 continue 和 break 来控制循环，但是它提供了一个更高级的 break，可以选择中断哪一个循环，如下例：
+*/
+JLoop: 
+for j := 0; j < 5; j++ { 
+    for i := 0; i < 10; i++ { 
+        if i > 5 { 
+            break JLoop
+        }
+        fmt.Println(i)
+    } 
+} 
+
 // goto 会跳到所定义的标志位
 goto FLAG
 fmt.Println("hello world3")
@@ -563,6 +638,7 @@ fmt.Println("hello world6")
 ```
 
 
+### Go 函数式编程
 **函数**  
 函数就是将一堆代码进行重用的一种机制。函数就是一段代码，一个函数就像一个专门做这件事的人，我们调用它来做一些事情，它可能需要我们提供一些数据给它，它执行完成后可能会有一些执行结果给我们。要求的数据就叫参数，返回的执行结果就是返回值。  
 ```golang
@@ -571,23 +647,578 @@ fmt.Println("hello world6")
 // }
 // 函数定义，只能定义一次
 // 在整个项目中函数名是唯一的，不能重名
-func add(s1 int, s2 int) {
+func Add(s1 int, s2 int) {
     sum := s1 + s2
     fmt.Println(sum)
 }
 // 调用函数
-add(1, 2)
+// 注意：在调用其他包定义的函数时，只有函数名首字母大写的函数才可以被访问（Go 语言中没有 public、protected、private 之类的关键字，它是通过首字母的大小写来区分可见性）
+Add(1, 2)
 ```
 
-普通函数列表与不定参数列表。  
+**系统内置函数**  
+日常开发中的常用功能提供了很多不需要导入任何包就可以直接调用的内置函数。  
+```golang
+// len 与 cap
+str := "golang"
+println(len(str))  // 6
 
-函数嵌套调用。  
+arr := [3]int{1, 2, 3}
+print(len(arr), "\n")  // 3
+print(cap(arr), "\n")  // 3
 
-匿名函数。  
+slice := arr[1:]
+println(len(slice)) // 2
+println(cap(slice)) // 2
 
-递归函数。  
+dict := map[string]int{"0":1, "1":2, "2":3}
+println(len(dict))  // 3
+
+// new 与 make
+p1 := new(int)     // 返回 int 类型指针，相当于 var p1 *int
+p2 := new(string)  // 返回 string 类型指针
+p3 := new([3]int)  // 返回数组类型指针，数组长度是 3
+
+type Student struct {
+    id int
+    name string
+    grade string
+}
+p4 := new(Student)  // 返回对象类型指针
+
+println("p1: ", p1)
+println("p2: ", p2)
+println("p3: ", p3)
+println("p4: ", p4)
+
+s1 := make([]int, 3)  // 返回初始化后的切片类型值，即 []int{0, 0, 0}
+m1 := make(map[string]int, 2)  // 返回初始化的字典类型值，即散列化的 map 结构
+
+println(len(s1))  // 3
+for i, v := range s1 {
+    println(i, v)
+}
+
+println(len(m1))   // 0
+m1["test"] = 100
+for k, v := range m1 {
+    println(k, v)
+}
+```
+
+**普通函数传参**  
+Go 语言默认使用按值传参来传递参数，也就是传递参数值的一个副本。  
+如果你想要实现在函数中修改形参值可以同时修改实参值，需要通过引用传参来完成，此时传递给函数的参数是一个指针，而指针代表的是实参的内存地址，修改指针引用的值即修改变量内存地址中存储的值，所以实参的值也会被修改（这种情况下，传递的是变量地址值的拷贝，所以从本质上来说还是按值传参）。  
+`注意：在函数调用时，像切片（slice）、字典（map）、接口（interface）、通道（channel）这样的引用类型默认使用引用传参`  
+```golang
+// 按值传参
+func add(a, b int) int  {
+    a *= 2
+    b *= 3
+    return a + b
+}
+
+func main()  {
+    x, y := 1, 2
+    z := add(x, y)
+    fmt.Printf("add(%d, %d) = %d\n", x, y, z)  // add(1, 2) = 8
+}
+
+// 引用传参
+func add(a, b *int) int {
+    *a *= 2
+    *b *= 3
+    return *a + *b
+}
+
+func main()  {
+    x, y := 1, 2
+    z := add(&x, &y)
+    fmt.Printf("add(%d, %d) = %d\n", x, y, z) // add(2, 6) = 8
+}
+
+// 变长参数（同一类型）
+func myfunc(numbers ...int) {
+    for _, number := range numbers {
+        fmt.Println(number)
+    }
+}
+myfunc(1, 2, 3, 4, 5) 
+// 变长参数还支持传递一个 []int 类型的切片，传递切片时需要在末尾加上 ... 作为标识，表示对应的参数类型是变长参数
+slice := []int{1, 2, 3, 4, 5}
+myfunc(slice...)
+myfunc(slice[1:3]...) // 类型 ...type 本质上是一个切片，也就是 []type
+// 任意类型的变长参数（泛型）
+// 指定变长参数类型为 interface{}
+func myPrintf(args ...interface{}) { // interface{} 是一个空接口，可以用于表示任意类型
+    for _, arg := range args {
+        // 通过反射获取类型
+        // 在运行时通过反射对数据类型进行检查，以便让程序在预设的轨道内运行，避免因为类型问题导致程序崩溃
+        switch reflect.TypeOf(arg).Kind() {
+        case reflect.Int:
+            fmt.Println(arg, "is an int value.")
+        case reflect.String:
+            fmt.Printf("\"%s\" is a string value.\n", arg)
+        case reflect.Array:
+            fmt.Println(arg, "is an array type.")
+        default:
+            fmt.Println(arg, "is an unknown type.")
+        }
+    }
+}
+myPrintf(1, "1", [1]int{1}, true)
 
 
+// 多返回值
+func add(a, b *int) (int, error) {
+    if *a < 0 || *b < 0 {
+        err := errors.New("只支持非负整数相加")
+        return 0, err
+    }
+    *a *= 2
+    *b *= 3
+    // 通过 error 指定多返回一个表示错误信息的、类型为 error 的返回值，函数的多个返回值之间可以通过逗号分隔，并且在最外面通过圆括号包起来
+    return *a + *b, nil
+}
+x, y := -1, 2
+z, err := add(&x, &y)
+if err != nil {
+    fmt.Println(err.Error()) // 只支持非负整数相加
+    return
+}
+fmt.Printf("add(%d, %d) = %d\n", x, y, z) 
+// 返回值支持命名（不推荐）
+// 这种机制避免了每次进行 return 操作时都要关注函数需要返回哪些返回值，为开发者节省了精力，尤其是在复杂的函数中
+func add(a, b *int) (c int, err error) {
+    if *a < 0 || *b < 0 {
+        err = errors.New("只支持非负整数相加")
+        return
+    }
+    *a *= 2
+    *b *= 3
+    c = *a + *b
+    return
+}
+```
+
+**匿名函数与闭包**  
+匿名函数是一种没有指定函数名的函数声明方式。  
+
+所谓闭包指的是引用了自由变量（未绑定到特定对象的变量，通常在函数外定义）的函数，被引用的自由变量将和这个函数一同存在，即使已经离开了创造它的上下文环境也不会被释放（比如传递到其他函数或对象中）。简单来说，「闭」的意思是「封闭外部状态」，即使外部状态已经失效，闭包内部依然保留了一份从外部引用的变量。  
+显然，闭包只能通过匿名函数实现，我们可以把闭包看作是有状态的匿名函数，反过来，如果匿名函数引用了外部变量，就形成了一个闭包（Closure）。  
+闭包的价值在于可以作为持有外部变量的函数对象或者匿名函数，对于类型系统而言，这意味着不仅要表示数据还要表示代码。支持闭包的语言都将函数作为第一类对象（firt-class object，有的地方也译作第一级对象、一等公民等，都是一个意思），Go 语言也不例外，这意味 Go 函数和普通 Go 数据类型（整型、字符串、数组、切片、字典、结构体等）具有同等的地位，可以赋值给变量，也可以作为参数传递给其他函数，还能够被函数动态创建和返回。  
+> 注：所谓第一类对象指的是运行期可以被创建并作为参数传递给其他函数或赋值给变量的实体，在绝大多数语言中，数值和基本类型都是第一类对象，在支持闭包的编程语言中（比如 Go、PHP、JavaScript、Python 等），函数也是第一类对象，而像 C、C++ 等不支持匿名函数的语言中，函数不能在运行期创建，所以在这些语言中，函数不是不是第一类对象。  
+
+```golang
+// 匿名函数的支持
+func(a, b int) int { 
+    return a + b
+}
+// 1、将匿名函数赋值给变量
+add := func(a, b int) int {
+    return a + b
+}
+// 调用匿名函数 add
+fmt.Println(add(1, 2))  
+// 2、定义时直接调用匿名函数
+func(a, b int) {
+    fmt.Println(a + b)
+} (1, 2) 
+
+// 匿名函数的典型使用场景 - 保证局部变量的安全性
+var j int = 1
+f := func() {
+    var i int = 1 // 闭包引用了局部变量 i 和 j，i 在闭包内部定义，其值被隔离，不能从外部修改
+    fmt.Printf("i, j: %d, %d\n", i, j)
+}
+f() // i, j: 1, 1
+j += 2 // 变量 j 在闭包外部定义，所以可以从外部修改，闭包持有的只是其引用
+f() // i, j: 1, 3
+
+// 匿名函数的典型使用场景 - 将匿名函数作为函数参数
+add := func(a, b int) int {
+    return a + b
+}
+// 将函数类型作为参数
+func(call func(int, int) int) {
+    fmt.Println(call(1, 2))
+}(add)
+// 将第二个匿名函数提取到 main 函数外，成为一个具名函数 handleAdd，然后定义不同的加法算法实现函数，并将其作为参数传入 handleAdd
+// 通过一个函数执行多种不同加法实现算法，提升了代码的复用性，我们可以基于这个功能特性实现一些更复杂的业务逻辑，比如 Go 官方 net/http 包底层的路由处理器也是这么实现的
+func main() {
+    ...
+
+    // 普通的加法操作
+    add1 := func(a, b int) int {
+        return a + b
+    }
+
+    // 定义多种加法算法
+    base := 10
+    add2 := func(a, b int) int {
+        return a * base + b
+    }
+
+    handleAdd(1, 2, add1) // 3
+    handleAdd(1, 2, add2) // 12
+}
+// 将匿名函数作为参数
+func handleAdd(a, b int, call func(int, int) int) {
+    fmt.Println(call(a, b))
+}
+
+// 匿名函数的典型使用场景 - 将匿名函数作为函数返回值
+// 将函数作为返回值类型
+func deferAdd(a, b int) func() int {
+    return func() int {
+        return a + b
+    }
+}
+func main() {
+    ...
+
+    // 此时返回的是匿名函数
+    addFunc := deferAdd(1, 2)
+    // 这里才会真正执行加法操作
+    fmt.Println(addFunc())
+}
+// 调用 deferAdd 函数返回的是一个匿名函数，但是这个匿名函数引用了外部函数传入的参数，因此形成闭包，只要这个闭包存在，这些持有的参数变量就一直存在，即使脱离了 deferAdd 函数的作用域，依然可以访问它们
+// 另外调用 deferAdd 方法时并没有执行闭包，只有运行 addFunc() 时才会真正执行闭包中的业务逻辑（这里是加法运算），因此，我们可以通过将函数返回值声明为函数类型来实现业务逻辑的延迟执行，让执行时机完全掌握在开发者手中
+```
+
+**通过高阶函数实现装饰器模式**  
+所谓高阶函数，就是接收其他函数作为参数传入，或者把其他函数作为结果返回的函数。  
+
+装饰器模式（Decorator）是一种软件设计模式，其应用场景是为某个已经存在的功能模块（类或者函数）添加一些「装饰」功能，而又不会侵入和修改原有的功能模块。  
+有过 Python、Java 编程经验的同学应该对这个模式很熟悉，在 Python、Java 中，我们可以通过注解非常优雅地实现装饰器模式，比如给某个功能模块添加日志功能、或者为路由处理器添加中间件功能，这些都可以通过装饰器实现。不过 Go 语言的设计哲学就是简单，没有提供「注解」之类的语法糖，在函数式编程中，要实现装饰器模式，可以借助高阶函数来实现。  
+
+核心思路就是在被修饰的功能模块执行前后加上一些额外的业务逻辑，而又不影响原有功能模块的执行。显然，装饰器模式是遵循 SOLID 设计原则中的开放封闭原则的 —— 对代码扩展开放，对代码修改关闭。  
+
+如下，原有的代码逻辑不需要做任何变动，只需要新增一个位运算版乘法实现函数 multiply2，然后套上装饰器函数 execTime 计算耗时。  
+```golang
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+// 为函数类型设置别名提高代码可读性
+type MultiPlyFunc func(int, int) int
+
+// 乘法运算函数1（算术运算）
+func multiply1(a, b int) int {
+    return a * b
+}
+
+// 乘法运算函数2（位运算）
+func multiply2(a, b int) int {
+    return a << b
+}
+
+// 通过高阶函数在不侵入原有函数实现的前提下计算乘法函数执行时间
+func execTime(f MultiPlyFunc) MultiPlyFunc {
+    return func(a, b int) int {
+        start := time.Now() // 起始时间
+        c := f(a, b)  // 执行乘法运算函数
+        end := time.Since(start) // 函数执行完毕耗时
+        fmt.Printf("--- 执行耗时: %v ---\n", end)
+        return c  // 返回计算结果
+    }
+}
+
+func main() {
+    a := 2
+    b := 8
+    fmt.Println("算术运算：")
+    decorator1 := execTime(multiply1)
+    c := decorator1(a, b)
+    fmt.Printf("%d x %d = %d\n", a, b, c)
+
+    fmt.Println("位运算：")
+    decorator2 := execTime(multiply2)
+    a = 1
+    b = 4
+    c = decorator2(a, b)
+    fmt.Printf("%d << %d = %d\n", a, b, c)
+}
+```
+
+**递归函数**  
+递归函数指的是在函数内部调用函数自身的函数，从数学解题思路来说，递归就是把一个大问题拆分成多个小问题，再各个击破，在实际开发过程中，某个问题满足以下条件就可以通过递归函数来解决：  
+> 一个问题的解可以被拆分成多个子问题的解  
+> 拆分前的原问题与拆分后的子问题除了数据规模不同，求解思路完全一样  
+> 子问题存在递归终止条件  
+
+`注意：编写递归函数时，这个递归一定要有终止条件，否则就会无限调用下去，直到内存溢出`  
+```golang
+// 实现斐波那契
+func fibonacci(n int) int {
+    if n == 1 {
+        return 0
+    }
+    if n == 2 {
+        return 1
+    }
+
+    return fibonacci(n-1) + fibonacci(n-2)
+}
+n := 5
+num := fibonacci(n)
+fmt.Printf("The %dth number of fibonacci sequence is %d\n", n, num) // The %dth number of fibonacci sequence is 3
+
+// 通过内存缓存技术优化递归函数性能（内存缓存技术 - 优化计算成本相对昂贵的函数调用时非常有用）
+const MAX = 50
+// 通过预定义数组 fibs 保存已经计算过的斐波那契序号对应的数值
+var fibs [MAX]int
+func fibonacci(n int) int {
+    if n == 1 {
+        return 0
+    }
+
+    if n == 2 {
+        return 1
+    }
+
+    index := n - 1
+    if fibs[index] != 0 {
+        return fibs[index]
+    }
+
+    num := fibonacci(n-1) + fibonacci(n-2)
+    fibs[index] = num
+    return num
+}
+```
+函数调用底层是通过栈来维护的，对于递归函数而言，如果层级太深，同时保存成百上千的调用记录，会导致这个栈越来越大，消耗大量内存空间，严重情况下会导致栈溢出（stack overflow），为了优化这个问题，可以引入*尾递归优化技术*来重用栈，降低对内存空间的消耗，提升递归函数性能。  
+在计算机科学里，*尾调用*是指一个函数的最后一个动作是调用一个函数（只能是一个函数调用，不能有其他操作，比如函数相加、乘以常量等）。该调用位置为尾位置，若这个函数在尾位置调用自身，则称这种情况为*尾递归*，它是尾调用的一种特殊情形。尾调用的一个重要特性是它不是在函数调用栈上添加一个新的堆栈帧 —— 而是更新它，尾递归自然也继承了这一特性，这就使得原来层层递进的调用栈变成了线性结构，因而可以极大优化内存占用，提升程序性能，这就是尾递归优化技术。  
+以计算斐波那契数列的递归函数为例，简单来说，就是处于函数尾部的递归调用前面的中间状态都不需要再保存了，这可以节省很大的内存空间，在此之前的代码实现中，递归调用 fibonacci(n-1) 时，还有 fibonacci(n-2) 没有执行，因此需要保存前面的中间状态，内存开销很大。  
+一些编程语言的编译器提供了对尾递归优化的支持，但是 Go 目前并不支持，为了使用尾递归优化技术，需要手动编写实现代码。  
+尾递归的实现需要重构之前的递归函数，确保最后一步只调用自身，要做到这一点，就要把所有用到的内部变量 / 中间状态变成函数参数。  
+```golang
+func fibonacci(n int) int {
+    return fibonacciTail(n, 0, 1) // F(1) = 0, F(2) = 1
+}
+// 当前 first + second 的和赋值给下次调用的 second 参数，当前 second 值赋值给下次调用的 first 参数，就等同于实现了 F(n) = F(n-1) + F(n-2) 的效果，循环往复，不断累加，直到 n 值等于 1（F (1) = 0，无需继续迭代下去），则返回 first 的值，也就是最终的 F(n) 的值
+// 简单来说，就是把原来通过递归调用计算结果转化为通过外部传递参数初始化，再传递给下次尾递归调用不断累加，这样就可以保证 fibonacciTail 调用始终是线性结构的更新，不需要开辟新的堆栈保存中间函数调用
+func fibonacciTail(n, first, second int) int {
+    if n < 2 {
+        return first
+    }
+    return fibonacciTail(n-1, second, first+second)
+}
+```
+
+**Map-Reduce-Filter 模式处理集合元素**  
+日常开发过程中，要处理数组、切片、字典等集合类型，常规做法都是循环迭代进行处理。比如将一个字典类型用户切片中的所有年龄属性值提取出来，然后求和，常规实现是通过循环遍历所有切片，然后从用户字典键值对中提取出年龄字段值，再依次进行累加，最后返回计算结果。  
+在函数式编程中，我们可以通过 Map-Reduce 技术让这个功能实现变得更优雅，代码复用性更好。  
+Map-Reduce 并不是一个整体，而是要分两步实现：Map 和 Reduce，Map-Reduce 模型：先将字典类型切片转化为一个字符串类型切片（Map，字面意思就是映射），再将转化后的切片元素转化为整型后累加起来（Reduce，字面意思就是将多个集合元素通过迭代处理减少为一个）。
+```golang
+// 常规做法
+func ageSum(users []map[string]string) int {
+    var sum int
+    for _, user := range users {
+        num, _ := strconv.Atoi(user["age"])
+        sum += num
+    }
+    return sum
+}
+var users = []map[string]string{
+    {
+        "name": "张三",
+        "age": "18",
+    },
+    {
+        "name": "李四",
+        "age": "22",
+    },
+    {
+        "name": "王五",
+        "age": "20",
+    },
+}
+fmt.Printf("用户年龄累加结果: %d\n", ageSum(users)) // 用户年龄累加结果: 60
+
+// Map-Reduce 模式
+// Map 映射转化函数
+func mapToString(items []map[string]string, f func(map[string]string) string) []string {
+    newSlice := make([]string, len(items))
+    for _, item := range items {
+        newSlice = append(newSlice, f(item))
+    }
+    return newSlice
+}
+// Reduce 求和函数
+func fieldSum(items []string, f func(string) int) int {
+    var sum int
+    for _, item := range items{
+        sum += f(item)
+    }
+    return sum
+}
+// 调用
+ageSlice := mapToString(users, func(user map[string]string) string {
+    return user["age"]
+})
+sum := fieldSum(ageSlice, func(age string) int {
+    intAge, _ := strconv.Atoi(age)
+    return intAge
+})
+fmt.Printf("用户年龄累加结果: %d\n", sum)
+```
+为了让 Map-Reduce 代码更加健壮（排除无效的字段值），或者只对指定范围的数据进行统计计算，还可以在 Map-Reduce 基础上引入 Filter（过滤器），对集合元素进行过滤。
+```golang
+func itemsFilter(items []map[string]string, f func(map[string]string) bool) []map[string]string {
+    newSlice := make([]map[string]string, len(items))
+    for _, item := range items {
+        if f(item) {
+            newSlice = append(newSlice, item)
+        }
+    }
+    return newSlice
+}
+var users = []map[string]string{
+    {
+        "name": "张三",
+        "age": "18",
+    },
+    {
+        "name": "李四",
+        "age": "22",
+    },
+    {
+        "name": "王五",
+        "age": "20",
+    },
+    {
+        "name": "赵六",
+        "age": "-10",
+    },
+    {
+        "name": "孙七",
+        "age": "60",
+    },
+    {
+        "name": "周八",
+        "age": "10",
+    },
+}
+
+validUsers := itemsFilter(users, func(user map[string]string) bool {
+    age, ok := user["age"]
+    if !ok {
+        return false
+    }
+    intAge, err := strconv.Atoi(age)
+    if err != nil {
+         return false
+    }
+    if intAge < 18 || intAge > 35 {
+        return false
+    }
+    return true
+})
+ageSlice := mapToString(validUsers, func(user map[string]string) string {
+    return user["age"]
+})
+sum := fieldSum(ageSlice, func(age string) int {
+    intAge, _ := strconv.Atoi(age)
+    return intAge
+})
+fmt.Printf("用户年龄累加结果: %d\n", sum)
+```
+
+**基于管道技术实现函数的流式调用**  
+管道（Pipeline）这一术语来源是 Unix 的 Shell 命令行，我们可以使用管道连接符 | 通过组合简单的命令实现强大的功能。
+```bash
+ps -ef | grep nginx 
+```
+在函数式编程中，我们也可以借助管道的思想串联一些简单的函数构建更加强大的功能，比如最常见的流式函数调用（水流一样，在面向对象编程中对应的是流接口模式，可以实现链式处理）。  
+这样一来，每个函数就可以专注于自己要处理的事情，把它做到极致，然后通过组合方式（管道）构建更加复杂的业务功能，这也是符合 SOLID 设计原则的单一职责原则。  
+```golang
+// 通过管道模式实现 Map-Reduce-Filter 模式处理集合元素的流式调用
+package main
+
+import (
+    "log"
+)
+
+type user struct {
+    name string
+    age  int
+}
+
+func filterAge(users []user) interface{} {
+    var slice []user
+    for _, u := range users {
+        if u.age >= 18 && u.age <= 35 {
+            slice = append(slice, u)
+        }
+    }
+    return slice
+}
+
+func mapAgeToSlice(users []user) interface{} {
+    var slice []int
+    for _, u := range users {
+        slice = append(slice, u.age)
+    }
+    return slice
+}
+
+func sumAge(users []user, pipes ...func([]user) interface{}) int {
+    var ages []int
+    var sum int
+    // 由于这些处理函数的返回值类型被声明为了空接口，所以需要在运行时动态对它们的返回值类型做检测
+    for _, f := range pipes {
+        result := f(users)
+        switch result.(type) {
+        case []user:
+            users = result.([]user)
+        case []int:
+            ages = result.([]int)
+        }
+    }
+    if len(ages) == 0 {
+        log.Fatalln("没有在管道中加入 mapAgeToSlice 方法")
+    }
+    for _, age := range ages {
+        sum += age
+    }
+    return sum
+}
+var users = []user{
+    {
+        name: "张三",
+        age: 18,
+    },
+    {
+        name: "李四",
+        age: 22,
+    },
+    {
+        name: "王五",
+        age: 20,
+    },
+    {
+        name: "赵六",
+        age: -10,
+    },
+    {
+        name: "孙七",
+        age: 60,
+    },
+    {
+        name: "周八",
+        age: 10,
+    },
+}
+sum := sumAge(users, filterAge, mapAgeToSlice)
+log.Printf("用户年龄累加结果: % d\n", sum)
+```
+
+
+### Go 其他
 **工程管理**  
 GO 语言规定通用管理：  
 为了更好的管理项目中的文件，要求将文件都要放在相应的文件夹中。  
