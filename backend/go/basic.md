@@ -1218,6 +1218,104 @@ log.Printf("用户年龄累加结果: % d\n", sum)
 ```
 
 
+### Go 面向对象
+Go 语言面向对象编程设计得简洁而优雅。  
+简洁之处在于，Go 语言并没有沿袭传统面向对象编程中的诸多概念，比如类的继承、接口的实现、构造函数和析构函数、隐藏的 this 指针等，也没有 public、protected、private 之类的访问修饰符。  
+优雅之处在于，Go 语言对面向对象编程的支持是语言类型系统中的天然组成部分，整个类型系统通过接口串联，浑然一体。  
+
+**类型系统**  
+类型系统才是一门编程语言的地基，它的地位至关重要。类型系统是指一个语言的类型体系结构。一个典型的类型系统通常包含如下基本内容：  
+- 基本类型，如 byte、int、bool、float、string 等；  
+- 复合类型，如数组、切片、字典、指针、结构体等；  
+- 可以指向任意对象的类型（Any 类型）；  
+- 值语义和引用语义；  
+- 面向对象，即所有具备面向对象特征（比如成员方法）的类型；  
+- 接口。  
+
+类型系统描述的是这些内容在一个语言中如何被关联。Go 语言中的大多数类型都是值语义，包括：  
+- 基本类型，如布尔类型、整型、浮点型、字符串等；  
+- 复合类型，如数组、结构体等（切片、字典、指针和通道都是引用语义）；  
+
+`这里的值语义和引用语义等价于值类型和引用类型。`
+
+**为值类型定义成员方法**  
+所有值语义类型都支持定义成员方法，包括内置基本类型。  
+```golang
+// 需要将基本类型通过 type 关键字设置为新的类型（这是一个新类型，不是类型别名）
+type Integer int
+
+func (a Integer) Equal(b Integer) bool {
+    return a == b
+}
+
+var x Integer
+var y Integer
+x, y = 10, 15
+fmt.Println(x.Equal(y))
+```
+在实现某个接口时，只需要实现该接口要求的所有方法即可，无需显式声明实现的接口（实际上，Go 语言根本就不支持传统面向对象编程中的继承和实现语法）。  
+```golang
+type Math interface {
+    Add(i Integer) Integer
+    Multiply(i Integer) Integer
+}
+```
+任何类型都可以被 Any 类型引用。在 Go 语言中，Any 类型就是空接口，即 interface{}。  
+
+**类的定义、初始化和成员方法**  
+Go 语言的面向对象编程与我们之前所熟悉的 PHP、Java 那一套完全不同，没有 class、extends、implements 之类的关键字和相应的概念，而是借助*结构体来*实现类的声明。  
+
+Go 语言中也不支持构造函数、析构函数，取而代之地，可以通过定义形如 NewXXX 这样的全局函数（首字母大写）作为类的初始化函数。  
+`注意：在 Go 语言中，未进行显式初始化的变量都会被初始化为该类型的零值，例如 bool 类型的零值为 false，int 类型的零值为 0，string 类型的零值为空字符串，float 类型的零值为 0.0`
+
+由于 Go 语言不支持 class 这样的代码块，要为 Go 类定义成员方法，需要在 func 和方法名之间声明方法所属的类型（有的地方将其称之为接收者声明）。  
+在类的成员方法中，可以通过声明的类型变量来访问类的属性和其他方法（Go 语言不支持隐藏的 this 指针，所有的东西都是显式声明）。因为 Go 语言面向对象编程不像 PHP、Java 那样支持隐式的 this 指针，所有的东西都是显式声明的，在 GetXXX 方法中，由于不需要对类的成员变量进行修改，所以不需要传入指针，而 SetXXX 方法需要在函数内部修改成员变量的值，并且该修改要作用到该函数作用域以外，所以需要传入指针类型（结构体是值类型，不是引用类型，所以需要显式传入指针）。  
+需要声明的是，在 Go 语言中，当我们将成员方法 SetName 所属的类型声明为指针类型时，严格来说，该方法并不属于 Student 类，而是属于指向 Student 的指针类型，所以，归属于 Student 的成员方法只是 Student 类型下所有可用成员方法的子集，归属于 \*Student 的成员方法才是 Student 类完整可用方法的集合。  
+我们在调用方法时，之所以可以直接在 student 实例上调用 SetName 方法，是因为 Go 语言底层会自动将 student 转化为对应的指针类型 &student，所以真正调用的代码是 (&student).SetName("小七2号")。  
+
+PHP、Java 支持默认调用类的 toString 方法以字符串格式打印类的实例，Go 语言也有类似的机制，只不过这个方法名是 String。  
+
+在 Go 语言中，有意弱化了传统面向对象编程中的类概念，这也符合 Go 语言的简单设计哲学，基于结构体定义的「类」就是和内置的数据类型一样的普通数据类型而已，内置的数据类型也可以通过 type 关键字转化为可以包含自定义成员方法的「类」。  
+一个数据类型关联的所有方法，共同组成了该类型的方法集合，和其他支持面向对象编程的语言一样，同一个方法集合中的方法也不能出现重名，并且，如果它们所属的是一个结构体类型，那么它们的名称与该类型中任何字段的名称也不能重复。  
+```golang
+// 声明类的结构体
+type Student struct {
+    id uint
+    name string
+    male bool
+    score float64
+}
+
+// 初始化函数
+func NewStudent(id uint, name string, male bool, score float64) *Student {
+    return &Student{id, name, male, score}
+    // 初始化指定字段
+    // return &Student{id: id, name:name, score:score}
+}
+
+// 定义成员方法 - 值方法（接收者类型为非指针的成员方法）
+func (s Student) GetName() string  {
+    return s.name
+}
+// 指针方法（接收者类型为指针的成员方法）
+func (s *Student) SetName(name string) {
+    s.name = name
+}
+// 以字符串格式打印类的实例
+func (s Student) String() string {
+    return fmt.Sprintf("{id: %d, name: %s, male: %t, score: %f}",
+        s.id, s.name, s.male, s.score)
+}
+
+// 使用
+student := NewStudent(1, "小七", 100)
+fmt.Println(student)
+student.SetName("小七2号")
+fmt.Println("Name:", student.GetName())
+```
+
+
+
 ### Go 其他
 **工程管理**  
 GO 语言规定通用管理：  
