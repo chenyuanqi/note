@@ -1516,6 +1516,217 @@ func main() {
 ```
 
 **接口定义与使用**  
+接口在 Go 语言中有着至关重要的地位，如果说 goroutine 和 channel 是支撑起 Go 语言并发模型的基石，那么接口就是 Go 语言整个类型系统的基石。  
+
+和类的实现相似，Go 语言的接口和其他语言中提供的接口概念完全不同。以 Java、PHP 为例，接口主要作为不同类之间的契约（Contract）存在，对契约的实现是强制的，体现在具体的细节上就是如果一个类实现了某个接口，就必须实现该接口声明的所有方法，这个叫「履行契约」。  
+我们把这种接口称为侵入式接口，所谓「侵入式」指的是实现类必须明确声明自己实现了某个接口。这种实现方式虽然足够明确和简单明了，但也存在一些问题，尤其是在设计标准库的时候，因为标准库必然涉及到接口设计，接口的需求方是业务实现类，只有具体编写业务实现类的时候才知道需要定义哪些方法，而在此之前，标准库的接口就已经设计好了，我们要么按照约定好的接口进行实现，如果没有合适的接口需要自己去设计，这里的问题就是接口的设计和业务的实现是分离的，接口的设计者并不能总是预判到业务方要实现哪些功能，这就造成了设计与实现的脱节。  
+接口的过分设计会导致某些声明的方法实现类完全不需要，如果设计的太简单又会导致无法满足业务的需求，这确实是一个问题，而且脱离了用户使用场景讨论这些并没有意义。  
+
+在 Go 语言中，类对接口的实现和子类对父类的继承一样，并没有提供类似 implement 这种关键字显式声明该类实现了哪个接口，*一个类只要实现了某个接口要求的所有方法，我们就说这个类实现了该接口*。  
+```golang
+type File struct { 
+    // ...
+}
+
+func (f *File) Read(buf []byte) (n int, err error) 
+func (f *File) Write(buf []byte) (n int, err error) 
+func (f *File) Seek(off int64, whence int) (pos int64, err error) 
+func (f *File) Close() error
+
+// 假设我们有如下接口（Go 语言通过关键字 interface 来声明接口，以示和结构体类型的区别，花括号内包含的是待实现的方法集合）
+type IFile interface { 
+    Read(buf []byte) (n int, err error) 
+    Write(buf []byte) (n int, err error) 
+    Seek(off int64, whence int) (pos int64, err error) 
+    Close() error 
+}
+
+type IReader interface { 
+    Read(buf []byte) (n int, err error) 
+}
+
+type IWriter interface { 
+    Write(buf []byte) (n int, err error) 
+}
+
+type ICloser interface { 
+    Close() error 
+}
+```
+尽管 File 类并没有显式实现这些接口，甚至根本不知道这些接口的存在，但是我们说 File 类实现了这些接口，因为 File 类实现了上述所有接口声明的方法。当一个类的成员方法集合包含了某个接口声明的所有方法，换句话说，如果一个接口的方法集合是某个类成员方法集合的子集，我们就认为该类实现了这个接口。  
+与 Java、PHP 相对，我们把 Go 语言的这种接口称作非侵入式接口，因为类与接口的实现关系不是通过显式声明，而是系统根据两者的方法集合进行判断。这样做有两个好处：
+- 其一，Go 语言的标准库不需要绘制类库的继承 / 实现树图，在 Go 语言中，类的继承树并无意义，你只需要知道这个类实现了哪些方法，每个方法是干什么的就足够了。  
+- 其二，定义接口的时候，只需要关心自己应该提供哪些方法即可，不用再纠结接口需要拆得多细才合理，也不需要为了实现某个接口而引入接口所在的包，接口由使用方按需定义，不用事先设计，也不用考虑之前是否有其他模块定义过类似接口。
+
+Go 语言也支持类似的「接口继承」特性，但是由于不支持 extends 关键字，所以其实现和类的继承一样，是通过组合来完成的。以上面这个 PHP 示例为例，在 Go 语言中，我们可以这样通过接口组合来实现接口继承，就像类的组合一样。  
+可以认为接口组合是匿名类型组合（没有显式为组合类型设置对应的属性名称）的一个特定场景，只不过接口只包含方法，而不包含任何属性。  
+```golang
+// Reader is the interface that wraps the basic Read method.
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+
+// Writer is the interface that wraps the basic Write method.
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+
+// ReadWriter is the interface that groups the basic Read and Write methods.
+type ReadWriter interface {
+    Reader
+    Writer
+}
+```
+
+**接口赋值**  
+和其他编程语言一样，Go 接口不支持直接实例化，因为它只是一个契约而已，只能通过具体的类来实现接口声明的所有方法。不同之处在于，Go 接口支持赋值操作，从而快速实现接口与实现类的映射。  
+接口赋值在 Go 语言中分为如下两种情况：  
+- 将实现接口的类实例赋值给接口；  
+- 将一个接口赋值给另一个接口。  
+
+将类实例赋值给接口，这要求该实例对应的类实现了接口声明的所有方法。  
+如果类中实现接口的成员方法都是值方法，则进行接口赋值时，传递类实例的值类型或者指针类型均可，否则只能传递指针类型实例，从代码性能角度来说，值拷贝需要消耗更多的内存空间，统一使用指针类型代码性能会更好。  
+```golang
+type Integer int
+
+// 加法运算
+func (a Integer) Add(b Integer) Integer {
+    return a + b
+}
+
+// 乘法运算
+func (a Integer) Multiply(b Integer) Integer {
+    return a * b
+}
+
+type Math interface {
+    Add(i Integer) Integer
+    Multiply(i Integer) Integer
+}
+
+var a Integer = 1 
+// Integer 类型实现了 Math 接口
+// 将 Integer 类型的实例 a 直接赋值给 Math 接口类型的变量 m
+var m Math = a
+// 对于值方法而言，进行接口赋值时传递 a 实例的指针引用也是可以的
+// var m Math = &a
+/*
+因为对于非指针方法，Go 底层会自动生成一个与之对应的指针成员方法
+func (a *Integer) Add(i Integer) Integer { 
+    return (*a).Add(i) 
+}
+
+func (a *Integer) Multiply(i Integer) Integer { 
+    return (*a).Multiply(i) 
+}
+*/
+fmt.Println(m.Add(1))
+```
+如果类型中包含了归属于指针的实现方法，那么在做接口赋值时，就只能传递指针类型的变量了。  
+```golang
+type Integer int
+
+func (a *Integer) Add(b Integer) {
+    *a = (*a) + b
+}
+
+func (a Integer) Multiply(b Integer) Integer {
+    return a * b
+}
+
+type Math interface {
+    Add(i Integer)
+    Multiply(i Integer) Integer
+}
+
+var a Integer = 1
+var m Math = &a
+m.Add(2)
+fmt.Printf("1 + 2 = %d\n", a)
+```
+
+
+如何将一个接口赋值给另一个接口：在 Go 语言中，只要两个接口拥有相同的方法列表（与顺序无关），那么它们就是等同的，可以相互赋值。不过，这里有一个前提，那就是接口变量持有的是基于对应实现类的实例值，所以接口与接口间的赋值是基于类实例与接口间的赋值的。  
+```golang
+type Number1 interface {
+    Equal(i int) bool
+    LessThan(i int) bool
+    MoreThan(i int) bool
+}
+
+type Number2 interface {
+    Equal(i int) bool
+    MoreThan(i int) bool
+    LessThan(i int) bool
+}
+
+type Number int
+
+func (n Number) Equal(i int) bool {
+    return int(n) == i
+}
+
+func (n Number) LessThan(i int) bool {
+    return int(n) < i
+}
+
+func (n Number) MoreThan(i int) bool {
+    return int(n) > i
+}
+
+// 任何实现了 Number1 接口的类，也实现了 Number2
+// 任何实现了 Number1 接口的类实例都可以赋值给 Number2，反之亦然
+// 在任何地方使用 Number1 接口与使用 Number2 并无差异
+var num1 Number = 1
+var num2 Number1 = num1 
+var num3 Number2 = num2
+```
+接口赋值并不要求两个接口完全等价（方法完全相同）。如果接口 A 的方法列表是接口 B 的方法列表的子集，那么接口 B 也可以赋值给接口 A。
+```golang
+type Number1 interface {
+    Equal(i int) bool
+    LessThan(i int) bool
+    MoreThan(i int) bool
+}
+
+type Number2 interface {
+    Equal(i int) bool
+    MoreThan(i int) bool
+    LessThan(i int) bool
+    Add(i int)
+}
+
+type Number int
+
+func (n Number) Equal(i int) bool {
+    return int(n) == i
+}
+
+func (n Number) LessThan(i int) bool {
+    return int(n) < i
+}
+
+func (n Number) MoreThan(i int) bool {
+    return int(n) > i
+}
+
+func (n *Number) Add(i int) {
+    *n = *n + Number(i)
+}
+
+var num1 Number = 1
+var num2 Number2 = &num1
+var num3 Number1 = num2 
+/*
+// 反过来会报错，因为 Number1 接口中没有声明 Add 方法
+var num1 Number = 1
+var num2 Number1 = &num1
+var num3 Number2 = num2   // 这一段编译出错
+*/
+```
+
+**类型断言**  
+
 
 
 
