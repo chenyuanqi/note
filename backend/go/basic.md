@@ -1726,8 +1726,309 @@ var num3 Number2 = num2   // 这一段编译出错
 ```
 
 **类型断言**  
+在 Java、PHP 等语言的面向对象编程实现中，提供了 instanceof 关键字来进行接口和类型的断言，这种断言其实就是判定一个对象是否是某个类（包括父类）或接口的实例。  
+Go 语言设计地非常简单，所以没有提供类似的关键字，而是通过类型断言运算符 .(type) 来实现，其中 type 对应的就是要断言的类型。
+```golang
+var num1 Number = 1;
+var num2 Number2 = &num1;
+// 断言 Number2 接口类型实例 num2 是否也是 Number1 接口类型
+if num3, ok := num2.(Number1); ok {
+    fmt.Println(num3.Equal(1))
+}
+```
+`需要注意的是，类型断言是否成功要在运行期才能够确定，它不像接口赋值，编译器只需要通过静态类型检查即可判断赋值是否可行。`  
+
+结构体类型断言实现语法和接口类型断言一样。
+```golang
+type IAnimal interface {
+    GetName() string
+    Call() string
+    FavorFood() string
+}
+
+var animal = NewAnimal("中华田园犬")
+var pet = NewPet("泰迪")
+var ianimal IAnimal = NewDog(&animal, pet)
+// Animal 和 Dog 类就都实现了 IAnimal 接口，查询 IAnimal 接口类型的实例是否是 Dog 结构体类型
+if dog, ok := ianimal.(Dog); ok {
+    fmt.Println(dog.GetName())
+    fmt.Println(dog.Call())
+    fmt.Println(dog.FavorFood())
+}
+```
+`需要注意的是，在 Go 语言结构体类型断言时，子类的实例并不归属于父类，即使子类和父类属性名和成员方法列表完全一致，因为类与类之间的「继承」是通过组合实现的，并不是 Java/PHP 中的那种父子继承关系，这是新手需要注意的地方。同理，父类实现了某个接口，不代表组合类它的子类也实现了这个接口。`  
+
+基于反射在运行时动态进行类型断言。
+```golang
+func myPrintf(args ...interface{}) {
+    for _, arg := range args {
+        switch reflect.TypeOf(arg).Kind() {
+        case reflect.Int:
+            fmt.Println(arg, "is an int value.")
+        case reflect.String:
+            fmt.Printf("\"%s\" is a string value.\n", arg)
+        case reflect.Array:
+            fmt.Println(arg, "is an array type.")
+        default:
+            fmt.Println(arg, "is an unknown type.")
+        }
+    }
+}
+
+// 如果要获取 ianimal 的实际类型，可以通过 reflect.TypeOf(ianimal) 获取
+var animal = NewAnimal("中华田园犬")
+var pet = NewPet("泰迪")
+var ianimal IAnimal = NewDog(&animal, pet)
+fmt.Println(reflect.TypeOf(ianimal)) // animal.Dog
+```
+
+对于基本数据类型，比如 int、string、bool 这些，不必通过反射，直接使用 variable.(type) 表达式即可获取 variable 变量对应的类型值。  
+```golang
+func myPrintf(args ...interface{}) {
+    for _, arg := range args {
+        switch arg.(type) {
+        case int:
+            fmt.Println(arg, "is an int value.")
+        case string:
+            fmt.Printf("\"%s\" is a string value.\n", arg)
+        case bool:
+            fmt.Println(arg, "is a bool value.")
+        default:
+            fmt.Println(arg, "is an unknown type.")
+        }
+    }
+}
+
+// Go 语言 fmt 标准库中的 Println() 函数底层就是基于类型断言将传入参数值转化为字符串进行打印的
+// arg 对应的是外部传入的每个待打印参数值，interface{} 表示空接口类型
+func (p *pp) printArg(arg interface{}, verb rune) {
+    p.arg = arg
+    p.value = reflect.Value{}
+
+    ...
+
+    // Some types can be done without reflection.
+    switch f := arg.(type) {
+    case bool:
+        p.fmtBool(f, verb)
+    case float32:
+        p.fmtFloat(float64(f), 32, verb)
+    case float64:
+        p.fmtFloat(f, 64, verb)
+    case complex64:
+        p.fmtComplex(complex128(f), 64, verb)
+    case complex128:
+        p.fmtComplex(f, 128, verb)
+    case int:
+        p.fmtInteger(uint64(f), signed, verb)
+    case int8:
+        p.fmtInteger(uint64(f), signed, verb)
+    case int16:
+        p.fmtInteger(uint64(f), signed, verb)
+    case int32:
+        p.fmtInteger(uint64(f), signed, verb)
+    case int64:
+        p.fmtInteger(uint64(f), signed, verb)
+    case uint:
+        p.fmtInteger(uint64(f), unsigned, verb)
+    case uint8:
+        p.fmtInteger(uint64(f), unsigned, verb)
+    case uint16:
+        p.fmtInteger(uint64(f), unsigned, verb)
+    case uint32:
+        p.fmtInteger(uint64(f), unsigned, verb)
+    case uint64:
+        p.fmtInteger(f, unsigned, verb)
+    case uintptr:
+        p.fmtInteger(uint64(f), unsigned, verb)
+    case string:
+        p.fmtString(f, verb)
+    case []byte:
+        p.fmtBytes(f, verb, "[]byte")
+    case reflect.Value:
+        // Handle extractable values with special methods
+        // since printValue does not handle them at depth 0.
+        if f.IsValid() && f.CanInterface() {
+            p.arg = f.Interface()
+            if p.handleMethods(verb) {
+                return
+            }
+        }
+        p.printValue(f, verb, 0)
+    default:
+        // If the type is not simple, it might have methods.
+        if !p.handleMethods(verb) {
+            // Need to use reflection, since the type had no
+            // interface methods that could be used for formatting.
+            p.printValue(reflect.ValueOf(f), verb, 0)
+        }
+    }
+}
+```
+
+**空接口**  
+Go 语言打破了传统面向对象编程中类与类之间继承的概念，而是通过组合实现方法和属性的复用，所以不存在类似的继承关系树，也就没有所谓的祖宗类，而且类与接口之间也不再通过 implements 关键字强制绑定实现关系，所以 Go 语言的面向对象编程非常灵活。  
+在 Go 语言中，类与接口的实现关系是通过类所实现的方法在编译期推断出来的，如果我们定义一个空接口的话，那么显然所有的类都实现了这个接口，反过来，我们也可以通过空接口来指向任意类型，从而实现类似 Java 中 Object 类所承担的功能，而且显然 Go 的空接口实现更加简洁，通过一个简单的字面量（interface{}）即可完成。  
+`需要注意的是空接口和接口零值不是一个概念，前者是 interface{}，后者是 nil。`
+```golang
+// 将空接口指向基本类型
+var v1 interface{} = 1 // 将 int 类型赋值给 interface{} 
+var v2 interface{} = "xxx" // 将 string 类型赋值给 interface{} 
+var v3 interface{} = true  // 将 bool 类型赋值给 interface{}
+
+// 将空接口指向复合类型
+var v4 interface{} = &v2 // 将指针类型赋值给 interface{} 
+var v5 interface{} = []int{1, 2, 3}  // 将切片类型赋值给 interface{} 
+var v6 interface{} = struct{   // 将结构体类型赋值给 interface{}
+    id int
+    name string
+}{1, "xxx"} 
 
 
+// 基于空接口来实现更加灵活的类型断言
+var animal = NewAnimal("中华田园犬")
+var pet = NewPet("泰迪")
+// 基于空接口将其他类型变量转化为空接口类型，这样，就不必单独引入 IAnimal 接口了
+var any interface{} = NewDog(&animal, pet)
+if dog, ok := any.(Dog); ok {
+    fmt.Println(dog.GetName())
+    fmt.Println(dog.Call())
+    fmt.Println(dog.FavorFood())
+    fmt.Println(reflect.TypeOf(dog))
+}
+```
+
+**反射**  
+很多现代高级编程语言都提供了对反射的支持，通过反射，你可以在运行时动态获取变量的类型和结构信息，然后基于这些信息做一些非常灵活的工作，一个非常典型的反射应用场景就是 IoC 容器。  
+Go 也支持反射功能，并且专门提供了一个 reflect 包用于提供反射相关的 API。reflect 包提供的两个最常用、最重要的类型就是 reflect.Type 和 reflect.Value。前者用于表示变量的类型，后者用于存储任何类型的值，分别可以通过 reflect.TypeOf 和 reflect.ValueOf 函数获取。  
+```golang
+animal := NewAnimal("中华田园犬")
+pet := NewPet("泰迪")
+dog := NewDog(&animal, pet)
+
+// 在运行时通过反射获取其类型，返回的是 reflect.Type 类型值
+dogType := reflect.TypeOf(dog)    
+fmt.Println("dog type:", dogType) // dog type: animal.Dog
+// 获取 dog 值的结构体信息，并且动态调用其成员方法，使用反射的话需要先获取对应的 reflect.Value 类型值
+// 返回的是 dog 指针对应的 reflect.Value 类型值
+dogValue := reflect.ValueOf(&dog).Elem()
+// Dog 类中不包含指针方法的话，也可以返回 dog 值对应的 reflect.Value 类型值
+dogValue := reflect.ValueOf(dog)
+
+// 如下反射代码分别批量获取 dog 实例的所有属性和成员方法，并打印其名称、类型、值以及调用结果
+// 获取 dogValue 的所有属性
+fmt.Println("================ Props ================")
+for i := 0; i < dogValue.NumField(); i++ {
+    // 获取属性名
+    fmt.Println("name:", dogValue.Type().Field(i).Name)
+    // 获取属性类型
+    fmt.Println("type:", dogValue.Type().Field(i).Type)
+    // 获取属性值
+    fmt.Println("value:", dogValue.Field(i))
+}
+// 获取 dogValue 的所有方法
+fmt.Println("================ Methods ================")
+for j := 0; j < dogValue.NumMethod(); j++ {
+    // 获取方法名
+    fmt.Println("name:", dogValue.Type().Method(j).Name)
+    // 获取方法类型
+    fmt.Println("type:", dogValue.Type().Method(j).Type)
+    // 调用该方法
+    fmt.Println("exec result:", dogValue.Method(j).Call([]reflect.Value{}))
+}
+```
+我们可以通过反射获取变量的所有未知结构信息，以结构体为例（基本类型只有类型和值，更加简单），包括其属性、成员方法的名称和类型，值和可见性，还可以动态修改属性值以及调用成员方法。  
+不过这种灵活是有代价的，因为所有这些解析工作都是在运行时而非编译期间进行，所以势必对程序性能带来负面影响，而且可以看到，反射代码的可读性和可维护性比起正常调用差很多，最后，反射代码出错不能在构建时被捕获，而是在运行时以恐慌的形式报告，这意味着反射错误有可能使你的程序崩溃。  
+所以，如果有其他更好解决方案的话，尽量不要使用反射。  
+
+**基于空接口和反射实现泛型**  
+在某些场景下，目前只能使用反射来实现，比如范型，因为现在 Go 官方尚未在语法层面提供对泛型的支持，我们只能通过空接口结合反射来实现。  
+空接口 interface{} 本身可以表示任何类型，因此它其实就是一个泛型了，不过这个泛型太泛了，我们必须结合反射在运行时对实际传入的参数做类型检查，让泛型变得可控，从而确保程序的健壮性，否则很容易因为传递进来的参数类型不合法导致程序崩溃。  
+```golang
+package main
+
+import (
+    "fmt"
+    "reflect"
+)
+
+type Container struct {
+    s reflect.Value
+}
+
+// 通过传入存储元素类型和容量来初始化容器
+func NewContainer(t reflect.Type, size int) *Container {
+    if size <= 0  {
+        size = 64
+    }
+    // 基于切片类型实现这个容器，这里通过反射动态初始化这个底层切片
+    return &Container{
+        s: reflect.MakeSlice(reflect.SliceOf(t), 0, size),
+    }
+}
+
+// 添加元素到容器，通过空接口声明传递的元素类型，表明支持任何类型
+func (c *Container) Put(val interface{})  error {
+    // 通过反射对实际传递进来的元素类型进行运行时检查，
+    // 如果与容器初始化时设置的元素类型不同，则返回错误信息
+    // c.s.Type() 对应的是切片类型，c.s.Type().Elem() 应的才是切片元素类型
+    if reflect.ValueOf(val).Type() != c.s.Type().Elem() {
+        return fmt.Errorf("put error: cannot put a %T into a slice of %s",
+            val, c.s.Type().Elem())
+    }
+    // 如果类型检查通过则将其添加到容器中
+    c.s = reflect.Append(c.s, reflect.ValueOf(val))
+    return nil
+}
+
+// 从容器中读取元素，将返回结果赋值给 val，同样通过空接口指定元素类型
+func (c *Container) Get(val interface{}) error {
+    // 还是通过反射对元素类型进行检查，如果不通过则返回错误信息
+    // Kind 与 Type 相比范围更大，表示类别，如指针，而 Type 则对应具体类型，如 *int
+    // 由于 val 是指针类型，所以需要通过 reflect.ValueOf(val).Elem() 获取指针指向的类型
+    if reflect.ValueOf(val).Kind() != reflect.Ptr ||
+        reflect.ValueOf(val).Elem().Type() != c.s.Type().Elem() {
+        return fmt.Errorf("get error: needs *%s but got %T", c.s.Type().Elem(), val)
+    }
+    // 将容器第一个索引位置值赋值给 val 指针
+    reflect.ValueOf(val).Elem().Set( c.s.Index(0) )
+    // 然后删除容器第一个索引位置值
+    c.s = c.s.Slice(1, c.s.Len())
+    return nil
+}
+
+func main() {
+    nums := []int{1, 2, 3, 4, 5}
+
+    // 初始化容器，元素类型和 nums 中的元素类型相同
+    c := NewContainer(reflect.TypeOf(nums[0]), 16)
+
+    // 添加元素到容器
+    for _, n := range nums {
+        // 试图添加其他类型元素到容器
+        if err := c.Put(n); err != nil {
+            panic(err)
+        }
+    }
+
+    // 从容器读取元素，将返回结果初始化为 0
+    num := 0
+    // 存储返回结果的变量类型与容器内元素类型不符
+    if err := c.Get(&num); err != nil {
+        panic(err)
+    }
+
+    // 打印返回结果值
+    fmt.Printf("%v (%T)\n", num, num)
+}
+```
+
+**空结构体**  
+表示没有任何属性和成员方法的空结构体，该类型的实例值只有一个，那就是 struct{}{}，这个值在 Go 程序中永远只会存一份，并且占据的内存空间是 0，当我们在并发编程中，将通道（channel）作为传递简单信号的介质时，使用 struct{} 类型来声明最好不过。  
+```golang
+// 空的结构体类型定义
+struct{}
+```
 
 
 ### Go 其他

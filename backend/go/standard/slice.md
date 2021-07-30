@@ -33,6 +33,24 @@ s := []int{1,2,3}
 s = append(s, 5, 6,7)
 fmt.Println(s) // [1 2 3 5 6 7]
 
+// 先定义一个数组
+months := [...]string{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
+// 基于数组创建切片
+q2 := months[3:6]    // 第二季度
+summer := months[5:8]  // 夏季
+fmt.Println(q2) // [April May June]
+fmt.Println(summer)  // [June July August]
+
+// 切片的容量和实际长度
+var oldSlice = make([]int, 5, 10)
+fmt.Println("len(oldSlice):", len(oldSlice))
+fmt.Println("cap(oldSlice):", cap(oldSlice))
+// 如果追加的元素个数超出 oldSlice 的默认容量，则底层会自动进行扩容
+newSlice := append(oldSlice, 1, 2, 3, 4, 5, 6)
+fmt.Println(newSlice)
+fmt.Println(len(newSlice))
+fmt.Println(cap(newSlice))
+
 // 通过指定下标方式完成赋值
 s = make([]int, 5,10)
 s[0] = 1
@@ -80,6 +98,55 @@ num := copy(slice2, slice1) // 把 slice1 的前 3 个值复制到 slice2
 fmt.Println(slice1)  // [1 2 3 4 5 6]
 fmt.Println(slice2)  // [1 2 3]
 fmt.Println(num)  // 3
+
+// 动态删除元素
+slice3 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+slice3 = slice3[:len(slice3) - 5]  // 删除 slice3 尾部 5 个元素
+slice3 = slice3[5:]  // 删除 slice3 头部 5 个元素
 ```
 
+**数据共享问题**  
+切片底层是基于数组实现的，对应的结构体对象如下所示：
+```golang
+type slice struct {
+    array unsafe.Pointer //指向存放数据的数组指针
+    len   int            //长度有多大
+    cap   int            //容量有多大
+}
+```
 
+在结构体中使用指针存在不同实例的数据共享问题，slice2 是基于 slice1 创建的，它们的数组指针指向了同一个数组，因此，修改 slice2 元素会同步到 slice1，因为修改的是同一份内存数据，这就是数据共享问题。
+```golang
+slice1 := []int{1, 2, 3, 4, 5}
+
+slice2 := slice1[1:3]
+slice2[1] = 6
+
+fmt.Println("slice1:", slice1) // slice1: [1 2 6 4 5]
+fmt.Println("slice2:", slice2) // slice2: [2 6]
+```
+
+解决这个问题，使用 append 函数会重新分配新的内存，然后将结果赋值。  
+```golang
+slice1 := make([]int, 4)
+slice2 := slice1[1:3]
+slice1 = append(slice1, 0)
+slice1[1] = 2
+slice2[1] = 6
+
+fmt.Println("slice1:", slice1) // slice1: [0 2 0 0 0]
+fmt.Println("slice2:", slice2) // slice2: [0 6]
+```
+
+但是这里有个需要注意的地方，就是一定要重新分配内存空间，如果没有重新分配，依然存在数据共享问题。  
+```golang
+slice1 := make([]int, 4, 5)
+slice2 := slice1[1:3]
+slice1 = append(slice1, 0)
+slice1[1] = 2
+slice2[1] = 6
+
+fmt.Println("slice1:", slice1) // slice1: [0 2 6 0 0]
+fmt.Println("slice2:", slice2) // slice2: [2 6]
+```
+这里就发生了数据共享问题，因为初始化的容量是 5，比长度大，执行 append 的时候没有进行扩容，也就不存在重新分配内存操作。
