@@ -12,10 +12,6 @@ type stringStruct struct {
 
 
 ### Go 字符串使用
-字符串常用方法：  
-> 
-
-
 ```golang
 // 使用字符串字面量初始化
 var a = "hi,狗"

@@ -9,7 +9,7 @@
 function binary_search($arr, $num){
     $arr_length = count($arr);
     if ($arr_length <= 1) {
-        return 0;
+        return -1;
     }
 
     return binary_search_internal($arr, $num, 0, $arr_length - 1);
