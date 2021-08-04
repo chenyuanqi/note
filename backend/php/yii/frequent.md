@@ -82,7 +82,7 @@ try {
     throw $e;
 }
 
-// 是否新记录
+// 是否新记录（afterSave 新纪录会变成已存在的记录）
 $model->isNewRecord;
 // 获取主键值
 $model->getOldPrimaryKey();
@@ -143,10 +143,10 @@ public function rules()
 
 	[['salt'], 'string', 'length' => 32],
 
-    [['content'], 'string', 'max' => 100],
+    [['content'], 'string', 'max' => 100, 'tooLong' => 'xxx'],
 	[['content'], 'trim'],
 
-	[['password'], 'string', 'min' => 6],
+	[['password'], 'string', 'min' => 6, 'tooShort' => 'xxx'],
     [
         ['password'],
         'match',
