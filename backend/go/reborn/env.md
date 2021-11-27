@@ -18,6 +18,13 @@ wget -c https://golang.google.cn/dl/go1.16.5.darwin-amd64.pkg
 # vim $HOME/.profile 
 export PATH=$PATH:/usr/local/go/bin
 source ~/.profile
+
+# mac 多版本
+brew install go
+brew install go@1.15
+# 切换版本
+brew unlink go
+brew link go@1.15
 ```
 
 **Go 升级**
@@ -31,5 +38,10 @@ export GOPROXY="https://goproxy.cn,direct"
 sudo rm -rf /usr/local/go
 sudo tar -C /usr/local -xzf /home/nikhita/Downloads/go1.8.1.linux-amd64.tar.gz
 echo $PATH | grep "/usr/local/go/bin"
+
+# Mac
+brew update
+brew upgrade
+brew upgrade go
 ```
 

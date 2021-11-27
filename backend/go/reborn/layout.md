@@ -9,7 +9,7 @@ go run main.go
 
 复杂项目下 Go 程序的编译是怎样的呢？
 ```bash
-go mod init
+go mod init project
 # 自动添加依赖
 go mod tidy
 go build main.go
@@ -45,4 +45,22 @@ demo
 > Go 库项目的初衷是为了对外部（开源或组织内部公开）暴露 API，对于仅限项目内部使用而不想暴露到外部的包，可以放在项目顶层的 internal 目录下面。当然 internal 也可以有多个并存在于项目结构中的任一目录层级中，关键是项目结构设计人员要明确各级 internal 包的应用层次和范围。  
 
 公司的 Go 项目布局是怎样的呢？  
+```
+demo
+├── README.md
+├── bin
+│   └── main.go
+├── configs
+│   ├── dev
+│   ├── prod
+│   └── test
+├── controllers
+│   ├── batch.go
+├── docs
+├── go.mod
+├── go.sum
+├── services
+│   ├── batch
+└── vendor
+```
 
