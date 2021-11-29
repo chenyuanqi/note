@@ -13,3 +13,19 @@ Go 包的初始化次序并不难，只需要记住这三点就可以了：
 2. 每个包内按以 “常量 -> 变量 -> init 函数” 的顺序进行初始化；  
 3. 包内的多个 init 函数按出现次序进行自动调用。  
 
+### 最简单的 HTTP 服务  
+```go
+package main
+
+import "net/http"
+
+func main() {
+  // 通过 http.HandleFunc 设置这个处理函数时，传入的模式字符串为 “/”
+  // HTTP 服务器在收到请求后，会将请求中的 URI 路径与设置的模式字符串进行最长前缀匹配，并执行匹配到的模式字符串所对应的处理函数
+  http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request){
+      w.Write([]byte("hello, world"))
+  })
+  // 通过 http 包提供的 ListenAndServe 函数，建立起一个 HTTP 服务，这个服务监听本地的 8080 端口
+  http.ListenAndServe(":8080", nil)
+}
+```
