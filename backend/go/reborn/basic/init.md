@@ -1,4 +1,16 @@
 
+### Go语言中的关键字和保留字
+**Go语言中的关键字**  
+| 包管理 | 声明与定义 | 流程控制 |  
+| :---: | :---: | :---: |  
+| import、package | chan、const、func、interface、map、struct、type、var | break、case、continue、default、defer、else、fallthrough、for、go、goto、if、range、return、select |  
+
+
+**Go语言中的保留字**   
+| 常量 | 变量类型 | 内置函数名 |  
+| :---: | :---: | :---: |  
+| true、false、iota、nil | Int、int8、int16、int32、int64、uint、uint8、uint16、uint32、uint64、uintptr、float32、float64、complex128、complex64、bool、byte、rune、string、error | make、len、cap、new、append、copy、close、delete、complex、real、imag、panic、recover |  
+
 ### Go 执行次序
 Go 程序由一系列 Go 包组成，代码的执行也是在各个包之间跳转。  
 
@@ -7,6 +19,14 @@ Go 语言中有一个特殊的函数：main 包中的 main 函数，也就是 ma
 > init 函数的第一个常用用途：重置包级变量值  
 > init 函数的第二个常用用途，是实现对包级变量的复杂初始化  
 > init 函数的第三个常用用途：在 init 函数中实现 “注册模式”  
+
+关于Go程序初始化init函数的六个特点：  
+- 包级别变量的初始化先于包内init函数的执行。
+- 一个包下可以有多个init函数，每个文件也可以有多个init 函数。
+- 多个 init 函数按照它们的文件名顺序逐个初始化。
+- 应用初始化时初始化工作的顺序是，从被导入的最深层包开始进行初始化，层层递出最后到main包。
+- 不管包被导入多少次，包内的init函数只会执行一次。
+- 应用在所有初始化工作完成后才会执行main函数。
 
 Go 包的初始化次序并不难，只需要记住这三点就可以了：  
 1. 依赖包按 “深度优先” 的次序进行初始化；  

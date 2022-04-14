@@ -9,9 +9,15 @@ go run main.go
 
 复杂项目下 Go 程序的编译是怎样的呢？
 ```bash
+# go mod init 初始化 go.mod 文件，一般建新项目时才会用这个命令
 go mod init project
-# 自动添加依赖
+# 获取源码包
+go get github.com/ethereum/go-ethereum
+go get github.com/ethereum/go-ethereum@v1.10.1
+# 自动添加依赖，go mod tidy 整理现有依赖，修改 go.mod 文件后执行会更新依赖
 go mod tidy
+# go mod graph 查看现有的依赖结构
+# go mod vendor 导出项目所有依赖到 vendor 目录 （不建议使用）
 go build main.go
 ```
 
@@ -63,4 +69,22 @@ demo
 │   ├── batch
 └── vendor
 ```
+
+### Go 编码规范
+[常用编码规范](https://github.com/kevinyan815/gocookbook/issues/61)  
+
+**注释**  
+单行注释也称为行注释，格式为以双斜杠（“//”）开头的一行，可以添加在代码的任何位置。  
+多行注释也称为块注释，格式为以“/”开头，以“/”结束的一行或多行。  
+```go
+// 单行注释
+/*
+多行注释第一行
+
+多行注释第三行
+多行注释第四行
+多行注释第五行
+ */
+```
+
 
