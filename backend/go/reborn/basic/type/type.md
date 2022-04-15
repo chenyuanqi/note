@@ -185,7 +185,21 @@ var a MyInt = n // ok
 ```
 
 ### Go 类型转换
+在某些特定的场景下，我们需要对数据进行类型转换才能继续后面的逻辑（如某个函数需要 float64 类型参数，需要将现有 int64 类型值传入其中时）。在 Go 语言中，进行类型转换有两个要注意的地方，分别是：
+- 只能进行相同类别的转换，如将 int32 转换为 int64。不同类别的转换将引发编译时错误，如将 bool 转换为 string；
+- 若将取值范围较大的类型转换为取值范围较小的类型，且实际值超过取值范围较小的类型时，将发生精度丢失的情况。
 ```go
 // 显式转换
 var b = int32(13)
+
+//声明float32型变量exampleFloat32并赋值
+var exampleFloat32 float32 = 150.25
+//将exampleFloat32转换为float64类型，并将结果赋值给exampleFloat64
+exampleFloat64 := float64(exampleFloat32)
+//输出exampleFloat64的类型和值
+fmt.Println(reflect.TypeOf(exampleFloat64), exampleFloat64) // float64 150.25
+//将exampleFloat32转换为int32类型，exampleInt32
+exampleInt32 := int32(exampleFloat32)
+//输出exampleInt32的类型和值
+fmt.Println(reflect.TypeOf(exampleInt32), exampleInt32) // int32 150
 ```
