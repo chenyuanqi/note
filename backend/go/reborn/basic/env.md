@@ -49,6 +49,8 @@ brew upgrade go
 环境变量（environment variables）一般是指在操作系统中用来指定操作系统运行环境的一些参数，如：临时文件夹位置和系统文件夹位置等。环境变量是在操作系统中一个具有特定名字的对象，它包含了一个或者多个应用程序所将使用到的信息。  
 ```bash
 sudo vi ~/.zshrc
+# 开启 gomod 管理包
+export GO111MODULE=on
 # GOPATH用于指定我们的开发工作区，是存放源代码、测试文件、库静态文件、可执行文件的目录
 export GOPATH=$HOME/golang
 # GOROOT表示 Go 语言的安装目录，当系统中存在多个版本的Go SDK时，通过设置这个环境变量，可方便我们在不同的Go SDK版本之间切换
