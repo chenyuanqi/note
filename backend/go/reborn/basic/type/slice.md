@@ -21,6 +21,11 @@ nums := []int{1, 2, 3}
 ```go
 // 切片名称 := make([]数据类型，长度，容量)
 nums := make([]int, 2, 5)
+
+// 三种初始化切片的方式
+arr[0:3] or slice[0:3]
+slice := []int{1, 2, 3}
+slice := make([]int, 10)
 ```
 
 **操作具体元素**  
