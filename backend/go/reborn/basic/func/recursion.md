@@ -45,9 +45,21 @@ func Factorial(n uint64) (result uint64) {
     return 1
 }
 func main() {
-    var i int = 10
+    var i int = 5
     fmt.Printf("%d 的阶乘是 %d\n", i, Factorial(uint64(i)))
 }
+// 递归的过程
+// 5 * Factorial(4)
+// 5 * (4 * Factorial(3))
+// 5 * (4 * (3 * Factorial(2)))
+// 5 * (4 * (3 * (2 * Factorial(1))))
+// 5 * (4 * (3 * (2 * (1 * Factorial(0)))))
+// 5 * (4 * (3 * (2 * (1 * 1))))
+// 5 * (4 * (3 * (2 * 1)))
+// 5 * (4 * (3 * 2))
+// 5 * (4 * 6)
+// 5 * 24
+// 120
 ```
 
 **多个函数组成递归**  
