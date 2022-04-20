@@ -20,7 +20,9 @@ Go 语言可以通过自定义的方式形成新的类型，结构体就是这�
 - 字段的类型也可以是结构体，甚至是字段所在结构体的类型。
 
 使用关键字 type 可以将各种基本类型定义为自定义类型，基本类型包括整型、字符串、布尔等。结构体是一种复合的基本类型，通过 type 定义为自定义类型后，使结构体更便于使用。  
-`结构体的定义只是一种内存布局的描述，只有当结构体实例化时，才会真正地分配内存。`
+`结构体的定义只是一种内存布局的描述，只有当结构体实例化时，才会真正地分配内存。`  
+- 使用 struct  关键字定义  
+- struct 关键字后必须紧跟 “{”，即在同一行
 ```go
 // 结构体的定义格式
 type 类型名 struct {
@@ -38,6 +40,10 @@ type Point struct {
 type Color struct {
     R, G, B byte
 }
+// 如果想把结构体中的字段写在一行，需要使用"英文分号"相隔，为了代码的结构清晰，这种一般不使用
+type OneLine struct{Name string; Age, Weight int}
+// 结构体中也可以不定义任何字段，即空结构体
+type EmptyStruct struct {}
 ```
 
 **实例化结构体——为结构体分配内存并初始化**  
@@ -52,12 +58,14 @@ type Point struct {
     Y int
 }
 var p Point
-// 使用.来访问结构体的成员变量
+// 访问字段，使用.来访问结构体的成员变量
+fmt.Println(p.X)
+// 设置字段
 p.X = 10
 p.Y = 20
 ```
 
-Go语言中，还可以使用 new 关键字对类型（包括结构体、整型、浮点数、字符串等）进行实例化，结构体在实例化后会形成指针类型的结构体。  
+Go 语言中，还可以使用 new 关键字对类型（包括结构体、整型、浮点数、字符串等）进行实例化，结构体在实例化后会形成指针类型的结构体。  
 创建指针类型的结构体格式：ins := new(T)。其中，T 为类型，可以是结构体、整型、字符串等；ins：T 类型被实例化后保存到 ins 变量中，ins 的类型为 *T，属于指针。
 ```go
 type Player struct{
@@ -65,6 +73,7 @@ type Player struct{
     HealthPoint int
     MagicPoint int
 }
+// 当初始化一个指针变量时，可以使用 “&” 符号，也可以使用 new 函数
 tank := new(Player)
 // 经过 new 实例化的结构体实例在成员赋值上与基本实例化的写法一致
 // 访问结构体指针的成员变量时可以继续使用.，这是因为Go语言为了方便开发者访问结构体指针的成员变量，使用了语法糖（Syntactic sugar）技术，将 ins.Name 形式转换为 (*ins).Name
@@ -121,6 +130,7 @@ type People struct {
     name  string
     child *People
 }
+// 带字段名称
 relation := &People{
     name: "爷爷",
     // 结构体成员中只能包含结构体的指针类型，包含非指针类型会引起编译错误
@@ -131,6 +141,23 @@ relation := &People{
         },
     },
 }
+// 不带字段名称
+relation := &People{
+    "爷爷",
+    // 结构体成员中只能包含结构体的指针类型，包含非指针类型会引起编译错误
+    &People{
+        name: "爸爸",
+        child: &People{
+                name: "我",
+        },
+    },
+}
+
+// 访问嵌套结构体 - 访问带字段名称
+relation.child.name
+// 访问不带字段名称
+relation.name
+relation.child.name // 当被嵌入结构体与父级结构体字段名称相同时，编译器是可以通过的；但是名字相同时，必须带上结构体名称
 ```
 
 使用多个值的列表初始化结构体  
@@ -204,6 +231,30 @@ func main() {
     }
     printMsgType(msg) // *struct { id int; data string }
 }
+
+// 嵌套结构体时，也可以使用匿名结构体
+type AnoStudent struct {
+    People struct {
+        Name string
+        Age  int
+    }
+    Collect string
+}
+```
+
+结构体标签  
+在定义结构体时，可以给字段写上标签，通过标签对结构体进行自定义处理。使用反引号包裹标签，标签的规则要看处理方法或函数是如何定义的。
+```go
+type Tag struct {
+    Name string `json:"name"`
+}
+
+t := Tag{"tag"}
+b, _ := json.Marshal(t)
+fmt.Println(string(b))
+
+// 输出
+{"name":"tag"}
 ```
 
 **构造函数**  
@@ -254,6 +305,11 @@ func NewBlackCat(color string) *BlackCat {
 
 **结构体方法**  
 在 Go 语言中，方法和函数的定义格式非常像。由于方法和对象存在紧密的关系，因此在定义的格式上需要接收器。接收器变量和接收器类型共同构成了接收器；参数列表是可选的；返回参数也是可选的。  
+`方法的名称在类型的所有方法名称和所有字段名称中必须是唯一的。就算相同的名称一个是字段一个是方法名也是不可以的。`  
+
+方法可见性控制  
+方法名大写字母开头公有，小写字母开头私有。如果方法所在的包和调用者不是同一个，那私有方法是不能被调用的，只能调用公有方法。  
+私有方法只能在同一个包内被调用。  
 ```go
 // 结构体方法格式
 func (接收器变量 接收器类型) 方法名(参数列表) (返回参数) {
@@ -275,8 +331,22 @@ fatShibaInu := &Dog{
    Gender: 0,
 }
 fmt.Println(fatShibaInu.GetGender()) // 公
+
+// 不管自定义的类型是基于内置类型还是结构体，都可以携带方法
+// 内置类型
+type Num int
+func (n Num) String() string {
+    return fmt.Sprintf("%d", n)
+}
+// 尝试调用
+var n Num
+n.String()
 ```
 为对象定义方法时，需要注意接收器的类型。使用指针与否，将决定了是否对原始变量产生影响。上面使用了*Dog，即指针类型，在方法中对该类型变量（d变量）的任何影响都将影响原始变量（fatShibaInu）；反之，若使用Dog类型，则不会影响。其原因是当不使用指针类型变量时，方法中的接收器变量实际上是对原始数据的“拷贝”，所做出的改变也仅仅会作用于这份“拷贝”的数据上，并不会影响到原始数据。  
+- 带星号的称为：指针接收者
+- 不带星号的称为：值接收者
+- 有一种特殊情况就是自定义的类型本身就是引用类型，就算接收者类型声明中带不带” 星号 “它也属于指针接收者
+- 在调用方法时，不管是值接收者还是指针接收者，调用时的变量类型是否是指针是不影响的；至于为什么？当编译器发现调用的变量类型和接收者的类型不相同时，也就是一个是指针一个不是，这个时候就会自动转化；即接收者的值被方法修改时结果会不会改变，和调用变量的类型没关系
 ```go
 func (d *Dog) GrowUp() {
    d.Age++
@@ -294,6 +364,13 @@ func main() {
 
    fatShibaInu.GrowUp2()
    fmt.Println(fatShibaInu) // &{Shiba Inu 3 12 0}
+}
+
+// 自定义的类型本身就是引用类型
+type M map[string]string
+// 指针接收者的方法
+func (m M) SetKey(key, val string) {
+    (m)[key] = val
 }
 ```
 
