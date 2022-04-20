@@ -53,6 +53,8 @@ sudo vi ~/.zshrc
 export GO111MODULE=on
 # GOPATH用于指定我们的开发工作区，是存放源代码、测试文件、库静态文件、可执行文件的目录
 export GOPATH=$HOME/golang
+# 设置多个GOPATH
+export GOPATH="/home/www/gopath1:/home/www/gopath2"
 # GOROOT表示 Go 语言的安装目录，当系统中存在多个版本的Go SDK时，通过设置这个环境变量，可方便我们在不同的Go SDK版本之间切换
 export GOROOT=$HOME/go1_17
 # 追加 path
