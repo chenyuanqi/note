@@ -4,6 +4,12 @@
 Go 语言中使用组合实现对象特性的描述。对象的内部使用结构体内嵌组合对象应该具有的特性，对外通过接口暴露能使用的特性。  
 Go 语言的接口设计是非侵入式的，接口编写者无须知道接口被哪些类型实现。而接口实现者只需知道实现的是什么样子的接口，但无须指明实现哪一个接口。编译器知道最终编译时使用哪个类型实现哪个接口，或者接口应该由谁来实现。  
 
+使用接口的目的是什么？概括地说有两点：  
+一是规范某个对象的行为，使其受控；  
+二是接口的使用者和实现者各司其职，互不干涉。  
+
+一般来说，接口分为两个步骤来准备，首先是定义（行为规范），然后是相关对象的实现（具体的操作），准备好后便可在后续的代码中使用接口了。
+
 **接口声明（定义）**  
 Go语言里有非常灵活的接口概念，通过它可以实现很多面向对象的特性。很多面向对象的语言都有相似的接口概念，但Go语言中接口类型的独特之处在于它是满足隐式实现的。也就是说，我们没有必要对于给定的具体类型定义所有满足的接口类型；简单地拥有一些必需的方法就足够了。  
 这种设计可以让你创建一个新的接口类型满足已经存在的具体类型却不会去改变这些类型的定义；当我们使用的类型来自于不受我们控制的包时这种设计尤其有用。  
@@ -35,6 +41,14 @@ type Stringer interface {
 ```
 
 **实现接口的条件**   
+接口的实现，实际上就是指实现具体的行为，比如从缓存中加载或从网络上下载图片的具体方法。
+```go
+// 实现接口的格式
+func (struct_variable struct_name) function_name([params]) [return_values] {
+   // 方法实现 
+}
+```
+
 如果一个任意类型 T 的方法集为一个接口类型的方法集的超集，则我们说类型 T 实现了此接口类型。T 可以是一个非接口类型，也可以是一个接口类型。  
 实现关系在 Go 语言中是隐式的。两个类型之间的实现关系不需要在代码中显式地表示出来。Go 语言中没有类似于 implements 的关键字。 Go 编译器将自动在需要的时候检查两个类型之间的实现关系。  
 接口定义后，需要实现接口，调用方才能正确编译通过并使用接口。接口的实现需要遵循两条规则才能让接口可用。  
@@ -87,6 +101,48 @@ func (d *file) WriteDataX(data interface{}) error {}
 // 未实现 DataWriter 的理由变为（错误的 WriteData() 方法类型）发现 WriteData(int)error，期望 WriteData(interface{})error
 func (d *file) WriteData(data int) error {}
 ```
+
+**接口的调用**  
+编写作用于*fileCache的接口实现，继续定义负责从网络下载图片的结构体以及作用于该结构体的接口实现。  
+定义一个 ImageDownloader 类型的变量，然后通过 new(fileCache) 函数为其赋值，随后便可通过这个变量调用从缓存中加载图片的方法。  
+```go
+// ImageDownloader 图片加载接口
+type ImageDownloader interface {
+	// FetchImage 获取图片，需要传入图片地址，方法返回图片数据
+	FetchImage(url string) string
+}
+
+type fileCache struct {
+}
+//FetchImage接口实现
+func (f *fileCache) FetchImage(url string) string {
+	return "从本地缓存中获取图片：" + url
+}
+
+//定义从网络下载图片的结构体
+type netFetch struct {
+}
+//FetchImage接口实现
+func (n *netFetch) FetchImage(url string) string {
+	return "从网络下载图片：" + url
+}
+
+func main() {
+	//从本地缓存中获取数据
+	var imageLoader ImageDownloader
+	imageLoader = new(fileCache)
+	data := imageLoader.FetchImage("https://www.example.com/a.png")
+	fmt.Println(data)
+	if data == "" {
+		// 当本地缓存中没有数据时，从网络下载
+		var imageLoader2 ImageDownloader
+		imageLoader2 = new(netFetch)
+		data2 := imageLoader2.FetchImage("https://www.example.com/a.png")
+		fmt.Println(data2)
+	}
+}
+```
+
 
 **类型与接口的关系**  
 在 Go 语言中类型和接口之间有一对多和多对一的关系。  
@@ -164,7 +220,158 @@ s.Log(“hello”)
 ```
 
 **接口嵌套组合**  
+在 Go 语言中，不仅结构体与结构体之间可以嵌套，接口与接口间也可以通过嵌套创造出新的接口。  
+一个接口可以包含一个或多个其他的接口，这相当于直接将这些内嵌接口的方法列举在外层接口中一样。只要接口的所有方法被实现，则这个接口中的所有嵌套接口的方法均可以被调用。  
 
+系统包中的接口嵌套组合  
+Go 语言的 io 包中定义了写入器（Writer）、关闭器（Closer）和写入关闭器（WriteCloser）3 个接口。
+```go
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+type Closer interface {
+    Close() error
+}
+type WriteCloser interface {
+    Writer
+    Closer
+}
+```
 
+在代码中使用接口嵌套组合  
+在代码中使用 io.Writer、io.Closer 和 io.WriteCloser 这 3 个接口时，只需要按照接口实现的规则实现 io.Writer 接口和 io.Closer 接口即可。而 io.WriteCloser 接口在使用时，编译器会根据接口的实现者确认它们是否同时实现了 io.Writer 和 io.Closer 接口。  
+```go
+package main
+import (
+    "io"
+)
+// 声明一个设备结构
+type device struct {
+}
+// 实现io.Writer的Write()方法
+func (d *device) Write(p []byte) (n int, err error) {
+    return 0, nil
+}
+// 实现io.Closer的Close()方法
+func (d *device) Close() error {
+    return nil
+}
+func main() {
+    // 声明写入关闭器, 并赋予device的实例
+    var wc io.WriteCloser = new(device)
+    // 写入数据
+    wc.Write(nil)
+    // 关闭设备
+    wc.Close()
+    // 声明写入器, 并赋予device的新实例
+    var writeOnly io.Writer = new(device)
+    // 写入数据
+    writeOnly.Write(nil)
+}
+```
 
+**接口和类型之间的转换**  
+Go 语言中使用接口断言（type assertions）将接口转换成另外一个接口，也可以将接口转换为另外的类型。接口的转换在开发中非常常见，使用也非常频繁。
 
+类型断言的格式  
+类型断言是一个使用在接口值上的操作。语法上它看起来像 i.(T) 被称为断言类型，这里 i 表示一个接口的类型和 T 表示一个类型。一个类型断言检查它操作对象的动态类型是否和断言的类型匹配。  
+类型断言的基本格式如下：t := i.(T)。其中，i 代表接口变量，T 代表转换的目标类型，t 代表转换后的变量。  
+
+这里有两种可能。第一种，如果断言的类型 T 是一个具体类型，然后类型断言检查 i 的动态类型是否和 T 相同。如果这个检查成功了，类型断言的结果是 i 的动态值，当然它的类型是 T。换句话说，具体类型的类型断言从它的操作对象中获得具体的值。如果检查失败，接下来这个操作会抛出 panic。
+```go
+var w io.Writer
+w = os.Stdout
+f := w.(*os.File) // 成功: f == os.Stdout
+c := w.(*bytes.Buffer) // 死机：接口保存*os.file，而不是*bytes.buffer
+```
+第二种，如果相反断言的类型 T 是一个接口类型，然后类型断言检查是否 i 的动态类型满足 T。如果这个检查成功了，动态值没有获取到；这个结果仍然是一个有相同类型和值部分的接口值，但是结果有类型 T。换句话说，对一个接口类型的类型断言改变了类型的表述方式，改变了可以获取的方法集合（通常更大），但是它保护了接口值内部的动态类型和值的部分。
+```go
+// 第一个类型断言后，w 和 rw 都持有 os.Stdout 因此它们每个有一个动态类型 *os.File，但是变量 w 是一个 io.Writer 类型只对外公开出文件的 Write 方法，然而 rw 变量也只公开它的 Read 方法
+var w io.Writer
+w = os.Stdout
+rw := w.(io.ReadWriter) // 成功：*os.file具有读写功能
+w = new(ByteCounter)
+rw = w.(io.ReadWriter) // 死机：*字节计数器没有读取方法
+
+//  i 没有完全实现 T 接口的方法，这个语句将会触发宕机。触发宕机不是很友好，换成这样
+t,ok := i.(T)
+```
+如果断言操作的对象是一个 nil 接口值，那么不论被断言的类型是什么这个类型断言都会失败。几乎不需要对一个更少限制性的接口类型（更少的方法集合）做断言，因为它表现的就像赋值操作一样，除了对于 nil 接口值的情况。
+
+将接口转换为其他接口  
+实现某个接口的类型同时实现了另外一个接口，此时可以在两个接口间转换。
+```go
+package main
+import "fmt"
+// 定义飞行动物接口
+type Flyer interface {
+    Fly()
+}
+// 定义行走动物接口
+type Walker interface {
+    Walk()
+}
+// 定义鸟类
+type bird struct {
+}
+// 实现飞行动物接口
+func (b *bird) Fly() {
+    fmt.Println("bird: fly")
+}
+// 为鸟添加Walk()方法, 实现行走动物接口
+func (b *bird) Walk() {
+    fmt.Println("bird: walk")
+}
+// 定义猪
+type pig struct {
+}
+// 为猪添加Walk()方法, 实现行走动物接口
+func (p *pig) Walk() {
+    fmt.Println("pig: walk")
+}
+func main() {
+// 创建动物的名字到实例的映射
+    animals := map[string]interface{}{
+        "bird": new(bird),
+        "pig":  new(pig),
+    }
+    // 遍历映射
+    for name, obj := range animals {
+        // 判断对象是否为飞行动物
+        f, isFlyer := obj.(Flyer)
+        // 判断对象是否为行走动物
+        w, isWalker := obj.(Walker)
+        fmt.Printf("name: %s isFlyer: %v isWalker: %v\n", name, isFlyer, isWalker)
+        // 如果是飞行动物则调用飞行动物接口
+        if isFlyer {
+            f.Fly()
+        }
+        // 如果是行走动物则调用行走动物接口
+        if isWalker {
+            w.Walk()
+        }
+    }
+}
+// name: pig isFlyer: false isWalker: true
+// pig: walk
+// name: bird isFlyer: true isWalker: true
+// bird: fly
+// bird: walk
+```
+
+将接口转换为其他类型  
+将接口转换为普通的指针类型，例如将 Walker 接口转换为 *pig 类型。
+```go
+p1 := new(pig)
+var a Walker = p1
+p2 := a.(*pig)
+fmt.Printf("p1=%p p2=%p", p1, p2)
+
+// 如果尝试将上面这段代码中的 Walker 类型的 a 转换为 *bird 类型，将会发出运行时错误
+p1 := new(pig)
+var a Walker = p1
+p2 := a.(*bird)
+// panic: interface conversion: main.Walker is *main.pig, not *main.bird 即main.Walker 接口的内部保存的是 *main.pig，而不是 *main.bird
+```
+接口在转换为其他类型时，接口内保存的实例对应的类型指针，必须是要转换的对应的类型指针。  
+接口断言类似于流程控制中的 if。但大量类型断言出现时，应使用更为高效的类型分支 switch 特性。  
