@@ -23,6 +23,7 @@ var i interface{} = a
 // 声明b变量, 尝试赋值i
 var b int = i // cannot use i (type interface {}) as type int in assignment: need type assertion 不能将 i 变量视为 int 类型赋值给 b，编译器提示我们得使用 type assertion，意思就是类型断言
 
+// 空接口取值
 // 修改后，代码可以编译通过，并且 b 可以获得 i 变量保存的 a 变量的值：1
 var b int = i.(int)
 ```
@@ -38,10 +39,18 @@ var a interface{} = 100
 var b interface{} = "hi"
 // 两个空接口不相等
 fmt.Println(a == b) // false
+
+var a interface{} = 10
+var b interface{} = "10"
+fmt.Println(a == b) // false
 ```
 2) 不能比较空接口中的动态值  
-当接口中保存有动态类型的值时，运行时将触发错误。  
+当接口中保存有动态类型的值时，运行时将触发错误。比如 Map 和 Slice，强行比较会引发如上宕机错误。  
 ```go
+var a interface{} = [5]int{1, 2, 3, 4, 5}
+var b interface{} = [5]int{1, 2, 3, 4, 5}
+fmt.Println(a == b) // true
+
 // c保存包含10的整型切片
 var c interface{} = []int{10}
 // d保存包含20的整型切片

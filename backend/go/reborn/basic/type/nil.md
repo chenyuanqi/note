@@ -2,11 +2,15 @@
 ### Go nil
 在 Go 语言中，布尔类型的零值（初始值）为 false，数值类型的零值为 0，字符串类型的零值为空字符串 ""，而指针、切片、映射、通道、函数和接口的零值则是 nil。
 
-nil 是 Go 语言中一个预定义好的标识符，有过其他编程语言开发经验的开发者也许会把 nil 看作其他语言中的 null（NULL），其实这并不是完全正确的，因为 Go 语言中的 nil 和其他语言中的 null 有很多不同点。
+nil 是 Go 语言中一个预定义好的标识符，有过其他编程语言开发经验的开发者也许会把 nil 看作其他语言中的 null（NULL），其实这并不是完全正确的，因为 Go 语言中的 nil 和其他语言中的 null 有很多不同点。  
+nil 是一个特殊的值，它只能赋值给指针类型和接口类型。  
 
 **nil 标识符是不能比较的**  
 == 对于 nil 来说是一种未定义的操作。  
 ```go
+var a interface{} = nil
+fmt.Println(a == nil) // true
+
 fmt.Println(nil==nil) // invalid operation: nil == nil (operator == not defined on nil)
 
 // 不同类型的 nil 是不能比较的
@@ -22,6 +26,47 @@ fmt.Printf(s1 == s2) // invalid operation: s1 == s2 (slice can only be compared 
 // 可以，不可比较类型的空值直接与 nil 标识符进行比较
 var s1 []int
 fmt.Println(s1 == nil) // true
+```
+
+将一个带有类型的 nil 赋值给接口时，只有值为 nil，而类型不为 nil。此时，接口与 nil 判断将不相等。  
+```go
+type Person struct {
+   name   string
+   age    int
+   gender int
+}
+type SayHello interface {
+   sayHello()
+}
+func (p *Person) sayHello() {
+   fmt.Println("Hello!")
+}
+func getSayHello() SayHello {
+   var p *Person = nil
+   return p
+}
+func main() {
+   var person = new(Person)
+   person.name = "David"
+   person.age = 18
+   person.gender = 0
+   var sayHello SayHello
+   sayHello = person
+   fmt.Println(reflect.TypeOf(sayHello)) // *main.Person
+   fmt.Println(sayHello == nil) // false
+   fmt.Println(getSayHello() == nil) // false
+}
+
+// 不妨在 getSayHello () 函数值做些特殊处理。当函数体中的 p 变量为 nil 时，直接返回 nil 即可
+func getSayHello() SayHello {
+   var p *Person = nil
+   if p == nil {
+      return nil
+   } else {
+      return p
+   }
+}
+fmt.Println(getSayHello() == nil) // true
 ```
 
 **nil 不是关键字或保留字**  
