@@ -256,3 +256,19 @@ exampleInt32 := int32(exampleFloat32)
 fmt.Println(reflect.TypeOf(exampleInt32), exampleInt32) // int32 150
 ```
 
+通过包 strconv 的 Itoa 函数可以把一个 int 类型转为 string，Atoi 函数则用来把 string 转为 int。
+```go
+i2s:=strconv.Itoa(i)
+s2i,err:=strconv.Atoi(i2s)
+fmt.Println(i2s,s2i,err)
+```
+
+对于浮点数、布尔型，Go 语言提供了 strconv.ParseFloat、strconv.ParseBool、strconv.FormatFloat 和 strconv.FormatBool 进行互转。
+
+对于数字类型之间，可以通过强制转换的方式。
+```go
+i2f:=float64(i)
+f2i:=int(f64)
+fmt.Println(i2f,f2i)
+```
+
