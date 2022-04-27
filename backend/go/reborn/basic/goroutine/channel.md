@@ -18,3 +18,18 @@ cs := make(chan string)
 cf := make(chan interface{})
 ```
 
+无缓冲 channel，它的容量是 0，不能存储任何数据。所以无缓冲 channel 只起到传输数据的作用，数据并不会在 channel 中做任何停留。这也意味着，无缓冲 channel 的发送和接收操作是同时进行的，它也可以称为同步 channel。  
+有缓冲 channel 类似一个可阻塞的队列，内部的元素先进先出。通过 make 函数的第二个参数可以指定 channel 容量的大小，进而创建一个有缓冲 channel。  
+
+channel 还可以使用内置函数 close 关闭，代码：close(cacheCh)。如果一个 channel 被关闭了，就不能向里面发送数据了，如果发送的话，会引起 painc 异常。但是还可以接收 channel 里的数据，如果 channel 里没有数据的话，接收的数据是元素类型的零值。  
+通过内置函数 cap 可以获取 channel 的容量，也就是最大能存放多少个元素，通过内置函数 len 可以获取 channel 中元素的个数。  
+`小提示：无缓冲 channel 其实就是一个容量大小为 0 的 channel。比如 make(chan int,0)。`
+
+我们有一些特殊的业务需求，比如限制一个 channel 只可以接收但是不能发送，或者限制一个 channel 只能发送但不能接收，这种 channel 称为单向 channel。  
+单向 channel 的声明也很简单，只需要在声明的时候带上 <- 操作符即可，如下面的代码所示：
+```go
+onlySend := make(chan<- int)
+onlyReceive:=make(<-chan int)
+```
+`注意，声明单向 channel <- 操作符的位置和上面讲到的发送和接收操作是一样的。`  
+在函数或者方法的参数中，使用单向 channel 的较多，这样可以防止一些操作影响了 channel。

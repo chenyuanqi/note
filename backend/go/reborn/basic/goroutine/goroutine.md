@@ -11,8 +11,11 @@
 
 Goroutine 是 Go 语言中的协程，其它语言称为的协程字面上叫 Coroutine，简单理解下就是比线程更轻量的一个玩意。说白了，就是可以异步执行函数。
 - routine 英 [ru:ˈti:n] 美 [ruˈtin] n. [计算机] 程序
+- goroutine 和 coroutine 的概念和运行机制都是脱胎于早期的操作系统；goroutine 间使用 channel 通信，coroutine 使用 yield 和 resume 操作
+- goroutines 意味着并行（或者可以以并行的方式部署），coroutines 一般来说不是这样的，goroutines 通过通道来通信；coroutines 通过让出和恢复操作来通信，goroutines 比 coroutines 更强大，也很容易从 coroutines 的逻辑复用到 goroutines  
 
-当启动 main 入口函数时，后台就自动跑了一个 main Goroutine，
+当启动 main 入口函数时，后台就自动跑了一个 main Goroutine，  
+`所以，一个 goroutine 内也可以使用 goroutine。`
 ```go
 package main
 func  main() {
