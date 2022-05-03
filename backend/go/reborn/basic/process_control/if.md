@@ -34,3 +34,20 @@ if err := fun1(); err != nil {
     panic(err)
 }
 ```
+
+### 三元运算
+go 没有这样的三元运算 expr ? x : y，但是可以这样：  
+```go
+if expr {
+    res = x
+} else {
+    res = y
+}
+
+func Min(x, y int) int {
+    if x <= y {
+        return x
+    }
+    return y
+}
+```
