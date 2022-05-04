@@ -121,6 +121,38 @@ func main() {
 // main
 ```
 
+**给其它任务 “让行” Vs 终止自身协程**  
+在程序运行中，某些特定的情况下需要暂停当前协程，让其它协程任务先执行。
+```go
+func main() {
+   go fmt.Println("Hello World")
+   runtime.Gosched() // 使主线程中的任务让出资源，优先执行上面协程输出文本
+   fmt.Println("程序运行结束")
+   // Hello World
+   // 程序运行结束
+}
+```
+
+在某些条件下，我们还希望立即停止协程任务的执行。方法便是使用调用 runtime.Goexit () 函数。
+```go
+func main() {
+    syncWait.Add(1)
+    go testFunc()
+    syncWait.Wait()
+    fmt.Println("程序运行结束")
+}
+
+func testFunc() {
+    defer syncWait.Done()
+    for i := 1; i < 100; i++ {
+        fmt.Println(i)
+        if i >= 5 {
+            runtime.Goexit()
+        }
+    }
+}
+```
+
 **控制并发数**  
 Go 语言中可以控制使用 CPU 的核心数量，从 Go1.5 版本开始，默认设置为 CPU 的总核心数。如果想自定义设置，使用如下函数：
 ```go
