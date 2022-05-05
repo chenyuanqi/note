@@ -69,6 +69,22 @@ func MysqlDemoCode() {
 		fmt.Println(id)
 	}
 
+	{ // 更新数据
+		stmt, err := db.Prepare("UPDAETE users SET username=? WHERE id=?")
+		if err != nil {
+			log.Fatal(err)
+		}
+		res, err := stmt.Exec("Dolly", 1)
+		if err != nil {
+			log.Fatal(err)
+		}
+		rowCnt, err := res.RowsAffected()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("ID = %d, affected = %d\n", lastId, rowCnt)
+	}
+
 	{ // 查询单个用户
 		var (
 			id        int
@@ -116,8 +132,31 @@ func MysqlDemoCode() {
 		fmt.Printf("%#v", users)
 	}
 
-	{
+	{ // 删除指定id记录
 		_, err := db.Exec(`DELETE FROM users WHERE id = ?`, 1)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	{ // 事务
+		tx, err := db.Begin()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer tx.Rollback()
+		stmt, err := tx.Prepare("INSERT INTO foo VALUES (?)")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer stmt.Close() // danger!
+		for i := 0; i < 10; i++ {
+			_, err = stmt.Exec(i)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		err = tx.Commit()
 		if err != nil {
 			log.Fatal(err)
 		}
