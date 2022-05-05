@@ -2,7 +2,8 @@
 ### database/sql
 Go 语言标准库中 database/sql 包，用于查询各种 SQL 数据库。它将所有通用 SQL 功能抽象到一个 API中供开发者使用。但是 Go 的标准库中不包括数据库驱动程序。数据库驱动程序由特定软件包提供的，用于实现特定数据库底层的封装。这对于向前兼容很有用，也使得 Go 不会变得臃肿。因为在创建所有 Go 软件包时，开发人员无法预见未来会有什么数据库会被投入使用，而且要支持每个可能的数据库将需要进行大量维护工作。  
 
-[更多可参考](http://go-database-sql.org/index.html)
+[更多可参考](http://go-database-sql.org/index.html)  
+[转中文文档](https://learnku.com/docs/go-database-sql)
 ```go
 import (
 	"database/sql"
