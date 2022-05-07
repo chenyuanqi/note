@@ -47,6 +47,13 @@ fmt.Println("b:", m["b"]) // b: 3
 // 初始化时也可以不指定键和值，这种情况和不指定容量的 make 函数是相同的
 m := map[string]int{}
 // 等价于 m := make(map[string]int)
+
+// nil 的 map 不可赋值
+var m map[string]float64
+m["pi"] = 3.1416 // panic: assignment to entry in nil map
+// 必须使用 make 初始化
+m := make(map[string]float64)
+m["pi"] = 3.1416
 ```
 当 map 增长到容量上限的时候，如果再增加新的 key-value，map 的大小会自动加 1，所以出于性能的考虑，对于大的 map 或者会快速扩张的 map，即使只是大概知道容量，也最好先标明。
 

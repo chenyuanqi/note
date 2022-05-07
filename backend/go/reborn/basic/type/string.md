@@ -31,6 +31,37 @@ type SliceHeader struct {
 ```go
 // 连接字符串
 "Ja" + "pan" // Japan
+// 高性能连接
+var b strings.Builder
+b.Grow(32)
+for i, p := range []int{2, 3, 5, 7, 11, 13} {
+    fmt.Fprintf(&b, "%d:%d, ", i+1, p)
+}
+s := b.String()   // no copying
+s = s[:b.Len()-2] // no copying (removes trailing ", ")
+fmt.Println(s) // 1:2, 2:3, 3:5, 4:7, 5:11, 6:13
+
+// 多行字符串
+const s = `First line
+Second line`
+fmt.Println(s)
+// First line
+// Second line
+// 或
+const s = "\tFirst line\n" +
+"Second line"
+fmt.Println(s)
+//    First line
+// Second line
+// 输出双引号
+fmt.Println("\"foo\"") // "foo"
+
+// 转义html
+const s = `"Foo's Bar" <foobar@example.com>`
+fmt.Println(html.EscapeString(s)) // &#34;Foo&#39;s Bar&#34; &lt;foobar@example.com&gt;
+// url编码
+const s = `Foo's Bar?`
+fmt.Println(url.PathEscape(s)) // Foo%27s%20Bar%3F
 
 // 等值比较
 "Japan" == "Japan" // true
@@ -76,6 +107,13 @@ strings.ToLower("Japan") // japan
 
 // 两端去除空格/指定字符
 strings.Trim("foo", "fo") // 
+// 去除两端空白符
+s := strings.TrimSpace("\t Goodbye hair!\n ")
+fmt.Printf("%q", s) // "Goodbye hair!"
+// 去除所有空白符
+space := regexp.MustCompile(`\s+`)
+s := space.ReplaceAllString("Hello  \t \n world!", " ")
+fmt.Printf("%q", s) // "Hello world!"
 
 // 切分
 strings.Fields(" a\t b\n") // ["a" "b"]
@@ -93,6 +131,48 @@ s := fmt.Sprintf("%.4f", math.Pi) // s == "3.1416"
 url.PathEscape("A B") // A%20B
 // html 实体化
 html.EscapeString("<>")
+
+// 字符串转浮点型
+f := "3.14159265"
+if s, err := strconv.ParseFloat(f, 32); err == nil {
+    fmt.Println(s) // 3.1415927410125732，精度问题
+}
+if s, err := strconv.ParseFloat(f, 64); err == nil {
+    fmt.Println(s) // 3.14159265
+}
+// 浮点型转字符串
+s := fmt.Sprintf("%f", 123.456) // s == "123.456000"
+
+// 整形转字符串
+s := strconv.Itoa(97) // s == "97"
+s := string(97) // s == "a"
+var n int64 = 97
+s := strconv.FormatInt(n, 10) // s == "97" (decimal)，十进制
+var n int64 = 97
+s := strconv.FormatInt(n, 16) // s == "61" (hexadecimal)，十六进制
+// 字符串转整形
+s := "97"
+if n, err := strconv.Atoi(s); err == nil {
+    fmt.Println(n+1) // 98
+} else {
+    fmt.Println(s, "is not an integer.")
+}
+// 转int64
+n, err := strconv.ParseInt(s, 10, 64)
+if err == nil {
+    fmt.Printf("%d of type %T", n, n) // 97 of type int64
+}
+var n int = 97
+m := int64(n) // safe
+// 格式化转换指定长度
+s := fmt.Sprintf("%+8d", 97) // s == "     +97" (width 8, right justify, always show sign)
+
+// 接口转字符串
+var x interface{} = "abc"
+str := fmt.Sprintf("%v", x)
+var x interface{} = []int{1, 2, 3}
+str := fmt.Sprintf("%v", x)
+fmt.Println(str) // "[1 2 3]"
 ```
 
 **拼接字符串**  

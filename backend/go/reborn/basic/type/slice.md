@@ -35,6 +35,12 @@ nums := []int{1, 2, 3}
 // 设置索引 1 的元素为 4
 nums[1] = 4
 fmt.Println(nums[1]) // 4
+
+// 读取最后一个元素
+a := []string{"A", "B", "C"}
+s := a[len(a)-1] // C
+// 移除最后一个元素
+a = a[:len(a)-1] // [A B]
 ```
 
 **迭代切片**  
@@ -136,6 +142,68 @@ fmt.Println(seq[:index], seq[index+1:]) // [a b] [d e]
 // 将删除点前后的元素连接起来
 seq = append(seq[:index], seq[index+1:]...)
 fmt.Println(seq) // [a b d e]
+```
+
+**切片清空**  
+```go
+// 移除所有元素
+a := []string{"A", "B", "C", "D", "E"}
+a = nil
+fmt.Println(a, len(a), cap(a)) // [] 0 0
+
+// 保留存储配置
+a := []string{"A", "B", "C", "D", "E"}
+a = a[:0]
+fmt.Println(a, len(a), cap(a)) // [] 0 5
+
+// 空切片和 nil
+var a []int = nil
+var a0 []int = make([]int, 0)
+fmt.Println(a == nil)  // true
+fmt.Println(a0 == nil) // false
+fmt.Printf("%#v\n", a)  // []int(nil)
+fmt.Printf("%#v\n", a0) // []int{}
+```
+
+**切片查找**  
+```go
+// 线性查找
+// Find returns the smallest index i at which x == a[i],
+// or len(a) if there is no such index.
+func Find(a []string, x string) int {
+    for i, n := range a {
+        if x == n {
+            return i
+        }
+    }
+    return len(a)
+}
+// Contains tells whether a contains x.
+func Contains(a []string, x string) bool {
+    for _, n := range a {
+        if x == n {
+            return true
+        }
+    }
+    return false
+}
+
+// 二分查找，切片必须升序排列
+// SearchType(a []Type, x Type) int 返回 x <= a[i] 最小索引值，不存在则返回插入排序后的索引有可能返回 len(a)
+a := []string{"A", "C", "C"}
+fmt.Println(sort.SearchStrings(a, "A")) // 0
+fmt.Println(sort.SearchStrings(a, "B")) // 1，为啥返回 1？不存在则插入 B 按升序排列的位置是 1
+fmt.Println(sort.SearchStrings(a, "C")) // 1
+fmt.Println(sort.SearchStrings(a, "D")) // 3
+// Search(n int, f func(int) bool) int 返回最小索引值，不存在返回 n
+x := "C"
+i := sort.Search(len(a), func(i int) bool { return x <= a[i] })
+if i < len(a) && a[i] == x {
+    fmt.Printf("Found %s at index %d in %v.\n", x, i, a)
+} else {
+    fmt.Printf("Did not find %s in %v.\n", x, a)
+}
+// Found C at index 1 in [A C C].
 ```
 
 **切片拷贝**  

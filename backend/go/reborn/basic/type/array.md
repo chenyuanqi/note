@@ -20,6 +20,16 @@ for i, v := range a {
 for _, v := range a {
     fmt.Printf("%d\n", v)
 }
+
+// 数组是非引用类型，在 func 中不可变
+func Foo(a [2]int) {
+    a[0] = 8
+}
+func main() {
+    a := [2]int{1, 2}
+    Foo(a)         // Try to change a[0].
+    fmt.Println(a) // Output: [1 2]
+}
 ```
 
 默认情况下，数组的每个元素都会被初始化为元素类型对应的零值，对于数字类型来说就是 0，同时也可以使用数组字面值语法，用一组值来初始化数组：  
