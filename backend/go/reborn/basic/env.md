@@ -21,10 +21,10 @@ go version
 
 # mac 多版本
 brew install go
-brew install go@1.15
+brew install go@1.17
 # 切换版本
 brew unlink go
-brew link go@1.15
+brew link go@1.17
 ```
 
 **Go 升级**
@@ -47,6 +47,21 @@ brew upgrade go
 
 ### Go 环境变量
 环境变量（environment variables）一般是指在操作系统中用来指定操作系统运行环境的一些参数，如：临时文件夹位置和系统文件夹位置等。环境变量是在操作系统中一个具有特定名字的对象，它包含了一个或者多个应用程序所将使用到的信息。  
+
+1). GO111MODULE  
+此变量为 Go modules 的开关，此值有以下几个可能：
+- auto：项目包含了 go.mod 文件的话启用 Go modules，目前在 Go1.11 至 Go1.15 中仍然是默认值。
+- on：启用 Go modules，推荐设置，将会是未来版本中的默认值。
+- off：禁用 Go modules，不推荐设置。
+
+因是在 Go1.11 版本添加，故命名为 GO111MODULE。未来 GO111MODULE 会先调整为默认值为 on（曾经在 Go1.13 想改为 on，并且已经合并了 PR，但最后因为种种原因改回了 auto），然后再把 GO111MODULE 这个变量去掉，目前猜测会在 Go 2。太早去掉 GO111MODULE 的支持，会存在兼容性问题。  
+
+2). GOPROXY  
+此变量用于设置 Go 模块代理（Go module proxy），其作用是拉取源码时能够脱离传统的 VCS 方式，直接通过镜像站点来快速拉取。  
+镜像的好处多多，一个是防止某个版本的代码被有意或无意删除。第二是能将源码压为 zip 包，方便传输。最重要的 —— 可以做镜像加速站点，这在例如国内这种不稳定的网络环境下尤为重要。  
+GOPROXY 的默认值是：https://proxy.golang.org,direct  
+proxy.golang.org 在国内是无法访问的，所以我们使用 Go modules 时，需设置国内的 Go 模块代理：go env -w GOPROXY=https://goproxy.cn,direct  
+
 ```bash
 sudo vi ~/.zshrc
 # 开启 gomod 管理包
