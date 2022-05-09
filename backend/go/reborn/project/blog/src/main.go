@@ -52,6 +52,22 @@ func initDB() {
 	checkError(err)
 }
 
+func createTables() {
+	createArticlesSQL := `CREATE TABLE IF NOT EXISTS articles(
+    id bigint(20) PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    title varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    content longtext COLLATE utf8mb4_unicode_ci
+); `
+	// Exec() 用于执行没有返回结果集的 SQL 语句，如 CREATE TABLE, INSERT, UPDATE, DELETE 等
+	_, err := db.Exec(createArticlesSQL)
+	// Exec() 方法的第一个返回值为一个实现了 sql.Result 接口的类型
+	// type Result interface {
+	// LastInsertId() (int64, error)    // 使用 INSERT 向数据插入记录，数据表有自增 id 时，该函数有返回值
+	// RowsAffected() (int64, error)    // 表示影响的数据表行数
+	// }
+	checkError(err)
+}
+
 func checkError(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -253,6 +269,8 @@ func removeTrailingSlash(next http.Handler) http.Handler {
 
 func main() {
 	initDB()
+	createTables()
+
 	// router := mux.NewRouter()
 	// .StrictSlash(true) 处理 url 尾部 /
 	// router := mux.NewRouter().StrictSlash(true)
