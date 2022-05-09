@@ -43,35 +43,50 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "访问文章列表~")
 }
 
-func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
-	// fmt.Fprint(w, "创建博文表单")
-
-	// 多行字符串使用 ``
-	html := `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>创建文章 —— 我的技术博客</title>
-</head>
-<body>
-    <form action="%s" method="post">
-        <p><input type="text" name="title"></p>
-        <p><textarea name="content" cols="30" rows="10"></textarea></p>
-        <p><button type="submit">提交</button></p>
-    </form>
-</body>
-</html>
-`
-	// 获取创建博文的链接，使用命名路由的好处是为 URL 修改提供了灵活性
-	storeURL, _ := router.Get("articles.store").URL()
-	fmt.Fprintf(w, html, storeURL)
-}
-
 // ArticlesFormData 创建博文表单数据，给模板文件传输变量
 type ArticlesFormData struct {
 	Title, Content string
 	URL            *url.URL
 	Errors         map[string]string
+}
+
+func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
+	// fmt.Fprint(w, "创建博文表单")
+
+	// 多行字符串使用 ``
+	/* html := `
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+	    <title>创建文章 —— 我的技术博客</title>
+	</head>
+	<body>
+	    <form action="%s" method="post">
+	        <p><input type="text" name="title"></p>
+	        <p><textarea name="content" cols="30" rows="10"></textarea></p>
+	        <p><button type="submit">提交</button></p>
+	    </form>
+	</body>
+	</html>
+	` */
+	// 获取创建博文的链接，使用命名路由的好处是为 URL 修改提供了灵活性
+	storeURL, _ := router.Get("articles.store").URL()
+	// fmt.Fprintf(w, html, storeURL)
+
+	data := ArticlesFormData{
+		Title:   "",
+		Content: "",
+		URL:     storeURL,
+		Errors:  nil,
+	}
+	// 加载模板文件
+	tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
+	if err != nil {
+		panic(err)
+	}
+	if err = tmpl.Execute(w, data); err != nil {
+		panic(err)
+	}
 }
 
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
@@ -126,28 +141,28 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "content 的长度为: %v <br>", len(content))
 	} else {
 		// fmt.Fprintf(w, "有错误发生，errors 的值为: %v <br>", errors)
-		html := `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>创建文章 —— 我的技术博客</title>
-    <style type="text/css">.error {color: red;}</style>
-</head>
-<body>
-    <form action="{{ .URL }}" method="post">
-        <p><input type="text" name="title" value="{{ .Title }}"></p>
-        {{ with .Errors.title }}
-        <p class="error">{{ . }}</p>
-        {{ end }}
-        <p><textarea name="content" cols="30" rows="10">{{ .Content }}</textarea></p>
-        {{ with .Errors.content }}
-        <p class="error">{{ . }}</p>
-        {{ end }}
-        <p><button type="submit">提交</button></p>
-    </form>
-</body>
-</html>
-`
+		/* html := `
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+		    <title>创建文章 —— 我的技术博客</title>
+		    <style type="text/css">.error {color: red;}</style>
+		</head>
+		<body>
+		    <form action="{{ .URL }}" method="post">
+		        <p><input type="text" name="title" value="{{ .Title }}"></p>
+		        {{ with .Errors.title }}
+		        <p class="error">{{ . }}</p>
+		        {{ end }}
+		        <p><textarea name="content" cols="30" rows="10">{{ .Content }}</textarea></p>
+		        {{ with .Errors.content }}
+		        <p class="error">{{ . }}</p>
+		        {{ end }}
+		        <p><button type="submit">提交</button></p>
+		    </form>
+		</body>
+		</html>
+		` */
 		// 通过路由参数生成 URL 路径
 		storeURL, _ := router.Get("articles.store").URL()
 		data := ArticlesFormData{
@@ -157,11 +172,14 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 			Errors:  errors,
 		}
 		// template.New() 包的初始化。html 变量里是包含模板语法的内容，模板语法以双层大括号 {{ }} 包起来
-		tmpl, err := template.New("create-form").Parse(html)
+		// tmpl, err := template.New("create-form").Parse(html)
+
+		// 使用模板文件
+		// 模板后缀名 .gohtml ，可以使用任意后缀名，这不会影响代码的运行；常见的 Go 模板后缀名有 .tmpl、.tpl、 .gohtml 等（推荐 .gohtml）
+		tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
 		if err != nil {
 			panic(err)
 		}
-		//  tmpl.Execute() 生成模板渲染
 		if err = tmpl.Execute(w, data); err != nil {
 			panic(err)
 		}
