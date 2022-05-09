@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -54,7 +56,7 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 <body>
     <form action="%s" method="post">
         <p><input type="text" name="title"></p>
-        <p><textarea name="body" cols="30" rows="10"></textarea></p>
+        <p><textarea name="content" cols="30" rows="10"></textarea></p>
         <p><button type="submit">提交</button></p>
     </form>
 </body>
@@ -63,6 +65,13 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	// 获取创建博文的链接，使用命名路由的好处是为 URL 修改提供了灵活性
 	storeURL, _ := router.Get("articles.store").URL()
 	fmt.Fprintf(w, html, storeURL)
+}
+
+// ArticlesFormData 创建博文表单数据，给模板文件传输变量
+type ArticlesFormData struct {
+	Title, Content string
+	URL            *url.URL
+	Errors         map[string]string
 }
 
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
@@ -86,10 +95,77 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "r.PostForm 中 title 的值为: %v <br>", r.PostFormValue("title"))
 	// 从 Form 中读取 title
 	fmt.Fprintf(w, "r.Form 中 title 的值为: %v <br>", r.FormValue("title"))
-	// POST PostForm: map[body:[content ] title:[title]]
-	// POST Form: map[body:[content ] title:[title]]
+	// POST PostForm: map[content:[content ] title:[title]]
+	// POST Form: map[content:[content ] title:[title]]
 	// title 的值为: titler.PostForm 中 title 的值为: title
 	// r.Form 中 title 的值为: title
+
+	// 表单验证
+	content := r.PostFormValue("content")
+	errors := make(map[string]string)
+	// 验证标题
+	// 注意：len() 由于 Go 语言的字符串都以 UTF-8 格式保存，每个中文占用 3 个字节
+	// 如果希望按习惯上的字符个数来计算，就需要使用 Go 语言中 utf8 包提供的 RuneCountInString () 函数来计数比如 utf8.RuneCountInString(title)
+	if title == "" {
+		errors["title"] = "标题不能为空"
+	} else if len(title) < 3 || len(title) > 40 {
+		errors["title"] = "标题长度需介于 3-40"
+	}
+	// 验证内容
+	if content == "" {
+		errors["content"] = "内容不能为空"
+	} else if len(content) < 10 {
+		errors["content"] = "内容长度需大于或等于 10 个字节"
+	}
+	// 检查是否有错误
+	if len(errors) == 0 {
+		fmt.Fprint(w, "验证通过!<br>")
+		fmt.Fprintf(w, "title 的值为: %v <br>", title)
+		fmt.Fprintf(w, "title 的长度为: %v <br>", len(title))
+		fmt.Fprintf(w, "content 的值为: %v <br>", content)
+		fmt.Fprintf(w, "content 的长度为: %v <br>", len(content))
+	} else {
+		// fmt.Fprintf(w, "有错误发生，errors 的值为: %v <br>", errors)
+		html := `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>创建文章 —— 我的技术博客</title>
+    <style type="text/css">.error {color: red;}</style>
+</head>
+<body>
+    <form action="{{ .URL }}" method="post">
+        <p><input type="text" name="title" value="{{ .Title }}"></p>
+        {{ with .Errors.title }}
+        <p class="error">{{ . }}</p>
+        {{ end }}
+        <p><textarea name="content" cols="30" rows="10">{{ .Content }}</textarea></p>
+        {{ with .Errors.content }}
+        <p class="error">{{ . }}</p>
+        {{ end }}
+        <p><button type="submit">提交</button></p>
+    </form>
+</body>
+</html>
+`
+		// 通过路由参数生成 URL 路径
+		storeURL, _ := router.Get("articles.store").URL()
+		data := ArticlesFormData{
+			Title:   title,
+			Content: content,
+			URL:     storeURL,
+			Errors:  errors,
+		}
+		// template.New() 包的初始化。html 变量里是包含模板语法的内容，模板语法以双层大括号 {{ }} 包起来
+		tmpl, err := template.New("create-form").Parse(html)
+		if err != nil {
+			panic(err)
+		}
+		//  tmpl.Execute() 生成模板渲染
+		if err = tmpl.Execute(w, data); err != nil {
+			panic(err)
+		}
+	}
 }
 
 func forceHTMLMiddleware(h http.Handler) http.Handler {
