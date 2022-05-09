@@ -43,6 +43,7 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 
 func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprint(w, "创建博文表单")
+
 	// 多行字符串使用 ``
 	html := `
 <!DOCTYPE html>
@@ -65,7 +66,30 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "创建新的文章~")
+	// fmt.Fprint(w, "创建新的文章~")
+
+	// 从请求中解析请求参数 r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		// 解析错误，这里应该有错误处理
+		fmt.Fprint(w, "请提供正确的数据！")
+		return
+	}
+
+	title := r.PostForm.Get("title")
+
+	// PostForm：存储了 post、put 参数，在使用之前需要调用 ParseForm 方法
+	fmt.Fprintf(w, "POST PostForm: %v <br>", r.PostForm)
+	// Form：存储了 post、put 和 get 参数，在使用之前需要调用 ParseForm 方法
+	fmt.Fprintf(w, "POST Form: %v <br>", r.Form)
+	// 从 PostForm 中读取 title
+	fmt.Fprintf(w, "title 的值为: %v", title)
+	fmt.Fprintf(w, "r.PostForm 中 title 的值为: %v <br>", r.PostFormValue("title"))
+	// 从 Form 中读取 title
+	fmt.Fprintf(w, "r.Form 中 title 的值为: %v <br>", r.FormValue("title"))
+	// POST PostForm: map[body:[content ] title:[title]]
+	// POST Form: map[body:[content ] title:[title]]
+	// title 的值为: titler.PostForm 中 title 的值为: title
+	// r.Form 中 title 的值为: title
 }
 
 func forceHTMLMiddleware(h http.Handler) http.Handler {
