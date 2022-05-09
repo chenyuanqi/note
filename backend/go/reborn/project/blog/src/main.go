@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -198,6 +199,17 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "title 的长度为: %v <br>", len(title))
 		fmt.Fprintf(w, "content 的值为: %v <br>", content)
 		fmt.Fprintf(w, "content 的长度为: %v <br>", len(content))
+
+		// 插入数据操作
+		lastInsertID, err := saveArticleToDB(title, content)
+		if lastInsertID > 0 {
+			// strconv.FormatInt() 方法来将类型为 int64 的 lastInsertID 转换为字符串，10 是十进制
+			fmt.Fprint(w, "插入成功，ID 为"+strconv.FormatInt(lastInsertID, 10))
+		} else {
+			checkError(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "500 服务器内部错误")
+		}
 	} else {
 		// fmt.Fprintf(w, "有错误发生，errors 的值为: %v <br>", errors)
 		/* html := `
@@ -243,6 +255,48 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 	}
+}
+
+func saveArticleToDB(title string, content string) (int64, error) {
+	// 变量初始化
+	var (
+		id   int64
+		err  error
+		rs   sql.Result
+		stmt *sql.Stmt
+	)
+
+	// 1. 获取一个 prepare 声明语句
+	// stmt 是 statement 的简写，是声明、陈述的意思。可以理解为将包含变量占位符 ? 的语句先告知 MySQL 服务器端
+	stmt, err = db.Prepare("INSERT INTO articles (title, content) VALUES(?,?)")
+	// 例行的错误检测
+	if err != nil {
+		return 0, err
+	}
+
+	// 2. 在此函数运行结束后关闭此语句，防止占用 SQL 连接
+	// stmt 是一个指针变量，会占用 SQL 连接
+	defer stmt.Close()
+
+	// 3. 执行请求，传参进入绑定的内容，stmt.Exec() 的参数依次对应 db.Prepare() 参数中 SQL 变量占位符 ?
+	rs, err = stmt.Exec(title, content)
+	// 返回值是一个 sql.Result 对象
+	// type Result interface {
+	// 	// 使用 INSERT 向数据插入记录，数据表有自增 ID 时，该函数有返回值
+	// 	LastInsertId() (int64, error)
+	// 	// 表示影响的数据表行数，常用于 UPDATE/DELETE 等 SQL 语句中
+	// 	RowsAffected() (int64, error)
+	// }
+	if err != nil {
+		return 0, err
+	}
+
+	// 4. 插入成功的话，会返回自增 ID
+	if id, err = rs.LastInsertId(); id > 0 {
+		return id, nil
+	}
+
+	return 0, err
 }
 
 func forceHTMLMiddleware(h http.Handler) http.Handler {
