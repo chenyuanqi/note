@@ -1,3 +1,4 @@
+{{- $postUrl := .URL -}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,9 @@
     <style type="text/css">.error {color: red;}</style>
 </head>
 <body>
-    <form action="{{ .URL }}" method="post">
+    <form action="{{- $postUrl -}}" method="post">
+        {{/* 这是一个注释 */}}
+        {{/* 更多可参考：https://learnku.com/courses/go-basic/1.17/template-syntax/11504， https://cloud.tencent.com/developer/article/1683688 */}}
         <p><input type="text" name="title" value="{{ .Title }}"></p>
         {{ with .Errors.title }}
         <p class="error">{{ . }}</p>

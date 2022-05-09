@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	_ "github.com/go-sql-driver/mysql" // 此驱动会自行初始化（利用 init() 函数）并注册自己到 Golang 的 database/sql 上下文中
 	"github.com/gorilla/mux"
 )
 
