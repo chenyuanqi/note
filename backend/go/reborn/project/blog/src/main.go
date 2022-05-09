@@ -92,11 +92,54 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>请求页面未找到 :(</h1><p>如有疑惑，请联系我们。</p>")
 }
 
+// Article  对应一条文章数据
+type Article struct {
+	Title, Content string
+	ID             int64
+}
+
 func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
+	// 1. 获取 URL 参数
 	vars := mux.Vars(r)
 	// 获取路径参数
 	id := vars["id"]
-	fmt.Fprint(w, "文章 ID："+id)
+	// fmt.Fprint(w, "文章 ID："+id)
+
+	// 2. 读取对应的文章数据
+	article := Article{}
+	query := "SELECT * FROM articles WHERE id = ?"
+	// QueryOne() 读取单条数据。参数只有一个的情况下，我们称之为纯文本模式，多个参数的情况下称之为 Prepare 模式（封装 Prepare 方法的调用）
+	err := db.QueryRow(query, id).Scan(&article.ID, &article.Title, &article.Content) // Scan() 将查询结果赋值到我们的 article struct 中，传参应与数据表字段的顺序保持一致。sql.Row 是个指针变量，保存有 SQL 连接。当调用 Scan() 时，就会将连接释放。所以在每次 QueryRow 后使用 Scan 是必须的
+	// 等同于
+	// stmt, err := db.Prepare(query)
+	// checkError(err)
+	// defer stmt.Close()
+	// err = stmt.QueryRow(id).Scan(&article.ID, &article.Title, &article.Body)
+
+	// 3. 如果出现错误
+	if err != nil {
+		// 当 Scan() 发现没有返回数据的话，会返回 sql.ErrNoRows 类型的错误
+		if err == sql.ErrNoRows {
+			// 3.1 数据未找到
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprint(w, "404 文章未找到")
+		} else {
+			// 3.2 数据库错误
+			checkError(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "500 服务器内部错误")
+		}
+	} else {
+		// 4. 读取成功
+		// fmt.Fprint(w, "读取成功，文章标题 —— "+article.Title)
+
+		// 4. 读取成功，显示文章
+		tmpl, err := template.ParseFiles("resources/views/articles/show.gohtml")
+		checkError(err)
+
+		err = tmpl.Execute(w, article)
+		checkError(err)
+	}
 }
 
 func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
