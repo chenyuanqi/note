@@ -1,12 +1,12 @@
 package main
 
 import (
+	"blog/pkg/logger"
 	"blog/pkg/route"
 
 	"database/sql"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -15,7 +15,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql" // 此驱动会自行初始化（利用 init() 函数）并注册自己到 Golang 的 database/sql 上下文中
 	"github.com/gorilla/mux"
 )
 
@@ -42,7 +41,7 @@ func initDB() {
 
 	// 准备数据库连接池，config.FormatDSN() 用来生成 DSN 信息，返回一个 *sql.DB 结构体实例
 	db, err = sql.Open("mysql", config.FormatDSN()) // root:root@tcp(127.0.0.1:3306)/demo?checkConnLiveness=false&maxAllowedPacket=0
-	checkError(err)
+	logger.LogError(err)
 
 	// 设置最大连接数（参考数据库 show variables like 'max_connections';）
 	db.SetMaxOpenConns(100)
@@ -53,7 +52,7 @@ func initDB() {
 
 	// 尝试连接，失败会报错
 	err = db.Ping() // 检测连接状态
-	checkError(err)
+	logger.LogError(err)
 }
 
 func createTables() {
@@ -69,13 +68,7 @@ func createTables() {
 	// LastInsertId() (int64, error)    // 使用 INSERT 向数据插入记录，数据表有自增 id 时，该函数有返回值
 	// RowsAffected() (int64, error)    // 表示影响的数据表行数
 	// }
-	checkError(err)
-}
-
-func checkError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
+	logger.LogError(err)
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -115,7 +108,7 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 	err := db.QueryRow(query, id).Scan(&article.ID, &article.Title, &article.Content) // Scan() 将查询结果赋值到我们的 article struct 中，传参应与数据表字段的顺序保持一致。sql.Row 是个指针变量，保存有 SQL 连接。当调用 Scan() 时，就会将连接释放。所以在每次 QueryRow 后使用 Scan 是必须的
 	// 等同于
 	// stmt, err := db.Prepare(query)
-	// checkError(err)
+	// logger.LogError(err)
 	// defer stmt.Close()
 	// err = stmt.QueryRow(id).Scan(&article.ID, &article.Title, &article.Body) */
 
@@ -134,7 +127,7 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "404 文章未找到")
 		} else {
 			// 3.2 数据库错误
-			checkError(err)
+			logger.LogError(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
@@ -149,10 +142,10 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 				"RouteName2URL": route.Name2URL,
 				"Int64ToString": Int64ToString,
 			}).ParseFiles("resources/views/articles/show.gohtml")
-		checkError(err)
+		logger.LogError(err)
 
 		err = tmpl.Execute(w, article)
-		checkError(err)
+		logger.LogError(err)
 	}
 }
 
@@ -160,7 +153,7 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprint(w, "访问文章列表~")
 	// 1. 执行查询语句，返回一个结果集。使用 Query() 从数据库中读取多条数据（调用方式与 QueryRow() 和 Exec() 一致，支持单一参数的纯文本模式，以及多个参数的 Prepare 模式；这里使用 纯文本模式）
 	rows, err := db.Query("SELECT * from articles") // rows 包含从数据库里读取出来的数据和 SQL 连接
-	checkError(err)
+	logger.LogError(err)
 	defer rows.Close() // 需在检测 err 以后调用，否则会让运行时 panic
 
 	var articles []Article
@@ -170,22 +163,22 @@ func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 		var article Article
 		// 2.1 扫描每一行的结果并赋值到一个 article 对象中
 		err := rows.Scan(&article.ID, &article.Title, &article.Content)
-		checkError(err) // 检测下是否有错误发生
+		logger.LogError(err) // 检测下是否有错误发生
 		// 2.2 将 article 追加到 articles 的这个数组中
 		articles = append(articles, article)
 	}
 
 	// 2.3 检测遍历时是否发生错误
 	err = rows.Err()
-	checkError(err)
+	logger.LogError(err)
 
 	// 3. 加载模板
 	tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
-	checkError(err)
+	logger.LogError(err)
 
 	// 4. 渲染模板，将所有文章的数据传输进去
 	err = tmpl.Execute(w, articles)
-	checkError(err)
+	logger.LogError(err)
 }
 
 // ArticlesFormData 创建博文表单数据，给模板文件传输变量
@@ -294,7 +287,7 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 			// strconv.FormatInt() 方法来将类型为 int64 的 lastInsertID 转换为字符串，10 是十进制
 			fmt.Fprint(w, "插入成功，ID 为"+strconv.FormatInt(lastInsertID, 10))
 		} else {
-			checkError(err)
+			logger.LogError(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
@@ -411,7 +404,7 @@ func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "404 文章未找到")
 		} else {
 			// 3.2 数据库错误
-			checkError(err)
+			logger.LogError(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
@@ -425,10 +418,10 @@ func articlesEditHandler(w http.ResponseWriter, r *http.Request) {
 			Errors:  nil,
 		}
 		tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-		checkError(err)
+		logger.LogError(err)
 
 		err = tmpl.Execute(w, data)
-		checkError(err)
+		logger.LogError(err)
 	}
 }
 
@@ -449,7 +442,7 @@ func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "404 文章未找到")
 		} else {
 			// 3.2 数据库错误
-			checkError(err)
+			logger.LogError(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
@@ -483,7 +476,7 @@ func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 			rs, err := db.Exec(query, title, content, id)
 
 			if err != nil {
-				checkError(err)
+				logger.LogError(err)
 				w.WriteHeader(http.StatusInternalServerError)
 				fmt.Fprint(w, "500 服务器内部错误")
 			}
@@ -507,10 +500,10 @@ func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 				Errors:  errors,
 			}
 			tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-			checkError(err)
+			logger.LogError(err)
 
 			err = tmpl.Execute(w, data)
-			checkError(err)
+			logger.LogError(err)
 		}
 	}
 }
@@ -530,7 +523,7 @@ func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "404 文章未找到")
 		} else {
 			// 3.2 数据库错误
-			checkError(err)
+			logger.LogError(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
@@ -541,7 +534,7 @@ func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		// 4.1 发生错误
 		if err != nil {
 			// 应该是 SQL 报错了
-			checkError(err)
+			logger.LogError(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "500 服务器内部错误")
 		} else {
@@ -594,7 +587,7 @@ func validateArticleFormData(title string, content string) map[string]string {
 func (a Article) Link() string {
 	showURL, err := router.Get("articles.show").URL("id", strconv.FormatInt(a.ID, 10))
 	if err != nil {
-		checkError(err)
+		logger.LogError(err)
 		return ""
 	}
 	return showURL.String()
