@@ -3,6 +3,7 @@ package main
 import (
 	"blog/pkg/logger"
 	"blog/pkg/route"
+	"blog/pkg/types"
 
 	"database/sql"
 	"fmt"
@@ -140,7 +141,7 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.New("show.gohtml").
 			Funcs(template.FuncMap{
 				"RouteName2URL": route.Name2URL,
-				"Int64ToString": Int64ToString,
+				"Int64ToString": types.Int64ToString,
 			}).ParseFiles("resources/views/articles/show.gohtml")
 		logger.LogError(err)
 
