@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blog/pkg/database"
 	"blog/pkg/logger"
 	"blog/pkg/route"
 	"blog/pkg/types"
@@ -12,10 +13,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 	"unicode/utf8"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
 
@@ -26,51 +25,6 @@ var router = mux.NewRouter()
 
 // 连接池对象：sql.DB 结构体是 database/sql 包封装的一个数据库操作对象，包含了操作数据库的基本方法。声明为包级别的变量，方便各个函数中访问
 var db *sql.DB
-
-func initDB() {
-
-	var err error
-	// 准备生成 DNS 信息（DSN 全称为 Data Source Name，表示 数据源信息，用于定义如何连接数据库）
-	config := mysql.Config{
-		User:                 "root",
-		Passwd:               "root",
-		Addr:                 "127.0.0.1:3306",
-		Net:                  "tcp",
-		DBName:               "demo",
-		AllowNativePasswords: true,
-	}
-
-	// 准备数据库连接池，config.FormatDSN() 用来生成 DSN 信息，返回一个 *sql.DB 结构体实例
-	db, err = sql.Open("mysql", config.FormatDSN()) // root:root@tcp(127.0.0.1:3306)/demo?checkConnLiveness=false&maxAllowedPacket=0
-	logger.LogError(err)
-
-	// 设置最大连接数（参考数据库 show variables like 'max_connections';）
-	db.SetMaxOpenConns(100)
-	// 设置最大空闲连接数（<= 0 表示不设置空闲连接数，默认为 2）
-	db.SetMaxIdleConns(25)
-	// 设置每个链接的过期时间（过期会自动关闭链接），设置的值不应该超过 MySQL 的 wait_timeout 设置项（默认情况下是 8 个小时）
-	db.SetConnMaxLifetime(5 * time.Minute)
-
-	// 尝试连接，失败会报错
-	err = db.Ping() // 检测连接状态
-	logger.LogError(err)
-}
-
-func createTables() {
-	createArticlesSQL := `CREATE TABLE IF NOT EXISTS articles(
-    id bigint(20) PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    title varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-    content longtext COLLATE utf8mb4_unicode_ci
-); `
-	// Exec() 用于执行没有返回结果集的 SQL 语句，如 CREATE TABLE, INSERT, UPDATE, DELETE 等
-	_, err := db.Exec(createArticlesSQL)
-	// Exec() 方法的第一个返回值为一个实现了 sql.Result 接口的类型
-	// type Result interface {
-	// LastInsertId() (int64, error)    // 使用 INSERT 向数据插入记录，数据表有自增 id 时，该函数有返回值
-	// RowsAffected() (int64, error)    // 表示影响的数据表行数
-	// }
-	logger.LogError(err)
-}
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -638,8 +592,8 @@ func removeTrailingSlash(next http.Handler) http.Handler {
 }
 
 func main() {
-	initDB()
-	createTables()
+	database.Initialize()
+	db = database.DB
 
 	route.Initialize()
 	router = route.Router
