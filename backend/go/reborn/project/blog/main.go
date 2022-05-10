@@ -26,23 +26,6 @@ var router = mux.NewRouter()
 // 连接池对象：sql.DB 结构体是 database/sql 包封装的一个数据库操作对象，包含了操作数据库的基本方法。声明为包级别的变量，方便各个函数中访问
 var db *sql.DB
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "<h1>Hello, 欢迎来到主页</h1>")
-}
-
-func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, "此博客是用以记录编程笔记，如您有反馈或建议，请联系 "+
-		"<a href=\"mailto:vikey@example.com\">vikey@example.com</a>")
-}
-
-func notFoundHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprint(w, "<h1>请求页面未找到 :(</h1><p>如有疑惑，请联系我们。</p>")
-}
-
 // Article  对应一条文章数据
 type Article struct {
 	Title, Content string
@@ -602,9 +585,6 @@ func main() {
 	// .StrictSlash(true) 处理 url 尾部 /
 	// router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
-	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
-
 	// 查看博文
 	router.HandleFunc("/articles/{id:[0-9]+}", articlesShowHandler).Methods("GET").Name("articles.show")
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
@@ -616,9 +596,6 @@ func main() {
 	router.HandleFunc("/articles/{id:[0-9]+}", articlesUpdateHandler).Methods("POST").Name("articles.update")
 	// 删除博文
 	router.HandleFunc("/articles/{id:[0-9]+}/delete", articlesDeleteHandler).Methods("POST").Name("articles.delete")
-
-	// 自定义 404 页面
-	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 
 	// 中间件：强制内容类型为 HTML
 	router.Use(forceHTMLMiddleware)
