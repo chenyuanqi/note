@@ -1,0 +1,23 @@
+{{- $postUrl := .URL -}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>创建文章 —— 我的技术博客</title>
+    <style type="text/css">.error {color: red;}</style>
+</head>
+<body>
+    <form action="{{- $postUrl -}}" method="post">
+        {{/* 这是一个注释 */}}
+        {{/* 更多可参考：https://learnku.com/courses/go-basic/1.17/template-syntax/11504， https://cloud.tencent.com/developer/article/1683688 */}}
+        <p><input type="text" name="title" value="{{ .Title }}"></p>
+        {{ with .Errors.title }}
+        <p class="error">{{ . }}</p>
+        {{ end }}
+        <p><textarea name="content" cols="30" rows="10">{{ .Content }}</textarea></p>
+        {{ with .Errors.content }}
+        <p class="error">{{ . }}</p>
+        {{ end }}
+        <p><button type="submit">提交</button></p>
+    </form>
+</body>
+</html>
