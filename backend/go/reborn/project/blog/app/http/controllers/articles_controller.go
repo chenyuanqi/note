@@ -5,6 +5,8 @@ import (
 	"blog/pkg/logger"
 	"blog/pkg/route"
 	"blog/pkg/types"
+	"strconv"
+	"unicode/utf8"
 
 	"fmt"
 	"html/template"
@@ -21,6 +23,27 @@ type ArticlesController struct {
 type Article struct {
 	Title, Content string
 	ID             uint64
+}
+
+// Index 文章列表页
+func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
+	// 1. 获取结果集
+	articles, err := article.GetAll()
+
+	if err != nil {
+		// 数据库错误
+		logger.LogError(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "500 服务器内部错误")
+	} else {
+		// 2. 加载模板
+		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+		logger.LogError(err)
+
+		// 3. 渲染模板，将所有文章的数据传输进去
+		err = tmpl.Execute(w, articles)
+		logger.LogError(err)
+	}
 }
 
 // Show 文章详情页面
@@ -63,23 +86,86 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Index 文章列表页
-func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
-	// 1. 获取结果集
-	articles, err := article.GetAll()
+// ArticlesFormData 创建博文表单数据
+type ArticlesFormData struct {
+	Title, Content string
+	URL            string
+	Errors         map[string]string
+}
 
+// Create 文章创建页面
+func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
+	storeURL := route.Name2URL("articles.store")
+	data := ArticlesFormData{
+		Title:   "",
+		Content: "",
+		URL:     storeURL,
+		Errors:  nil,
+	}
+	tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
 	if err != nil {
-		// 数据库错误
-		logger.LogError(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "500 服务器内部错误")
+		panic(err)
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Store 文章创建页面
+func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
+	title := r.PostFormValue("title")
+	content := r.PostFormValue("content")
+
+	// 检查是否有错误
+	errors := validateArticleFormData(title, content)
+	if len(errors) == 0 {
+		_article := article.Article{
+			Title:   title,
+			Content: content,
+		}
+		_article.Create()
+		if _article.ID > 0 {
+			fmt.Fprint(w, "插入成功，ID 为"+strconv.FormatUint(_article.ID, 10))
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "创建文章失败，请联系管理员")
+		}
 	} else {
-		// 2. 加载模板
-		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+
+		storeURL := route.Name2URL("articles.store")
+
+		data := ArticlesFormData{
+			Title:   title,
+			Content: content,
+			URL:     storeURL,
+			Errors:  errors,
+		}
+		tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
+
 		logger.LogError(err)
 
-		// 3. 渲染模板，将所有文章的数据传输进去
-		err = tmpl.Execute(w, articles)
+		err = tmpl.Execute(w, data)
 		logger.LogError(err)
 	}
+}
+
+func validateArticleFormData(title string, content string) map[string]string {
+	errors := make(map[string]string)
+	// 验证标题
+	if title == "" {
+		errors["title"] = "标题不能为空"
+	} else if utf8.RuneCountInString(title) < 3 || utf8.RuneCountInString(title) > 40 {
+		errors["title"] = "标题长度需介于 3-40"
+	}
+
+	// 验证内容
+	if content == "" {
+		errors["content"] = "内容不能为空"
+	} else if utf8.RuneCountInString(content) < 10 {
+		errors["content"] = "内容长度需大于或等于 10 个字节"
+	}
+
+	return errors
 }
