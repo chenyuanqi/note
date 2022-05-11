@@ -244,7 +244,7 @@ func Runner(baton chan int) {
 
 **有缓冲 channel**  
 有缓冲 channel 类似一个可阻塞的队列，内部的元素先进先出。通过 make 函数的第二个参数可以指定 channel 容量的大小，进而创建一个有缓冲 channel。这种类型的通道并不强制要求 goroutine 之间必须同时完成发送和接收。通道会阻塞发送和接收动作的条件也会不同。只有在通道中没有要接收的值时，接收动作才会阻塞。只有在通道没有可用缓冲区容纳被发送的值时，发送动作才会阻塞。  
-所以，有缓冲的通道和无缓冲的通道之间的一个很大的不同：无缓冲的通道保证进行发送和接收的 goroutine 会在同一时间进行数据交换；有缓冲的通道没有这种保证。一个有缓冲 channel 具备以下特点：
+所以，有缓冲的通道和无缓冲的通道之间的一个很大的不同：无缓冲的通道保证进行发送和接收的 goroutine 会在同一时间进行数据交换；有缓冲的通道没有这种保证。即同步通道和缓冲通道在声明时的区别，只在于是否定义缓冲区的大小；当缓冲区大小的值为 0 时，通道的类型将为同步通道。一个有缓冲 channel 具备以下特点：
 - 有缓冲 channel 的内部有一个缓冲队列；
 - 发送操作是向队列的尾部插入元素，如果队列已满，则阻塞等待，直到另一个 goroutine 执行，接收操作释放队列的空间；
 - 接收操作是从队列的头部获取元素并把它从队列中删除，如果队列为空，则阻塞等待，直到另一个 goroutine 执行，发送操作插入新的元素。
@@ -267,6 +267,29 @@ ch <- 3
 fmt.Println(len(ch)) // 3
 ```
 
+譬如我们收集鸡蛋。
+```go
+func layEggs() {
+	defer syncWait.Done()
+	for i := 0; i < DaysOfWeek; i++ {
+		time.Sleep(time.Millisecond * 500)
+		intChan <- 1
+         fmt.Println("产鸡蛋了")
+	}
+	close(intChan)
+}
+
+func collectEggs(intChan chan int) {
+   defer syncWait.Done()
+   var eggCounts int
+   for i := 0; i < DaysOfWeek; i++ {
+      eggCounts += <-intChan
+      fmt.Println("鸡蛋被收集了")
+   }
+   fmt.Printf("本周共产%d个鸡蛋\n", eggCounts)
+}
+```
+
 带缓冲通道在很多特性上和无缓冲通道是类似的。无缓冲通道可以看作是长度永远为 0 的带缓冲通道。因此根据这个特性，带缓冲通道在下面列举的情况下依然会发生阻塞：  
 - 带缓冲通道被填满时，尝试再次发送数据时发生阻塞。
 - 带缓冲通道为空时，尝试接收数据时发生阻塞。
@@ -286,8 +309,35 @@ close(intChan)
 x, ok := <-ch
 ```
 
+譬如我们收集鸡蛋，判断通道是否关闭。
+```go
+func collectEggs(intChan chan int) {
+   defer syncWait.Done()
+   var eggCounts int
+   for i := 0; i < DaysOfWeek; i++ {
+      eggCounts += <-intChan
+      fmt.Println("鸡蛋被收集了")
+   }
+   // 从通道中接收值来判断通道是否关闭
+   _, isOpen := <-intChan
+   if !isOpen {
+      fmt.Printf("本周共产%d个鸡蛋\n", eggCounts)
+   }
+}
+// 使用 for-range 简化（当通道关闭后，for-range 循环会自动跳出）
+func collectEggs(intChan chan int) {
+   defer syncWait.Done()
+   var eggCounts int
+   for intValue := range intChan {
+      eggCounts += intValue
+      fmt.Println("鸡蛋被收集了")
+   }
+   fmt.Printf("本周共产%d个鸡蛋\n", eggCounts)
+}
+```
+
 **单向channel**  
-我们有一些特殊的业务需求，比如限制一个 channel 只可以接收但是不能发送，或者限制一个 channel 只能发送但不能接收，这种 channel 称为单向 channel。  
+在实际项目中，有时候需要特别规定数据的流向，以确保其正确性。我们有一些特殊的业务需求，比如限制一个 channel 只可以接收但是不能发送，或者限制一个 channel 只能发送但不能接收，这种 channel 称为单向 channel。  
 单向 channel 的声明也很简单，只需要在声明的时候带上 <- 操作符即可，如下面的代码所示：
 ```go
 // var 通道实例 chan<- 元素类型    // 只能写入（发送）数据的通道
@@ -305,7 +355,9 @@ var chRecvOnly <-chan int = ch
 `注意，声明单向 channel <- 操作符的位置和上面讲到的发送和接收操作是一样的。一个不能写入数据只能读取的通道是毫无意义的。`  
 在函数或者方法的参数中，使用单向 channel 的较多，这样可以防止一些操作影响了 channel。所以，单向通道有利于代码接口的严谨性。  
 
-time 包中的单向通道，time 包中的计时器会返回一个 timer 实例。
+单向通道的使用  
+Go 语言提供了封装好的定时器，分别是 Timer 和 Ticker 。Timer 可以让特定的代码延迟执行，Ticker 可以让特定的代码周期性执行。time 包中的单向通道，time 包中的计时器会返回一个 timer 实例。  
+若要使用 Timer，实现预约任务，要借助 time 包中的 Timer 类型，该类型的变量通过 time.NewTimer () 函数返回。  
 ```go
 // timer 的 Timer 类型定义
 type Timer struct {
@@ -314,8 +366,35 @@ type Timer struct {
     r runtimeTimer
 }
 
+// 调用 time.NewTimer() 函数给定预约时间长度，然后从 C 中接收数据。接收数据消耗的时长就是之前给定的时长
 timer := time.NewTimer(time.Second)
 ```
+比如预约下载文件。
+```go
+// 延迟将执行下载任务
+downloadTimer := time.NewTimer(time.Second * 2)
+// 从 downloadTimer 中接收值。一旦接收值的操作开始，计时也会随之开始
+defer downloadTimer.Stop() // 即使在任务执行期间发生宕机，也要确保预约定时器能够顺利退出
+<-downloadTimer.C // 单纯的延迟执行无需关注该值，只要能成功接收到，便表示时间到了
+// 执行的具体任务
+fmt.Println("开始下载")
+```
+`注意：预约定时器是一次性的。示例中只能从 downloadTimer 通道接收一次值，若多次接收则会引发宕机。若要重复使用 downloadTimer，可调用 downloadTimer.Reset() 函数，并传入时长。`
+
+Ticker 是 Go 封装的另一种类型的定时器，就像 Mac 中的系统监视器或 Windows 中的任务管理器中的 CPU 使用率，默认会每隔几秒钟刷新一次。Ticker 在应对这样的需求非常好用且易于实现。  
+在 Go 语言中使用 Ticker 与使用 Timer 非常相似，区别在于 Timer 是一次性的，Ticker 是可以反复接收值的。  
+```go
+func main() {
+    // 模拟获取 CPU 使用量
+   cpuUsageTicker := time.NewTicker(time.Second * 1)
+   defer cpuUsageTicker.Stop() // 确保定时器的正常关闭
+   for {
+      <-cpuUsageTicker.C
+      fmt.Println("获取实时CPU使用率")
+   }
+}
+```
+`提示：无论 Timer 还是 Ticker，调用 stop() 方法会立即停止数据的发送，但很可能都不会立即关闭通道。这是为了保证正常接收而设计的，不过别担心，Go 程序会在合适的时机自动关闭通道。`  
 
 **channel 超时机制**  
 Go 语言没有提供直接的超时处理机制，所谓超时可以理解为当我们上网浏览一些网站时，如果一段时间之后不作操作，就需要重新登录。那么我们应该如何实现这一功能呢，这时就可以使用 select 来设置超时。  
