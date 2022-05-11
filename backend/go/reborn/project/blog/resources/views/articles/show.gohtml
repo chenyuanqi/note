@@ -1,18 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>{{ .Title }} —— 我的技术博客</title>
-    <style type="text/css">.error {color: red;}</style>
-</head>
-<body>
-    <p>ID： {{ .ID }}</p>
-    <p>标题： {{ .Title }}</p>
-    <p>内容：{{ .Content }}</p>
+{{define "title"}}
+{{ .Title }}
+{{end}}
 
-    {{/* 构建删除按钮  */}}
-    {{ $idString := Uint64ToString .ID  }}
-    <form action="{{ RouteName2URL "articles.delete" "id" $idString }}" method="post">
-        <button type="submit" onclick="return confirm('删除动作不可逆，请确定是否继续')">删除</button>
-    </form>
-</body>
-</html>
+{{define "main"}}
+<div class="col-md-9 blog-main">
+
+    <div class="blog-post bg-white p-5 rounded shadow mb-4">
+      <h3 class="blog-post-title">{{ .Title }}</h3>
+      <p class="blog-post-meta text-secondary">发布于 <a href="" class="font-weight-bold">2020-09-05</a> by <a href="#" class="font-weight-bold">Summer</a></p>
+
+      <hr>
+      {{ .Content }}
+
+      {{/* 构建删除按钮  */}}
+      <form class="mt-4" action="{{ RouteName2URL "articles.delete" "id" .GetStringID }}" method="post">
+          <button type="submit" onclick="return confirm('删除动作不可逆，请确定是否继续')" class="btn btn-outline-danger btn-sm">删除</button>
+          <a href="{{ RouteName2URL "articles.edit" "id" .GetStringID }}" class="btn btn-outline-secondary btn-sm">编辑</a>
+      </form>
+
+    </div>
+</div>
+
+{{end}}

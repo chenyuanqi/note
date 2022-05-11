@@ -1,13 +1,16 @@
 package article
 
 import (
+	"blog/app/models"
 	"blog/pkg/route"
+
 	"strconv"
 )
 
 // Article 文章模型
 type Article struct {
-	ID      uint64
+	models.BaseModel
+
 	Title   string
 	Content string
 }

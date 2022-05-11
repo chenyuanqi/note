@@ -1,23 +1,22 @@
-{{- $postUrl := .URL -}}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>创建文章 —— 我的技术博客</title>
-    <style type="text/css">.error {color: red;}</style>
-</head>
-<body>
-    <form action="{{- $postUrl -}}" method="post">
-        {{/* 这是一个注释 */}}
-        {{/* 更多可参考：https://learnku.com/courses/go-basic/1.17/template-syntax/11504， https://cloud.tencent.com/developer/article/1683688 */}}
-        <p><input type="text" name="title" value="{{ .Title }}"></p>
-        {{ with .Errors.title }}
-        <p class="error">{{ . }}</p>
-        {{ end }}
-        <p><textarea name="content" cols="30" rows="10">{{ .Content }}</textarea></p>
-        {{ with .Errors.content }}
-        <p class="error">{{ . }}</p>
-        {{ end }}
-        <p><button type="submit">提交</button></p>
+{{define "title"}}
+创建文章
+{{end}}
+
+{{define "main"}}
+<div class="col-md-9 blog-main">
+  <div class="blog-post bg-white p-5 rounded shadow mb-4">
+
+    <h3>新建文章</h3>
+
+    <form action="{{ RouteName2URL "articles.store" }}" method="post">
+
+      {{template "form-fields" . }}
+
+      <button type="submit" class="btn btn-primary mt-3">提交</button>
+
     </form>
-</body>
-</html>
+
+  </div><!-- /.blog-post -->
+</div>
+
+{{end}}

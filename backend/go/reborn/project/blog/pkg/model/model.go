@@ -17,7 +17,7 @@ func ConnectDB() *gorm.DB {
 	var err error
 
 	config := mysql.New(mysql.Config{
-		DSN: "root:root@tcp(127.0.0.1:3306)/demo?charset=utf8&parseTime=True&loc=Local",
+		DSN: "root:@tcp(127.0.0.1:3306)/demo?charset=utf8&parseTime=True&loc=Local",
 	})
 
 	// 准备数据库连接池
