@@ -1,0 +1,29 @@
+{{/* {{define 模板名 }} 是定义模板，而 {{template 模板名 传给模板的数据，.表示不传}} 是使用模板 */}}
+{{define "app"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>{{template "title" .}}</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/app.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <div class="container-sm">
+    <div class="row mt-5">
+
+      {{template "sidebar" .}}
+
+      {{template "main" .}}
+
+    </div>
+  </div>
+
+  <script src="/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
+{{end}}
