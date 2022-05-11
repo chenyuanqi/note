@@ -4,8 +4,6 @@ import (
 	"blog/bootstrap"
 	"blog/pkg/database"
 	"blog/pkg/logger"
-	"blog/pkg/route"
-	"blog/pkg/types"
 
 	"database/sql"
 	"fmt"
@@ -31,93 +29,6 @@ var db *sql.DB
 type Article struct {
 	Title, Content string
 	ID             int64
-}
-
-func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
-	/* // 1. 获取 URL 参数
-	vars := mux.Vars(r)
-	// 获取路径参数
-	id := vars["id"]
-	// fmt.Fprint(w, "文章 ID："+id)
-
-	// 2. 读取对应的文章数据
-	article := Article{}
-	query := "SELECT * FROM articles WHERE id = ?"
-	// QueryOne() 读取单条数据。参数只有一个的情况下，我们称之为纯文本模式，多个参数的情况下称之为 Prepare 模式（封装 Prepare 方法的调用）
-	err := db.QueryRow(query, id).Scan(&article.ID, &article.Title, &article.Content) // Scan() 将查询结果赋值到我们的 article struct 中，传参应与数据表字段的顺序保持一致。sql.Row 是个指针变量，保存有 SQL 连接。当调用 Scan() 时，就会将连接释放。所以在每次 QueryRow 后使用 Scan 是必须的
-	// 等同于
-	// stmt, err := db.Prepare(query)
-	// logger.LogError(err)
-	// defer stmt.Close()
-	// err = stmt.QueryRow(id).Scan(&article.ID, &article.Title, &article.Body) */
-
-	// 1. 获取 URL 参数
-	id := getRouteVariable("id", r)
-
-	// 2. 读取对应的文章数据
-	article, err := getArticleByID(id)
-
-	// 3. 如果出现错误
-	if err != nil {
-		// 当 Scan() 发现没有返回数据的话，会返回 sql.ErrNoRows 类型的错误
-		if err == sql.ErrNoRows {
-			// 3.1 数据未找到
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "404 文章未找到")
-		} else {
-			// 3.2 数据库错误
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500 服务器内部错误")
-		}
-	} else {
-		// 4. 读取成功
-		// fmt.Fprint(w, "读取成功，文章标题 —— "+article.Title)
-
-		// 4. 读取成功，显示文章
-		// Funcs() 方法的传参是 template.FuncMap 类型的 Map 对象。键为模板里调用的函数名称，值为当前上下文的函数名称
-		tmpl, err := template.New("show.gohtml").
-			Funcs(template.FuncMap{
-				"RouteName2URL": route.Name2URL,
-				"Int64ToString": types.Int64ToString,
-			}).ParseFiles("resources/views/articles/show.gohtml")
-		logger.LogError(err)
-
-		err = tmpl.Execute(w, article)
-		logger.LogError(err)
-	}
-}
-
-func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-	// fmt.Fprint(w, "访问文章列表~")
-	// 1. 执行查询语句，返回一个结果集。使用 Query() 从数据库中读取多条数据（调用方式与 QueryRow() 和 Exec() 一致，支持单一参数的纯文本模式，以及多个参数的 Prepare 模式；这里使用 纯文本模式）
-	rows, err := db.Query("SELECT * from articles") // rows 包含从数据库里读取出来的数据和 SQL 连接
-	logger.LogError(err)
-	defer rows.Close() // 需在检测 err 以后调用，否则会让运行时 panic
-
-	var articles []Article
-	// 2. 循环读取结果
-	// 使用 rows.Next() 遍历数据，遍历到最后内部遇到 EOF 错误，会自动调用 rows.Close() 将 SQL 连接关闭；如遇错误，SQL 连接也会自动关闭（rows.Close() 可调用多次，使用 rows.Close() 可保证 SQL 连接永远是关闭的）
-	for rows.Next() {
-		var article Article
-		// 2.1 扫描每一行的结果并赋值到一个 article 对象中
-		err := rows.Scan(&article.ID, &article.Title, &article.Content)
-		logger.LogError(err) // 检测下是否有错误发生
-		// 2.2 将 article 追加到 articles 的这个数组中
-		articles = append(articles, article)
-	}
-
-	// 2.3 检测遍历时是否发生错误
-	err = rows.Err()
-	logger.LogError(err)
-
-	// 3. 加载模板
-	tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
-	logger.LogError(err)
-
-	// 4. 渲染模板，将所有文章的数据传输进去
-	err = tmpl.Execute(w, articles)
-	logger.LogError(err)
 }
 
 // ArticlesFormData 创建博文表单数据，给模板文件传输变量
@@ -522,16 +433,6 @@ func validateArticleFormData(title string, content string) map[string]string {
 	return errors
 }
 
-// Link 方法用来生成文章链接
-func (a Article) Link() string {
-	showURL, err := router.Get("articles.show").URL("id", strconv.FormatInt(a.ID, 10))
-	if err != nil {
-		logger.LogError(err)
-		return ""
-	}
-	return showURL.String()
-}
-
 // Delete 方法用以从数据库中删除单条记录
 func (a Article) Delete() (rowsAffected int64, err error) {
 	// Exec() 使用的是纯文本模式的查询模式，因为 ID 我们是从数据库里拿出来的，是自增 ID ，无需担心 SQL 注入，这样可以少发送一次 SQL 请求
@@ -546,11 +447,6 @@ func (a Article) Delete() (rowsAffected int64, err error) {
 	}
 
 	return 0, nil
-}
-
-// Int64ToString 将 int64 转换为 string
-func Int64ToString(num int64) string {
-	return strconv.FormatInt(num, 10)
 }
 
 func forceHTMLMiddleware(h http.Handler) http.Handler {
@@ -582,13 +478,6 @@ func main() {
 	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
 
-	// router := mux.NewRouter()
-	// .StrictSlash(true) 处理 url 尾部 /
-	// router := mux.NewRouter().StrictSlash(true)
-
-	// 查看博文
-	// router.HandleFunc("/articles/{id:[0-9]+}", articlesShowHandler).Methods("GET").Name("articles.show")
-	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 	// 创建博文
 	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
 	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
