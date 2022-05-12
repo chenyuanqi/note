@@ -135,12 +135,8 @@ func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// 4. 读取成功，显示编辑文章表单
 		view.Render(w, view.D{
-			"Article": ArticlesFormData{
-				Title:   _article.Title,
-				Content: _article.Content,
-				Article: _article,
-				Errors:  nil,
-			}}, "articles.edit", "articles._form_field")
+			"Article": _article,
+		}, "articles.edit", "articles._form_field")
 	}
 }
 
@@ -196,12 +192,8 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 		} else {
 			// 4.3 表单验证不通过，显示理由
 			view.Render(w, view.D{
-				"Article": ArticlesFormData{
-					Title:   title,
-					Content: content,
-					Article: _article,
-					Errors:  errors,
-				}}, "articles.edit", "articles._form_field")
+				"Article": _article,
+			}, "articles.edit", "articles._form_field")
 		}
 	}
 }

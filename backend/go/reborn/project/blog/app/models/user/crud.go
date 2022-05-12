@@ -3,6 +3,7 @@ package user
 import (
 	"blog/pkg/logger"
 	"blog/pkg/model"
+	"blog/pkg/password"
 	"blog/pkg/types"
 )
 
@@ -17,8 +18,8 @@ func (user *User) Create() (err error) {
 }
 
 // ComparePassword 对比密码是否匹配
-func (user *User) ComparePassword(password string) bool {
-	return user.Password == password
+func (user *User) ComparePassword(_password string) bool {
+	return password.CheckHash(_password, user.Password)
 }
 
 // Get 通过 ID 获取用户
