@@ -3,12 +3,18 @@ package main
 import (
 	"blog/app/http/middlewares"
 	"blog/bootstrap"
-	"blog/pkg/logger"
+	"blog/config"
+	c "blog/pkg/config"
 
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
+
+func init() {
+	// 初始化配置信息
+	config.Initialize()
+}
 
 // 语法错误：non-declaration statement outside function body 函数外无法使用变量赋值语句
 // router := mux.NewRouter()
@@ -19,6 +25,5 @@ func main() {
 	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
 
-	err := http.ListenAndServe(":8000", middlewares.RemoveTrailingSlash(router))
-	logger.LogError(err)
+	http.ListenAndServe(":"+c.GetString("app.port"), middlewares.RemoveTrailingSlash(router))
 }
