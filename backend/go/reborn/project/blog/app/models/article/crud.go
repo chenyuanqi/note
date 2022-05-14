@@ -21,7 +21,8 @@ func Get(idstr string) (Article, error) {
 // GetAll 获取全部文章
 func GetAll() ([]Article, error) {
 	var articles []Article
-	if err := model.DB.Debug().Preload("User").Find(&articles).Error; err != nil {
+	// 查看 sql 语句：model.DB.Debug()
+	if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
 		return articles, err
 	}
 	return articles, nil
