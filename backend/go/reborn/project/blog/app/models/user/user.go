@@ -2,6 +2,7 @@ package user
 
 import (
 	"blog/app/models"
+	"blog/pkg/route"
 )
 
 // User 用户模型
@@ -23,5 +24,5 @@ type User struct {
 
 // Link 方法用来生成用户链接
 func (user User) Link() string {
-	return ""
+	return route.Name2URL("users.show", "id", user.GetStringID())
 }
