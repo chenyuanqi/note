@@ -2,6 +2,7 @@ package article
 
 import (
 	"blog/app/models"
+	"blog/app/models/user"
 	"blog/pkg/route"
 
 	"strconv"
@@ -13,6 +14,13 @@ type Article struct {
 
 	Title   string `gorm:"type:varchar(255);not null;" valid:"title"`
 	Content string `gorm:"type:longtext;not null;" valid:"content"`
+	UserID  uint64 `gorm:"not null;index"`
+	User    user.User
+}
+
+// CreatedAtDate 创建日期
+func (article Article) CreatedAtDate() string {
+	return article.CreatedAt.Format("2006-01-02")
 }
 
 // Link 方法用来生成文章链接

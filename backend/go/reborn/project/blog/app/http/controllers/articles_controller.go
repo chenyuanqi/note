@@ -39,7 +39,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		// 2. 加载模板
 		view.Render(w, view.D{
 			"Articles": articles,
-		}, "articles.index")
+		}, "articles.index", "articles._article_meta")
 	}
 }
 
@@ -50,6 +50,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 
 	// 2. 读取对应的文章数据
 	article, err := article.Get(id)
+	fmt.Println(article.User.Link)
 
 	// 3. 如果出现错误
 	if err != nil {
@@ -68,7 +69,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 		// 4. 读取成功
 		view.Render(w, view.D{
 			"Article": article,
-		}, "articles.show")
+		}, "articles.show", "articles._article_meta")
 	}
 }
 

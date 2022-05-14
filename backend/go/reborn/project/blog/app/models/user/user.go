@@ -20,3 +20,8 @@ type User struct {
 	// gorm:"-" —— 设置 GORM 在读写时略过此字段
 	PasswordConfirm string ` gorm:"-" valid:"password_confirm"`
 }
+
+// Link 方法用来生成用户链接
+func (user User) Link() string {
+	return ""
+}

@@ -16,12 +16,12 @@ func RegisterWebRoutes(r *mux.Router) {
 	ac := new(controllers.ArticlesController)
 	r.NotFoundHandler = http.HandlerFunc(pc.NotFound)
 	// r.HandleFunc("/", pc.Home).Methods("GET").Name("home")
-	r.HandleFunc("/", ac.Index).Methods("GET")
+	r.HandleFunc("/", ac.Index).Methods("GET").Name("articles.index")
 	r.HandleFunc("/about", pc.About).Methods("GET").Name("about")
 
 	// 文章相关页面
 	// 查看博文
-	r.HandleFunc("/articles", ac.Index).Methods("GET").Name("articles.index")
+	// r.HandleFunc("/articles", ac.Index).Methods("GET").Name("articles.index")
 	r.HandleFunc("/articles/{id:[0-9]+}", ac.Show).Methods("GET").Name("articles.show")
 	// 创建博文
 	r.HandleFunc("/articles/create", middlewares.Auth(ac.Create)).Methods("GET").Name("articles.create")
