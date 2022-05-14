@@ -4,6 +4,7 @@ import (
 	"blog/app/models/article"
 	"blog/app/policies"
 	"blog/app/requests"
+	"blog/pkg/auth"
 	"blog/pkg/flash"
 	"blog/pkg/route"
 	"blog/pkg/view"
@@ -74,9 +75,11 @@ func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
 
 // Store 文章创建页面
 func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
+	currentUser := auth.User()
 	_article := article.Article{
 		Title:   r.PostFormValue("title"),
 		Content: r.PostFormValue("content"),
+		UserID:  currentUser.ID,
 	}
 
 	// 检查是否有错误
