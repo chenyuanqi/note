@@ -5,25 +5,33 @@
 {{define "main"}}
 <div class="col-md-9 blog-main">
 
-  {{ range $key, $article := .Articles }}
+  {{ if .Articles }}
 
-    <div class="blog-post bg-white p-5 rounded shadow mb-4">
-      <h3 class="blog-post-title"><a href="{{ $article.Link }}" class="text-dark text-decoration-none">{{ $article.Title }}</a></h3>
+    {{ range $key, $article := .Articles }}
 
-      {{template "article-meta" $article }}
+      <div class="blog-post bg-white p-5 rounded shadow mb-4">
+        <h3 class="blog-post-title"><a href="{{ $article.Link }}" class="text-dark text-decoration-none">{{ $article.Title }}</a></h3>
 
-      <hr>
-      {{ $article.Content }}
+        {{template "article-meta" $article }}
 
-    </div><!-- /.blog-post -->
+        <hr>
+        {{ $article.Content }}
 
-  {{ end }}
+      </div><!-- /.blog-post -->
+
+    {{ end }}
+
+  {{ else }}
+
+    <div class="blog-post bg-white p-5 rounded shadow mb-4 text-muted">
+      <p>暂无文章！</p>
+    </div>
+
+  {{end}}
 
 
-  <nav class="blog-pagination mb-5">
-    <a class="btn btn-outline-primary" href="#">下一页</a>
-    <a class="btn btn-outline-secondary disabled" href="#" tabindex="-1" aria-disabled="true">上一页</a>
-  </nav>
+  <!-- 分页 -->
+  {{template "pagination" .PagerData }}
 
 </div>
 {{ end }}

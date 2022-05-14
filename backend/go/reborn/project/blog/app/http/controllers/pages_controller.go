@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"blog/pkg/view"
 	"fmt"
 	"net/http"
 )
@@ -16,12 +17,11 @@ func (*PagesController) Home(w http.ResponseWriter, r *http.Request) {
 
 // About 关于我们页面
 func (*PagesController) About(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "此博客是用以记录编程笔记，如您有反馈或建议，请联系 "+
-		"<a href=\"mailto:vikey@example.com\">vikey@example.com</a>")
+	view.RenderSimple(w, view.D{}, "site.about")
 }
 
 // NotFound 404 页面
 func (*PagesController) NotFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprint(w, "<h1>请求页面未找到 :(</h1><p>如有疑惑，请联系我们。</p>")
+	view.RenderSimple(w, view.D{}, "site.404")
 }
