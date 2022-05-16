@@ -12,10 +12,11 @@ import (
 type Article struct {
 	models.BaseModel
 
-	Title   string `gorm:"type:varchar(255);not null;" valid:"title"`
-	Content string `gorm:"type:longtext;not null;" valid:"content"`
-	UserID  uint64 `gorm:"not null;index"`
-	User    user.User
+	Title      string `gorm:"type:varchar(255);not null;" valid:"title"`
+	Content    string `gorm:"type:longtext;not null;" valid:"content"`
+	UserID     uint64 `gorm:"not null;index"`
+	User       user.User
+	CategoryID uint64 `gorm:"not null;default:1;index"`
 }
 
 // CreatedAtDate 创建日期

@@ -9,8 +9,6 @@ import (
 	"blog/pkg/route"
 	"blog/pkg/view"
 
-	"strconv"
-
 	"fmt"
 	"net/http"
 )
@@ -89,7 +87,8 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	if len(errors) == 0 {
 		_article.Create()
 		if _article.ID > 0 {
-			fmt.Fprint(w, "插入成功，ID 为"+strconv.FormatUint(_article.ID, 10))
+			flash.Warning("文章发布成功！")
+			http.Redirect(w, r, "/", http.StatusFound)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "创建文章失败，请联系管理员")
@@ -163,6 +162,7 @@ func (ac *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 
 				// √ 更新成功，跳转到文章详情页
 				if rowsAffected > 0 {
+					flash.Warning("文章更新成功！")
 					showURL := route.Name2URL("articles.show", "id", id)
 					http.Redirect(w, r, showURL, http.StatusFound)
 				} else {
