@@ -1,0 +1,11 @@
+{{define "form-fields"}}
+<div class="form-group mt-3">
+    <label for="title">分类名称</label>
+    <input type="text" class="form-control {{if .Errors.name }}is-invalid {{end}}" name="name" value="{{ .Category.Name }}" required>
+    {{ with .Errors.name }}
+      <div class="invalid-feedback">
+        {{ . }}
+      </div>
+    {{ end }}
+  </div>
+{{ end }}

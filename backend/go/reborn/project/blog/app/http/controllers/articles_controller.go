@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"blog/app/models/article"
+	"blog/app/models/category"
 	"blog/app/policies"
 	"blog/app/requests"
 	"blog/pkg/auth"
 	"blog/pkg/flash"
 	"blog/pkg/route"
+	"blog/pkg/types"
 	"blog/pkg/view"
 
 	"fmt"
@@ -70,16 +72,20 @@ type ArticlesFormData struct {
 
 // Create 文章创建页面
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request) {
-	view.Render(w, view.D{}, "articles.create", "articles._form_field")
+	view.Render(w, view.D{
+		"Article": view.D{},
+		"Errors":  view.D{},
+	}, "articles.create", "articles._form_field")
 }
 
 // Store 文章创建页面
 func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	currentUser := auth.User()
 	_article := article.Article{
-		Title:   r.PostFormValue("title"),
-		Content: r.PostFormValue("content"),
-		UserID:  currentUser.ID,
+		Title:      r.PostFormValue("title"),
+		Content:    r.PostFormValue("content"),
+		UserID:     currentUser.ID,
+		CategoryID: types.StringToUint64(r.PostFormValue("category_id")),
 	}
 
 	// 检查是否有错误
@@ -145,8 +151,17 @@ func (ac *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/", http.StatusForbidden)
 		} else {
 			// 4.1 表单验证
+			// 接收更换的分类ID
+			cid := r.PostFormValue("category_id")
+			_category, err := category.Get(cid)
+			if err != nil {
+				ac.ResponseForSQLError(w, err)
+			}
+			_article.CategoryID = types.StringToUint64(cid)
 			_article.Title = r.PostFormValue("title")
 			_article.Content = r.PostFormValue("content")
+			// 必须赋值才可以更新关联的分类
+			_article.Category = _category
 
 			errors := requests.ValidateArticleForm(_article)
 			if len(errors) == 0 {

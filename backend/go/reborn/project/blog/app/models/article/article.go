@@ -2,6 +2,7 @@ package article
 
 import (
 	"blog/app/models"
+	"blog/app/models/category"
 	"blog/app/models/user"
 	"blog/pkg/route"
 
@@ -17,6 +18,7 @@ type Article struct {
 	UserID     uint64 `gorm:"not null;index"`
 	User       user.User
 	CategoryID uint64 `gorm:"not null;default:1;index"`
+	Category   category.Category
 }
 
 // CreatedAtDate 创建日期

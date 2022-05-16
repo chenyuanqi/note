@@ -14,7 +14,7 @@ import (
 func Get(idstr string) (Article, error) {
 	var article Article
 	id := types.StringToUint64(idstr)
-	if err := model.DB.Preload("User").First(&article, id).Error; err != nil {
+	if err := model.DB.Preload("User").Preload("Category").First(&article, id).Error; err != nil {
 		return article, err
 	}
 
@@ -40,7 +40,7 @@ func GetAll(r *http.Request, perPage int) ([]Article, pagination.ViewData, error
 // GetByUserID 获取全部文章
 func GetByUserID(uid string) ([]Article, error) {
 	var articles []Article
-	if err := model.DB.Where("user_id = ?", uid).Preload("User").Order("created_at desc").Find(&articles).Error; err != nil {
+	if err := model.DB.Where("user_id = ?", uid).Preload("User").Preload("Category").Order("created_at desc").Find(&articles).Error; err != nil {
 		return articles, err
 	}
 	return articles, nil
