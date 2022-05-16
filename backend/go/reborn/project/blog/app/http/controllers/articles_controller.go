@@ -88,6 +88,7 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 		CategoryID: types.StringToUint64(r.PostFormValue("category_id")),
 	}
 
+	// fmt.Printf("%T", _article.CategoryID)
 	// 检查是否有错误
 	errors := requests.ValidateArticleForm(_article)
 	if len(errors) == 0 {
@@ -157,11 +158,11 @@ func (ac *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				ac.ResponseForSQLError(w, err)
 			}
+			// 必须赋值才可以更新关联的分类
+			_article.Category = _category
 			_article.CategoryID = types.StringToUint64(cid)
 			_article.Title = r.PostFormValue("title")
 			_article.Content = r.PostFormValue("content")
-			// 必须赋值才可以更新关联的分类
-			_article.Category = _category
 
 			errors := requests.ValidateArticleForm(_article)
 			if len(errors) == 0 {
