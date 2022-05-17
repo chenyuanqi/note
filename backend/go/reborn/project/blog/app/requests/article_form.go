@@ -10,7 +10,7 @@ import (
 func ValidateArticleForm(data article.Article) map[string][]string {
 	// 1. 定制认证规则
 	rules := govalidator.MapData{
-		"category_id": []string{"required,gt=1"},
+		"category_id": []string{"required"},
 		"title":       []string{"required", "min_cn:3", "max_cn:40"},
 		"content":     []string{"required", "min_cn:10"},
 	}
