@@ -182,6 +182,37 @@ var s string
 for i := 0; i < 1000; i++ {
     s += "a"
 }
+
+str := ""
+// 1
+str += "test-string"
+// 2
+str = fmt.Sprintf("%s%s", str, "test-string")
+// 3
+str = strings.Join([]string{str, "test-string"}, "")
+// 4
+buf := new(bytes.Buffer)
+buf.WriteString("test-string")
+str := buf.String()
+// 5
+var b []byte
+s := "test-string"
+b = append(b, s...)
+str := string(b)
+// 6
+ts := "test-string"
+n := 5
+tsl := len(ts) * n
+bs := make([]byte, tsl)
+bl := 0
+for bl < tsl {
+    bl += copy(bs[bl:], ts)
+}
+str := string(bs)
+// 7
+var builder strings.Builder
+builder.WriteString("test-string")
+str := builder.String()
 ```
 怎么更高效得进行字符串拼接呢？在早先 Go1.10 以前使用的是 bytes.Buffer，
 ```go
