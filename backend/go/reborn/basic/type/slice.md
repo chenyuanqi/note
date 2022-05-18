@@ -41,6 +41,13 @@ a := []string{"A", "B", "C"}
 s := a[len(a)-1] // C
 // 移除最后一个元素
 a = a[:len(a)-1] // [A B]
+
+data := []int{1, 2, 3}
+// 修改原有元素的值，应该使用索引直接访问
+for i, v := range data {
+    data[i] = v * 10    
+}
+fmt.Println("data: ", data)    // data:  [10 20 30]
 ```
 
 **迭代切片**  

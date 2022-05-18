@@ -22,7 +22,8 @@ var exampleNumB int = 3
 fmt.Println(exampleNumA / exampleNumB) // 3
 fmt.Println(exampleNumA % exampleNumB) // 1
 ```
-还有一种较为精简的自增（++）和自减（--）运算符，它们相当于加1和减1，然后再将计算结果赋值给自身变量。
+还有一种较为精简的自增（++）和自减（--）运算符，它们相当于加1和减1，然后再将计算结果赋值给自身变量。  
+Go 特立独行，去掉了前置操作（++i），同时 ++、— 只作为运算符而非表达式。  
 ```go
 var exampleNumA int = 10
 // exampleNumA = exampleNumA + 1

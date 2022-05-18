@@ -73,7 +73,7 @@ strings.EqualFold("Japan", "JAPAN")	// true
 // 长度
 len("日") // 字节长度 3
 utf8.RuneCountInString("日") // 1 in runes
-utf8.ValidString("日") // true 是否 utr-8
+utf8.ValidString("日") // true 是否 utf-8
 
 // 切片
 "Japan"[2] // 'p'	Byte at position 2
@@ -92,6 +92,13 @@ for i := 0; i < len(s); i++ {
 }
 // Output: 'J' 'a' 'p' 'a' 'n' ' ' 'æ' '\u0097' '¥' 'æ' '\u009c' '¬'
 // 非 ascii 转为乱码
+
+// 修改字符串
+x := "text"
+xRunes := []rune(x)
+xRunes[0] = '我'
+x = string(xRunes)
+fmt.Println(x)    // 我ext
 
 // 是否包含
 strings.Contains("Japan", "abc") // false
