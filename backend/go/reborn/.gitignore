@@ -3,3 +3,5 @@ __debug_bin
 tmp
 # .air.toml
 .env
+/project/pkg
+/project/bin
