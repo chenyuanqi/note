@@ -17,6 +17,8 @@ func init() {
 }
 
 func main() {
+	// TODO: error lens 配置
+
 	// 配置初始化，依赖命令行 --env 参数
 	var env string
 	flag.StringVar(&env, "env", "", "加载 .env 文件，如 --env=testing 加载的是 .env.testing 文件")
