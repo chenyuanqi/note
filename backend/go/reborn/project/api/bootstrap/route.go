@@ -27,8 +27,12 @@ func SetupRoute(router *gin.Engine) {
 func registerGlobalMiddleWare(router *gin.Engine) {
 	router.Use(
 		// gin.Logger(),
+		// 使用 zap 来记录日志
 		middlewares.Logger(),
-		gin.Recovery(),
+
+		// gin.Recovery(),
+		// 当 recovery 时，使用 zap 来记录日志
+		middlewares.Recovery(),
 	)
 }
 
