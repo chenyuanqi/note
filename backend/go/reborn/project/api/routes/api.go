@@ -3,6 +3,9 @@ package routes
 
 import (
 	"api/app/http/controllers/api/v1/auth"
+	"api/app/http/middlewares"
+	auth_pkg "api/pkg/auth"
+	"api/pkg/response"
 
 	"net/http"
 
@@ -11,6 +14,11 @@ import (
 
 // RegisterAPIRoutes 注册网页相关路由
 func RegisterAPIRoutes(r *gin.Engine) {
+
+	r.GET("/test_auth", middlewares.AuthJWT(), func(c *gin.Context) {
+		userModel := auth_pkg.CurrentUser(c)
+		response.Data(c, userModel)
+	})
 
 	// 测试一个 v1 的路由组，我们所有的 v1 版本的路由都将存放到这里
 	v1 := r.Group("/v1")
