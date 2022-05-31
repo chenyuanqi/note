@@ -44,6 +44,8 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			// 登录
 			authGroup.POST("/login/using-phone", lgc.LoginByPhone)
 			authGroup.POST("/login/using-password", lgc.LoginByPassword)
+			// 刷新token
+			authGroup.POST("/login/refresh-token", lgc.RefreshToken)
 		}
 	}
 }
