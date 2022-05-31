@@ -25,6 +25,13 @@ func RegisterAPIRoutes(r *gin.Engine) {
 
 		authGroup := v1.Group("/auth")
 		{
+			// 发送验证码
+			vcc := new(auth.VerifyCodeController)
+			// 图片验证码，需要加限流
+			authGroup.POST("/verify-codes/captcha", vcc.ShowCaptcha)
+			authGroup.POST("/verify-codes/phone", vcc.SendUsingPhone)
+			authGroup.POST("/verify-codes/email", vcc.SendUsingEmail)
+
 			suc := new(auth.SignupController)
 			// 判断手机是否已注册
 			authGroup.POST("/signup/phone/exist", suc.IsPhoneExist)
@@ -33,13 +40,9 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			// 注册
 			authGroup.POST("/signup/using-phone", suc.SignupUsingPhone)
 			authGroup.POST("/signup/using-email", suc.SignupUsingEmail)
-
-			// 发送验证码
-			vcc := new(auth.VerifyCodeController)
-			// 图片验证码，需要加限流
-			authGroup.POST("/verify-codes/captcha", vcc.ShowCaptcha)
-			authGroup.POST("/verify-codes/phone", vcc.SendUsingPhone)
-			authGroup.POST("/verify-codes/email", vcc.SendUsingEmail)
+			lgc := new(auth.LoginController)
+			// 登录
+			authGroup.POST("/login/using-phone", lgc.LoginByPhone)
 		}
 	}
 }
