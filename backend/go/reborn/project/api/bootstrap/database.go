@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"api/app/models/user"
 	"api/pkg/config"
 	"api/pkg/database"
 	"api/pkg/logger"
@@ -53,5 +52,5 @@ func SetupDB() {
 	database.SQLDB.SetConnMaxLifetime(time.Duration(config.GetInt("database.mysql.max_life_seconds")) * time.Second)
 
 	// 自动迁移
-	database.DB.AutoMigrate(&user.User{})
+	// database.DB.AutoMigrate(&user.User{})
 }

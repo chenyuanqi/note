@@ -4,6 +4,7 @@ package migrate
 import (
 	"api/pkg/console"
 	"api/pkg/database"
+	"api/pkg/file"
 
 	"io/ioutil"
 
