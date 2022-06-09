@@ -5,6 +5,7 @@ import (
 	// "api/app/policies"
 	// "api/app/requests"
 	"api/app/models/user"
+	"api/app/requests"
 	"api/pkg/auth"
 	"api/pkg/response"
 
@@ -25,6 +26,11 @@ func (ctrl *UsersController) CurrentUser(c *gin.Context) {
 func (ctrl *UsersController) Index(c *gin.Context) {
 	// data := user.All()
 	// response.Data(c, data)
+	request := requests.PaginationRequest{}
+	if ok := requests.Validate(c, &request, requests.Pagination); !ok {
+		return
+	}
+
 	data, pager := user.Paginate(c, 10)
 	response.JSON(c, gin.H{
 		"data":  data,
