@@ -74,5 +74,9 @@ func RegisterAPIRoutes(r *gin.Engine) {
 		uc := new(controllers.UsersController)
 		// 获取当前用户
 		v1.GET("/user", middlewares.AuthJWT(), uc.CurrentUser)
+		usersGroup := v1.Group("/users")
+		{
+			usersGroup.GET("", uc.Index)
+		}
 	}
 }
