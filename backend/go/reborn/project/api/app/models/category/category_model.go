@@ -2,6 +2,7 @@
 package category
 
 import (
+	"api/app/models"
 	"api/pkg/database"
 )
 
