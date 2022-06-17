@@ -13,11 +13,11 @@ type {{StructName}}Request struct {
 }
 
 func {{StructName}}Save(data interface{}, c *gin.Context) map[string][]string {
-
     rules := govalidator.MapData{
         // "name":        []string{"required", "min_cn:2", "max_cn:8", "not_exists:{{TableName}},name"},
         // "description": []string{"min_cn:3", "max_cn:255"},
     }
+
     messages := govalidator.MapData{
         // "name": []string{
         //     "required:名称为必填项",

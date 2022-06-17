@@ -2,6 +2,7 @@
 package topic
 
 import (
+	"api/app/models"
 	"api/app/models/category"
 	"api/app/models/user"
 	"api/pkg/database"
