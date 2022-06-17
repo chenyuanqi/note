@@ -27,6 +27,15 @@ func (ctrl *TopicsController) Index(c *gin.Context) {
 	})
 }
 
+func (ctrl *TopicsController) Show(c *gin.Context) {
+	topicModel := topic.Get(c.Param("id"))
+	if topicModel.ID == 0 {
+		response.Abort404(c)
+		return
+	}
+	response.Data(c, topicModel)
+}
+
 func (ctrl *TopicsController) Store(c *gin.Context) {
 
 	request := requests.TopicRequest{}
