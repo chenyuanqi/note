@@ -2,6 +2,7 @@ package v1
 
 import (
 	"api/app/models/topic"
+	"api/app/policies"
 	"api/app/requests"
 	"api/pkg/auth"
 	"api/pkg/response"
@@ -39,6 +40,12 @@ func (ctrl *TopicsController) Update(c *gin.Context) {
 	topicModel := topic.Get(c.Param("id"))
 	if topicModel.ID == 0 {
 		response.Abort404(c)
+		return
+	}
+
+    // 策略：只允许添加者更新
+	if ok := policies.CanModifyTopic(c, topicModel); !ok {
+		response.Abort403(c)
 		return
 	}
 
