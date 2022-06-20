@@ -97,5 +97,11 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			tpcGroup.PUT("/:id", middlewares.AuthJWT(), tpc.Update)
 			tpcGroup.DELETE("/:id", middlewares.AuthJWT(), tpc.Delete)
 		}
+
+		lsc := new(controllers.LinksController)
+		linksGroup := v1.Group("/links")
+		{
+			linksGroup.GET("", lsc.Index)
+		}
 	}
 }
