@@ -2,6 +2,7 @@
 package {{PackageName}}
 
 import (
+    "api/app/models"
     "api/pkg/logger"
     "api/pkg/database"
 )
