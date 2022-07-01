@@ -6,6 +6,7 @@ require github.com/gin-gonic/gin v1.8.1
 
 require (
 	github.com/astaxie/beego v1.12.3 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-ini/ini v1.66.6 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
