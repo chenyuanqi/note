@@ -1,7 +1,6 @@
 package routers
 
 import (
-	_ "eddycjy_gin/docs"
 	"eddycjy_gin/middleware/jwt"
 	"eddycjy_gin/pkg/setting"
 	"eddycjy_gin/routers/api"
