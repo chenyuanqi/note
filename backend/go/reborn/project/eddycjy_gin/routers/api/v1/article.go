@@ -70,7 +70,7 @@ func GetArticles(c *gin.Context) {
 	if !valid.HasErrors() {
 		code = e.SUCCESS
 
-		data["lists"] = models.GetArticles(util.GetPage(c), setting.PageSize, maps)
+		data["lists"] = models.GetArticles(util.GetPage(c), setting.AppSetting.PageSize, maps)
 		data["total"] = models.GetArticleTotal(maps)
 
 	} else {
@@ -93,6 +93,7 @@ func AddArticle(c *gin.Context) {
 	title := c.PostForm("title")
 	desc := c.PostForm("desc")
 	content := c.PostForm("content")
+	coverImageUrl := c.PostForm("cover_image_url")
 	createdBy := c.PostForm("created_by")
 	state := com.StrTo(c.DefaultPostForm("state", "0")).MustInt()
 
@@ -101,6 +102,7 @@ func AddArticle(c *gin.Context) {
 	valid.Required(title, "title").Message("标题不能为空")
 	valid.Required(desc, "desc").Message("简述不能为空")
 	valid.Required(content, "content").Message("内容不能为空")
+	valid.Required(coverImageUrl, "cover_image_url").Message("封面图片不能为空")
 	valid.Required(createdBy, "created_by").Message("创建人不能为空")
 	valid.Range(state, 0, 1, "state").Message("状态只允许0或1")
 
@@ -112,6 +114,7 @@ func AddArticle(c *gin.Context) {
 			data["title"] = title
 			data["desc"] = desc
 			data["content"] = content
+			data["cover_image_url"] = coverImageUrl
 			data["created_by"] = createdBy
 			data["state"] = state
 
@@ -143,6 +146,7 @@ func EditArticle(c *gin.Context) {
 	title := c.PostForm("title")
 	desc := c.PostForm("desc")
 	content := c.PostForm("content")
+	coverImageUrl := c.PostForm("cover_image_url")
 	modifiedBy := c.PostForm("modified_by")
 
 	var state int = -1
@@ -174,6 +178,9 @@ func EditArticle(c *gin.Context) {
 				}
 				if content != "" {
 					data["content"] = content
+				}
+				if coverImageUrl != "" {
+					data["cover_image_url"] = coverImageUrl
 				}
 
 				data["modified_by"] = modifiedBy
