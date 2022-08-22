@@ -23,6 +23,65 @@ int 和 uint 类型长度由操作系统类型决定，如果系统是 32 位的
 | int16 | 有符号 16 位整型 (-2^15 到 2^15-1) |  
 | int32 | 有符号 32 位整型 (-2^31 到 2^31) |  
 | int64 | 有符号 64 位整型 (-2^64 到 2^64) |  
+| uintptr | 长度4或8字节 | 存储指针的 uint32 或 uint64 整数 |  
+
+```go
+// 取值范围
+package main
+
+import (
+	"fmt"
+	"math"
+	"unsafe"
+)
+
+func main() {
+	fmt.Println("各int类型的大小: ")
+	var i1 int = 1
+	var i2 int8 = 2
+	var i3 int16 = 3
+	var i4 int32 = 4
+	var i5 int64 = 5
+	var i6 uint64 = 6
+	fmt.Printf("int       : %v\n", unsafe.Sizeof(i1)) // int       : 8
+	fmt.Printf("int8  : %v\n", unsafe.Sizeof(i2)) // int8  : 1
+	fmt.Printf("int16 : %v\n", unsafe.Sizeof(i3)) // int16 : 2
+	fmt.Printf("int32 : %v\n", unsafe.Sizeof(i4)) // int32 : 4
+	fmt.Printf("int64 : %v\n", unsafe.Sizeof(i5)) // int64 : 8
+	fmt.Printf("uint64: %v\n", unsafe.Sizeof(i6)) // uint64: 8
+
+	// 输出各int类型的取值范围
+	fmt.Println("int8:", math.MinInt8, "~", math.MaxInt8) // int8: -128 ~ 127
+	fmt.Println("int16:", math.MinInt16, "~", math.MaxInt16) // int16: -32768 ~ 32767
+	fmt.Println("int32:", math.MinInt32, "~", math.MaxInt32) // int32: -2147483648 ~ 2147483647
+	fmt.Println("int64:", math.MinInt64, "~", math.MaxInt64) // int64: -9223372036854775808 ~ 9223372036854775807
+	fmt.Println()
+
+	// n是自动推导类型
+	n := 1234567890
+	fmt.Printf("n := 1234567890 的默认类型为: %T\n", n) // n := 1234567890 的默认类型为: int
+	fmt.Printf("int类型的字节数为: %v\n\n", unsafe.Sizeof(n)) // int类型的字节数为: 8
+
+	// 初始化一个32位整型值
+	var a int32 = 987654321
+	fmt.Println("var a int32 = 987654321") // var a int32 = 987654321
+
+	// 输出变量的十六进制形式和十进制
+	fmt.Printf("int32: 十六进制为0x%x, 十进制为%d\n", a, a) // int32: 十六进制为0x3ade68b1, 十进制为987654321
+
+	// 将a转换为int8类型, 发生数值截断
+	b := int8(a)
+	fmt.Printf("int8: 十六进制0x%x, 十进制为%d\n", b, b) // int8: 十六进制0x-4f, 十进制为-79
+
+	// 将a转换为int16类型, 发生数值截断
+	c := int16(a)
+	fmt.Printf("int16: 十六进制为0x%x, 十进制%d\n", c, c) // int16: 十六进制为0x68b1, 十进制26801
+
+	// 将a转换为int64类型
+	d := int64(a)
+	fmt.Printf("int64: 十六进制为0x%x, 十进制%d\n", d, d) // int64: 十六进制为0x3ade68b1, 十进制987654321
+}
+```
 
 **基本数据类型之浮点形**  
 对于浮点类型，只有 float32 和 float64，没有 float 类型，使用 IEEE-754 标准。  
@@ -47,7 +106,9 @@ c1 := 5 + 10i
 | complex128 | 含 float64 位实数和 float64 位虚数 |  
 
 **基本数据类型之布尔形**  
-布尔型使用 bool 声明，要么是 true, 要么是 false, 默认是 false。
+布尔型使用 bool 声明，要么是 true, 要么是 false, 默认是 false。  
+if 和 for 语句的条件部分都是布尔类型的值，并且 == 和 < 等比较运算符也会产生布尔型的值。一元操作符 ! 对应逻辑非操作，因此 !true 的值为 false。
+
 
 | 类型 | 精度 |  
 | :---: | :---: |  

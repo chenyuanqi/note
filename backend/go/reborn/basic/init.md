@@ -5,11 +5,36 @@
 | :---: | :---: | :---: |  
 | import、package | chan、const、func、interface、map、struct、type、var | break、case、continue、default、defer、else、fallthrough、for、go、goto、if、range、return、select |  
 
+Go语言中共有25个关键字：
+```go
+break      default       func     interface   select
+case       defer         go       map         struct
+chan       else          goto     package     switch
+const      fallthrough   if       range       type
+continue   for           import   return      var
+```
 
 **Go语言中的保留字**   
 | 常量 | 变量类型 | 内置函数名 |  
 | :---: | :---: | :---: |  
 | true、false、iota、nil | Int、int8、int16、int32、int64、uint、uint8、uint16、uint32、uint64、uintptr、float32、float64、complex128、complex64、bool、byte、rune、string、error | make、len、cap、new、append、copy、close、delete、complex、real、imag、panic、recover |  
+
+预定义名称列表：
+```go
+// 内建常量 
+true false iota nil
+
+// 内建类型 
+int int8 int16 int32 int64
+uint uint8 uint16 uint32 uint64 uintptr
+float32 float64 complex128 complex64
+bool byte rune string error
+
+// 内建函数
+make len cap new append copy close delete
+complex real imag
+panic recover
+```
 
 ### Go 执行次序
 Go 程序由一系列 Go 包组成，代码的执行也是在各个包之间跳转。  

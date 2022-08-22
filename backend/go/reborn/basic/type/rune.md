@@ -8,3 +8,19 @@ fmt.Println(len("Go语言")) // 8
 fmt.Println(len([]rune("Go语言"))) // 4
 ```
 
+rune 类型是和 int32 类型等价，在所有方面都等同于 int32，按照约定，它用于区分字符值和整数值。  
+rune 常用来处理 unicode 或 utf-8 字符，通常用于表示一个 Unicode 码点，这两个名称可以互换使用。即 rune 一个值代表的就是一个 Unicode 字符，它的最大特点就是可变长。它可以使用 1-4 个字节表示一个字符，根据字符的不同变换长度。所以使用 int32 类型范围就可以完美适配。 单个中文占 2 个字节，单个英文占 2 个字节。因为 Go 语言中字符串编码为 UTF-8 ，英文占 1 个字节，中文占 3 个字节。 占用空间相比之下会更大。  
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+	// 计算中文字符
+    var data = "帽儿山的枪手"
+    fmt.Println("data length", len(data)) // data length 18
+    fmt.Println("data word length", len([]rune(data))) // data word length 6
+}
+```
