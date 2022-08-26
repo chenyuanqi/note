@@ -120,7 +120,7 @@ cap 内建函数，返回指定类型的容量，根据不同类型，返回分�
 // 函数原型
 func cap(v Type) int 
 
-slice := make([]int, 5, 10)  // 第三个参数, 预留内存空间 10
+slice := make([]int, 5, 10)  // 第三个参数, 预留内存空间 10
 fmt.Println(cap(slice)) // 10
 ```
 
@@ -139,6 +139,98 @@ print("print", "帽儿山的枪手\n") // print帽儿山的枪手
 println("println", "帽儿山的枪手") // println 帽儿山的枪手
 ```
 
+**close**  
+close 内建函数，其功能是关闭一个通道，该通道必须是双向或仅发送。它只能由发送者执行，而不能由发送者执行接收器，并具有在最后一次发送值被接收。在从已关闭的通道 c，任何来自 c 的接收都将在不阻塞的情况下成功，返回通道元素的值为零。  
+`注意: 对于值为 nil 的 channel 或者对同一个 channel 重复 close, 都会 panic, 关闭只读 channel 会报编译错误。`  
+```go
+// 函数原型
+func close(c chan<- Type) 
 
+ch1 := make(chan int, 1) // 双向通道
+ch2 := make(chan<- int, 1) // 只写通道
+close(ch1)
+close(ch2)
+```
+
+**delete**  
+delete内置函数，是删除指定键值(map)元素。如果 map 是 nil 或没有这样的元素，delete 是禁止删除的。  
+```go
+// 函数原型
+func delete(m map[Type]Type1, key Type) 
+// Type1 类型， 仅用于文档编制。这是一个替身对于任何 Go 类型，但表示任何给定函数的相同类型
+
+mapInfo := make(map[string]int)
+mapInfo["key1"] = 1
+mapInfo["key2"] = 2
+mapInfo["key3"] = 3
+delete(mapInfo, "key1") //delete key1后输出map集合key和value
+for k, v := range mapInfo {
+   fmt.Printf("key:%s value:%d \n", k, v)
+}
+// key:key2 value:2
+// key:key3 value:3
+```
+
+**complex**  
+complex 内置函数，从指定的实部和虚部构建复数。  
+```go
+// 函数原型
+func complex(r, i FloatType) ComplexType 
+// Go 提供了两种大小的复数类型：complex64 和 complex128，分别由 float32 和 float64 组成
+
+complex(1, 2) // 构建复数
+```
+
+**real&imag**  
+内置函数 real 和 imag 用来获取复数的实部和虚部。
+```go
+// 函数原型
+func real(c ComplexType) FloatType
+func imag(c ComplexType) FloatType 
+
+var x complex128 = complex(1, 2) // 1+2i  构建复数
+var y complex128 = complex(3, 4) // 3+4i 构建复数
+fmt.Println(x*y)                 // "(-5+10i)" 
+fmt.Println(real(x*y))           // "-5"  获取实部
+fmt.Println(imag(x*y))           // "10"  获取虚部
+```
+
+**panic**  
+panic 内建函数，是在程序运行时才回抛出来的异常错误。在 panic 被抛出之后，如果没有在程序里添加任何保护措施的话，程序就会在打印出 panic 的详情，终止运行。  
+Go 语言追求简洁优雅，所以，Go 语言不支持传统的 try…catch…finally 这种异常，因为 Go 语言的设计者们认为，将异常与控制结构混在一起会很容易使得代码变得混乱。因为开发者很容易滥用异常，甚至一个小小的错误都抛出一个异常。在 Go 语言中，使用多值返回来返回错误。不要用异常代替错误，更不要用来控制流程。
+```go
+// 函数原型
+func panic(v interface{}) 
+
+// 引发panic
+panic("出现错误")
+```
+
+**recover**  
+recover 内建函数，会捕获错误信息，使该错误信息终止报告。 (用来控制一个 goroutine 的 panicking 行为，捕获 panic，从而影响应用的行为)。
+使用 recvoer 内建函数，通常在延迟函数中执行恢复调用。  
+- 在 defer 函数中，通过 recever 来终止一个 goroutine 的 panicking 过程，从而恢复正常代码的执行  
+- 可以获取通过 panic 传递的 error  
+- 利用 recover 处理 panic 指令，defer 必须在 panic 之前声明，否则当 panic 时，recover 无法捕获到 panic  
+
+```go
+// 函数原型
+func recover() interface{} 
+
+
+func main() {
+  defer func() { // 必须要先声明defer，否则不能捕获到panic异常
+    if err := recover(); err != nil {
+      fmt.Println(err) // panic内建函数传入的内容
+    }
+    fmt.Println("recover执行后") // 最后执行
+  }()
+  fmt.Println("正常执行")
+  panic("panic错误")
+}
+// 正常执行
+// panic错误
+// recover执行后
+```
 
 
