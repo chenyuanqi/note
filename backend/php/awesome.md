@@ -46,4 +46,4 @@
 [Laravel China](https://laravel-china.org/)  
 [Laravel 学院](http://laravelacademy.org/)  
 [风雪之隅](http://www.laruence.com/)  
-[点灯坊](http://oomusou.io/)  
+[点灯坊](https://old-oomusou.goodjack.tw/)  
