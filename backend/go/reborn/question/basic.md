@@ -22,4 +22,3 @@ x := []int {
 > 若 slice 容量小于 1024 个元素，那么扩容的时候 slice 的 cap 就翻番，乘以 2；一旦元素个数超过 1024 个元素，增长因子就变成 1.25，即每次增加原来容量的四分之一。  
 > 若 slice 容量够用，则将新元素追加进去，slice.len++，返回原 slice。  
 > 若 slice 容量不够用，将 slice 先扩容，扩容得到新 slice，将新元素追加进新 slice，slice.len++，返回新 slice。  
-
