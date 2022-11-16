@@ -185,10 +185,162 @@ pet := struct {
     name: "Fido",
     kind: "dog",
 }
+
+// defer
+// 延迟执行；参数预计算；LIFO 执行顺序
+func f() {
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("Recovered in f", r)
+        }
+    }()
+    fmt.Println("Calling g.")
+    g(0)
+    fmt.Println("Returned normally from g.")
+}
+
+// 接口
+// 声明和定义
+type Shape interface {
+  perimeter() float64
+  area() float64
+}
+var s Shape
+// 隐式地让一个类型实现接口
+type Rectangle struct {
+  a, b float64
+}
+func (r Rectangle) perimeter() float64 {
+  return (r.a + r.b) * 2
+}
+func (r Rectangle) area() float64 {
+  return r.a * r.b
+}
+// 接口的动态调用方式
+var s Shape
+s = Rectangle{3, 4}
+s.perimeter()
+s.area()
+// 接口的嵌套
+type ReadWriter interface {
+  Reader
+  Writer
+}
+type Reader interface {
+  Read(p []byte) (n int, err error)
+}
+type Writer interface {
+  Write(p []byte) (n int, err error)
+}
+// 接口的类型断言
+func main(){
+  var s Shape
+  s = Rectangle{3, 4}
+  rect := s.(Rectangle)
+  fmt.Printf("长方形周长:%v, 面积:%v \\n",rect.perimeter(),rect.area())
+}
+// 根据空接口中动态类型的差异选择不同的处理方式
+switch f := arg.(type) {
+  case bool:
+    p.fmtBool(f, verb)
+  case float32:
+    p.fmtFloat(float64(f), 32, verb)
+  case float64:
+    p.fmtFloat(f, 64, verb)
 ```
 
+**并发编程**  
+在 Go 语言中与并发编程紧密相关的就是协程与通道。  
+- 进程、线程与协程。进程是操作系统资源分配的基本单位，线程是操作系统资源调度的基本单位。而协程位于用户态，是在线程基础上构建的轻量级调度单位。  
+- 并发与并行。并行指的是同时做很多事情，并发是指同时管理很多事情。  
+- 主协程与子协程。 main 函数是特殊的主协程，它退出之后整个程序都会退出。而其他的协程都是子协程，子协程退出之后，程序正常运行。
 
+```golang
+// 通道声明与初始化
+chan int
+chan <- float
+<-chan string
+// 通道写入数据
+c <- 5
+// 通道读取数据
+data := <- c
+// 通道关闭
+close(c)
+// 通道作为参数
+func worker(id int, c chan int) {
+  for n := range c {
+    fmt.Printf("Worker %d received %c\\n",
+      id, n)
+  }
+}
+// 通道作为返回值（一般用于创建通道的阶段）
+func createWorker(id int) chan int {
+  c := make(chan int)
+  go worker(id, c)
+  return c
+}
+// 单方向的通道，用于只读和只写场景
+func worker(id int, c <-chan int)
+// select 监听多个通道实现多路复用。当 case 中多个通道状态准备就绪时，select 随机选择一个分支进行执行
+select {
+  case <-ch1:
+    // ...
+  case x := <-ch2:
+    // ...use x...
+  case ch3 <- y:
+    // ...
+  default:
+    // ...
+  }
 
+// 用 context 来处理协程的优雅退出和级联退出
+
+func Stream(ctx context.Context, out chan<- Value) error {
+  for {
+    v, err := DoSomething(ctx)
+    if err != nil {
+      return err
+    }
+    select {
+    case <-ctx.Done():
+      return ctx.Err()
+    case out <- v:
+    }
+  }
+// 传统的同步原语：原子锁。Go 提供了 atomic 包用于处理原子操作
+func add() {
+  for {
+    if atomic.CompareAndSwapInt64(&flag, 0, 1) {
+      count++
+      atomic.StoreInt64(&flag, 0)
+      return
+    }
+  }
+}
+// 传统的同步原语：互斥锁
+var m sync.Mutex
+func add() {
+  m.Lock()
+  count++
+  m.Unlock()
+}
+// 传统的同步原语：读写锁。适合多读少写场景
+
+type Stat struct {
+  counters map[string]int64
+  mutex sync.RWMutex
+}
+func (s *Stat) getCounter(name string) int64 {
+  s.mutex.RLock()
+  defer s.mutex.RUnlock()
+  return s.counters[name]
+}
+func (s *Stat) SetCounter(name string){
+  s.mutex.Lock()
+  defer s.mutex.Unlock()
+  s.counters[name]++
+}
+```
 
 
 
