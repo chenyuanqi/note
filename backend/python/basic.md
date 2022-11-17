@@ -67,6 +67,9 @@ make install
 
 # mac install
 brew install python3
+# mac upgrade
+brew update
+brew upgrade Python3
 
 # pip 升级
 python -m pip install --upgrade pip
@@ -79,6 +82,8 @@ price = 100
 price + 100
 _ - 50 # 150
 ```
+
+[python环境管理](https://github.com/pyenv/pyenv)  
 
 ### Python 工具
 **Jupyter Notebook**  
