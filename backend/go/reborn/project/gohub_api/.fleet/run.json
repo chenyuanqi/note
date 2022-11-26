@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "go",
+            "name": "gohub_api",
+            "goExecPath": "/usr/local/bin/go",
+            "buildParams": [],
+        },
+    ]
+}
