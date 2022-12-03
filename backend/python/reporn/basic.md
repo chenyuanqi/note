@@ -38,4 +38,39 @@ pip install jupyterlab
 jupyter lab
 ```
 
+**文件操作**  
+```python
+file = open('test.txt', 'w')
+file.write('1')
+print("文件当前指针：". file.tell())
+print('回到开头')
+file.seek(0)
+print("文件当前指针：". file.tell())
+file.close()
+
+with open('test.txt') as f:
+	f.readline()
+``` 
+
+**异常处理**  
+```python
+try:
+	print(i)
+	raise ValueError('xxx')
+except NameError:
+    print('NameError')
+except Exception:
+	print('Exception')
+finally:
+	i = 2022
+```
+
+**函数**  
+```python
+def sum(num1, num2):
+	return num1 + num2
+print(sum(1, 1))
+```
+
+
 
