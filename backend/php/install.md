@@ -55,6 +55,15 @@ brew install php@7.4
 # 查看配置
 php -ini
 
+# 安装composer
+curl -sS https://getcomposer.org/installer | php 
+mkdir -p /usr/local/bin 
+mv composer.phar /usr/local/bin/composer 
+chmod +x /usr/local/bin/composer
+# 更新&卸载
+composer self-update 
+rm /usr/local/bin/composer 
+
 # 安装node
 brew install node
 # 更新
@@ -93,4 +102,16 @@ brew link --overwrite --force php@8.0
 # 切换回7.2
 brew unlink php@8.0
 brew link php@7.2
+
 ```
+
+安装laravel。
+```bash
+composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+composer global require laravel/installer
+```
+确保 Composer 的全局 vendor/bin 目录包含在系统 $PATH 路径中，以便系统可以找到 laravel 可执行命令。在不同的操作系统中，这个目录的位置也有所不同，常见的几种操作系列存放位置罗列如下：
+- macOS：$HOME/.composer/vendor/bin（$HOME 表示当前用户家目录，可以用 ~ 替代）  
+- Windows：%USERPROFILE%\AppData\Roaming\Composer\vendor\bin（%USERPROFILE% 代表的也是当前用户家目录）  
+- GNU/Linux：$HOME/.config/composer/vendor/bin 或者 $HOME/.composer/vendor/bin  
+
