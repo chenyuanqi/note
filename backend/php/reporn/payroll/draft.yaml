@@ -1,0 +1,34 @@
+models:
+  Department:
+    uuid: uuid
+    name: string:50
+    description: longtext
+    relationships:
+      hasMany: Employee
+  Employee:
+    uuid: uuid
+    full_name: string:100
+    email: string:100 index
+    department_id: id foreign
+    job_title: string:50
+    payment_type: string:20
+    salary: integer unsigned nullable
+    hourly_rate: integer unsigned nullable
+    relationships:
+      hasMany: Paycheck, Timelog
+  Paycheck:
+    uuid: uuid
+    employee_id: id foreign
+    net_amount: integer unsigned nullable
+    payed_at: timestamp nullable
+    relationships:
+      belongsTo: Employee
+  TimeLog:
+    uuid: uuid
+    employee_id: id foreign
+    started_at: timestamp nullable
+    stopped_at: timestamp nullable
+    minutes: integer unsigned nullable
+    relationships:
+      hasMany: Employee
+  
