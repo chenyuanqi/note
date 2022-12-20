@@ -1,6 +1,8 @@
 package gee
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // HandlerFunc defines the request handler used by gee
 type HandlerFunc func(*Context)
