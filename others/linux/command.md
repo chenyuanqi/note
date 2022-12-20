@@ -145,6 +145,7 @@ cp [OPTION] SRC DEST
 # 复制本地到远程： scp [-r] local_path user_name@ip:remote_path
 # 复制远程到本地： scp [-r] user_name@ip:remote_path local_path
 
+# rz，sz 是 Linux/Unix 和 Windows 进行 ZModem 文件传输的命令行工具，优点是不用再开一个sftp工具登录上去上传下载文件
 # yum install lrzsz/apt-get install lrzsz
 # 从服务器传文件到本地
 sz file_name
