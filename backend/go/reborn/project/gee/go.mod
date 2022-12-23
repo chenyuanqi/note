@@ -1,4 +1,4 @@
-module example
+module gee_example
 
 go 1.13
 
