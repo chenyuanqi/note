@@ -1,0 +1,41 @@
+package main
+
+import (
+	"fmt"
+	"geeorm"
+
+	// 注册 sqlite3 的驱动
+	_ "github.com/mattn/go-sqlite3"
+)
+
+func main() {
+	// db, _ := sql.Open("sqlite3", "gee.db")
+	// defer func() { db.Close() }()
+	// 执行 SQL 语句，如果是查询语句，不会返回相关的记录
+	// _, _ = db.Exec("DROP TABLE IF EXISTS User;")
+	// _, _ = db.Exec("CREATE TABLE User(Name text);")
+	// result, err := db.Exec("INSERT INTO User(`Name`) VALUES(?), (?)", "Tom", "Sam")
+	// if err == nil {
+	// 	affected, _ := result.RowsAffected()
+	// 	log.Println(affected)
+	// }
+
+	// 查询语句通常使用 Query() 和 QueryRow()，前者可以返回多条记录，后者只返回一条记录
+	// Exec()、Query()、QueryRow() 接受1或多个入参，第一个入参是 SQL 语句，后面的入参是 SQL 语句中的占位符 ? 对应的值，占位符一般用来防 SQL 注入
+	// QueryRow() 的返回值类型是 *sql.Row，row.Scan() 接受1或多个指针作为参数，可以获取对应列(column)的值，在这个示例中，只有 Name 一列，因此传入字符串指针 &name 即可获取到查询的结果
+	// row := db.QueryRow("SELECT Name FROM User LIMIT 1")
+	// var name string
+	// if err := row.Scan(&name); err == nil {
+	// 	log.Println(name)
+	// }
+
+	engine, _ := geeorm.NewEngine("sqlite3", "gee.db")
+	defer engine.Close()
+	s := engine.NewSession()
+	_, _ = s.Raw("DROP TABLE IF EXISTS User;").Exec()
+	_, _ = s.Raw("CREATE TABLE User(Name text);").Exec()
+	_, _ = s.Raw("CREATE TABLE User(Name text);").Exec()
+	result, _ := s.Raw("INSERT INTO User(`Name`) values (?), (?)", "Tom", "Sam").Exec()
+	count, _ := result.RowsAffected()
+	fmt.Printf("Exec success, %d affected\n", count)
+}
