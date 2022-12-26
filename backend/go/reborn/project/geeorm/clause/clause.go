@@ -1,6 +1,8 @@
 package clause
 
-import "strings"
+import (
+	"strings"
+)
 
 type Clause struct {
 	sql     map[Type]string
@@ -9,6 +11,7 @@ type Clause struct {
 
 type Type int
 
+// Support types for Clause
 const (
 	INSERT Type = iota
 	VALUES
@@ -16,6 +19,9 @@ const (
 	LIMIT
 	WHERE
 	ORDERBY
+	UPDATE
+	DELETE
+	COUNT
 )
 
 // 根据 Type 调用对应的 generator，生成该子句对应的 SQL 语句
