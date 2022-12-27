@@ -5,6 +5,7 @@ import (
 
 	"errors"
 	_ "github.com/mattn/go-sqlite3"
+	"reflect"
 	"testing"
 )
 
@@ -66,4 +67,23 @@ func TestEngine_Transaction(t *testing.T) {
 	t.Run("commit", func(t *testing.T) {
 		transactionCommit(t)
 	})
+}
+
+func TestEngine_Migrate(t *testing.T) {
+	engine := OpenDB(t)
+	defer engine.Close()
+	s := engine.NewSession()
+	// 假设原有的 User 包含两个字段 Name 和 XXX
+	_, _ = s.Raw("DROP TABLE IF EXISTS User;").Exec()
+	_, _ = s.Raw("CREATE TABLE User(Name text PRIMARY KEY, XXX integer);").Exec()
+	_, _ = s.Raw("INSERT INTO User(`Name`) values (?), (?)", "Tom", "Sam").Exec()
+	// 在一次业务变更之后，User 结构体的字段变更为 Name 和 Age
+	// 调用 Migrate(&User{}) 之后，新表的结构为 Name，Age
+	engine.Migrate(&User{})
+
+	rows, _ := s.Raw("SELECT * FROM User").QueryRows()
+	columns, _ := rows.Columns()
+	if !reflect.DeepEqual(columns, []string{"Name", "Age"}) {
+		t.Fatal("Failed to migrate table User, got columns", columns)
+	}
 }
