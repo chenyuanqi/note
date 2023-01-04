@@ -42,6 +42,8 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 > 不要（在生产环境）使用 panic()  
 
 ### Go 入门
+[Go 中文文档](https://go-zh.org/doc/)  
+
 [零基础通关 Go 语言](https://juejin.cn/book/7039174186522116131)  
 [Go 实战：web 入门](https://learnku.com/courses/go-basic/1.17)  
 
@@ -55,8 +57,10 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 [Go 编码指南](https://learnku.com/go/wikis/38174)  
 [Go 编码规范](https://learnku.com/go/wikis/38426)  
 [Go 最佳实践](https://learnku.com/go/wikis/38430)  
+[Go 语言圣经](https://yar999.gitbook.io/gopl-zh/)  
 [地鼠文档](https://www.topgoer.cn/)  
 
 ### Go 进阶
 [Go 语言编程之旅](https://golang2.eddycjy.com/)  
 
+[Gopher 日报](https://github.com/bigwhite/gopherdaily)  
