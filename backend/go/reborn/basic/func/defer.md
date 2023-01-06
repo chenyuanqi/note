@@ -72,3 +72,201 @@ func fileSize(filename string) int64 {
 }
 ```
 
+### Defer 必掌握的 7 个知识点
+**知识点1：defer的执行顺序**  
+多个 defer 出现的时候，它是一个“栈”的关系，也就是先进后出。一个函数中，写在前面的 defer 会比写在后面的 defer 调用的晚。
+```go
+package main
+
+import "fmt"
+
+func main() {
+    defer func1()
+    defer func2()
+    defer func3()
+    // C
+    // B
+    // A
+}
+
+func func1() {
+    fmt.Println("A")
+}
+
+func func2() {
+    fmt.Println("B")
+}
+
+func func3() {
+    fmt.Println("C")
+}
+```
+
+**知识点2: defer 与 return 谁先谁后**  
+return 之后的语句先执行，defer 后的语句后执行。  
+```go
+package main
+
+import "fmt"
+
+func deferFunc() int {
+    fmt.Println("defer func called")
+    return 0
+}
+
+func returnFunc() int {
+    fmt.Println("return func called")
+    return 0
+}
+
+func returnAndDefer() int {
+    defer deferFunc()
+    return returnFunc()
+}
+
+func main() {
+    returnAndDefer()
+    // return func called
+    // defer func called
+}
+```
+
+**知识点3：函数的返回值初始化**  
+该知识点不属于 defer 本身，但是调用的场景却与 defer 有联系，所以也算是 defer 必备了解的知识点之一。  
+如：func DeferFunc1(i int) (t int) {} 其中返回值 t int，这个 t 会在函数起始处被初始化为对应类型的零值并且作用域为整个函数。  
+证明，只要声明函数的返回值变量名称，就会在函数初始化时候为之赋值为0，而且在函数体作用域可见。  
+```go
+package main
+
+import "fmt"
+
+func DeferFunc1(i int) (t int) { // 初始化 i=10，t=0
+    fmt.Println("t = ", t)
+
+    return 2 // 赋值 t=2
+}
+
+func main() {
+    DeferFunc11(10) 
+    // t =  0
+}
+```
+
+**知识点4: 有名函数返回值遇见 defer 情况**  
+在没有 defer 的情况下，其实函数的返回就是与 return 一致的，但是有了 defer 就不一样了。“先 return，再 defer”的原则，所以在执行完 return 之后，还要再执行 defer 里的语句，依然可以修改本应该返回的结果。  
+```go
+package main
+
+import "fmt"
+
+func returnButDefer() (t int) {  //t初始化0，并且作用域为该函数全域
+
+    defer func() {
+        t = t * 10
+    }()
+
+    return 1 // t赋值1
+}
+
+func main() {
+    fmt.Println(returnButDefer()) 
+    // 10
+}
+```
+
+**知识点5: defer 遇见 panic**  
+遇到 panic 时，遍历本协程的 defer 链表，并执行 defer。  
+在执行 defer 过程中：遇到 recover 则停止 panic，返回 recover 处继续往下执行；如果没有遇到 recover，遍历完本协程的 defer 链表后，向 stderr 抛出 panic 信息。  
+defer 最大的功能是 panic 后依然有效，所以 defer 可以保证你的一些资源一定会被关闭，从而避免一些异常出现的问题。
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    defer_call()
+
+    fmt.Println("main 正常结束")
+    // defer: panic 之前2, 不捕获
+    // defer: panic 之前1, 捕获异常
+    // 异常内容
+    // main 正常结束
+}
+
+func defer_call() {
+
+    defer func() {
+        fmt.Println("defer: panic 之前1, 捕获异常")
+        if err := recover(); err != nil {
+            fmt.Println(err)
+        }
+    }()
+
+    defer func() { fmt.Println("defer: panic 之前2, 不捕获") }()
+
+    panic("异常内容")  //触发defer出栈
+
+	defer func() { fmt.Println("defer: panic 之后, 永远执行不到") }()
+}
+```
+
+**知识点6: defer 中包含 panic**  
+panic 仅有最后一个可以被 revover 捕获。  
+触发 panic("panic") 后 defer 顺序出栈执行，第一个被执行的 defer 中会有 panic("defer panic") 异常语句，这个异常将会覆盖掉 main 中的异常 panic("panic")，最后这个异常被第二个执行的 defer 捕获到。
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main()  {
+    defer func() {
+       if err := recover(); err != nil{
+           fmt.Println(err)
+       }else {
+           fmt.Println("fatal")
+       }
+    }()
+
+    defer func() {
+        panic("defer panic")
+    }()
+
+    panic("panic")
+    // defer panic
+}
+```
+
+**知识点7: defer 下的函数参数包含子函数**  
+如下 4 个函数的先后执行顺序是什么呢？  
+这里面有两个 defer， 所以 defer 一共会压栈两次，先进栈 1，后进栈 2。 那么在压栈 function1 的时候，需要连同函数地址、函数形参一同进栈，那么为了得到 function1 的第二个参数的结果，所以就需要先执行function3 将第二个参数算出，那么 function3 就被第一个执行。同理压栈 function2，就需要执行 function4 算出 function2 第二个参数的值。然后函数结束，先出栈 fuction2、再出栈 function1。所以顺序如下：
+● defer 压栈 function1，压栈函数地址、形参1、形参2(调用 function3) --> 打印3  
+● defer 压栈 function2，压栈函数地址、形参1、形参2(调用 function4) --> 打印4  
+● defer 出栈 function2, 调用 function2 --> 打印2   
+● defer 出栈 function1, 调用 function1--> 打印1  
+```go
+package main
+
+import "fmt"
+
+func function(index int, value int) int {
+    fmt.Println(index)
+
+    return index
+}
+
+func main() {
+    defer function(1, function(3, 0))
+    defer function(2, function(4, 0))
+    // 3
+    // 4
+    // 2
+    // 1
+}
+```
+
+[更多参考](https://www.yuque.com/aceld/golang/qnubsg)  
+

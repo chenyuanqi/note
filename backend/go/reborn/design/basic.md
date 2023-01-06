@@ -108,15 +108,184 @@ func main() {
 
 3、里氏代换原则 (Liskov Substitution Principle, LSP）  
 任何抽象类（interface接口）出现的地方都可以用他的实现类进行替换，实际就是虚拟机制，语言级别实现面向对象功能。  
+```go
+type Bird interface {
+    ID() int
+    Name() string
+}
+
+type FlyableBird interface {
+    Bird
+    Fly() error
+}
+
+type RunnableBird interface {
+    Bird
+    Run() error
+}
+```
 
 4、依赖倒转原则 (Dependence  Inversion Principle, DIP)  
 依赖于抽象(接口)，不要依赖具体的实现(类)，也就是针对接口编程。  
+```go
+/*
+模拟组装2台电脑
+--- 抽象层 ---
+有显卡Card  方法display
+有内存Memory 方法storage
+有处理器CPU   方法calculate
+
+--- 实现层层 ---
+有 Intel因特尔公司 、产品有(显卡、内存、CPU)
+有 Kingston 公司， 产品有(内存3)
+有 NVIDIA 公司， 产品有(显卡)
+
+--- 逻辑层 ---
+1. 组装一台Intel系列的电脑，并运行
+2. 组装一台 Intel CPU  Kingston内存 NVIDIA显卡的电脑，并运行
+*/
+package main
+
+import "fmt"
+
+//------  抽象层 -----
+type Card interface{
+	Display()
+}
+
+type Memory interface {
+	Storage()
+}
+
+type CPU interface {
+	Calculate()
+}
+
+type Computer struct {
+	cpu CPU
+	mem Memory
+	card Card
+}
+
+func NewComputer(cpu CPU, mem Memory, card Card) *Computer{
+	return &Computer{
+		cpu:cpu,
+		mem:mem,
+		card:card,
+	}
+}
+
+func (this *Computer) DoWork() {
+	this.cpu.Calculate()
+	this.mem.Storage()
+	this.card.Display()
+}
+
+//------  实现层 -----
+//intel
+type IntelCPU struct {
+	CPU	
+}
+
+func (this *IntelCPU) Calculate() {
+	fmt.Println("Intel CPU 开始计算了...")
+}
+
+type IntelMemory struct {
+	Memory
+}
+
+func (this *IntelMemory) Storage() {
+	fmt.Println("Intel Memory 开始存储了...")
+}
+
+type IntelCard struct {
+	Card
+}
+
+func (this *IntelCard) Display() {
+	fmt.Println("Intel Card 开始显示了...")
+}
+
+//kingston
+type KingstonMemory struct {
+	Memory
+}
+
+func (this *KingstonMemory) Storage() {
+	fmt.Println("Kingston memory storage...")
+}
+
+//nvidia
+type NvidiaCard struct {
+	Card
+}
+
+func (this *NvidiaCard) Display() {
+	fmt.Println("Nvidia card display...")
+}
+
+
+//------  业务逻辑层 -----
+func main() {
+	//intel系列的电脑
+	com1 := NewComputer(&IntelCPU{}, &IntelMemory{}, &IntelCard{})
+	com1.DoWork()
+
+	//杂牌子
+	com2 := NewComputer(&IntelCPU{}, &KingstonMemory{}, &NvidiaCard{})
+	com2.DoWork()
+}
+```
 
 5、接口隔离原则 (Interface Segregation Principle, ISP）   
 不应该强迫用户的程序依赖他们不需要的接口方法。一个接口应该只提供一种对外功能，不应该把所有操作都封装到一个接口中去。  
 
 6、合成复用原则 (Composite Reuse Principle, CRP)  
 如果使用继承，会导致父类的任何变换都可能影响到子类的行为。如果使用对象组合，就降低了这种依赖关系。对于继承和组合，优先使用组合。  
+```go
+package main
+
+import "fmt"
+
+type Cat struct {}
+
+func (c *Cat) Eat() {
+	fmt.Println("小猫吃饭")
+}
+
+//给小猫添加一个 可以睡觉的方法 （使用继承来实现）
+type CatB struct {
+	Cat
+}
+
+func (cb *CatB) Sleep() {
+	fmt.Println("小猫睡觉")
+}
+
+//给小猫添加一个 可以睡觉的方法 （使用组合的方式）
+type CatC struct {
+	C *Cat
+}
+
+func (cc *CatC) Sleep() {
+	fmt.Println("小猫睡觉")
+}
+
+
+func main() {
+	//通过继承增加的功能，可以正常使用
+	cb := new(CatB)
+	cb.Eat()
+	cb.Sleep()
+
+	//通过组合增加的功能，可以正常使用
+	cc := new(CatC)
+	cc.C = new(Cat)
+	cc.C.Eat()
+	cc.Sleep()
+}
+```
 
 7、迪米特法则 (Law of Demeter, LoD）  
 一个对象应当对其他对象尽可能少的了解，从而降低各个对象之间的耦合，提高系统的可维护性。例如在一个程序中，各个模块之间相互调用时，通常会提供一个统一的接口来实现。这样其他模块不需要了解另外一个模块的内部实现细节，这样当一个模块内部的实现发生改变时，不会影响其他模块的使用。（黑盒原理）  
