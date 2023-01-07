@@ -1,5 +1,9 @@
 <?php
 
+// TODO：
+// 1、自动加载配置 config
+// 2、http 请求响应
+// 3、...
 define('ROOT_PATH', realpath('./'));
 define('CORE_PATH', realpath('./core'));
 define('APP_PATH', realpath('./app'));
