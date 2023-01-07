@@ -10,9 +10,9 @@ class IndexController extends controller
     public function actionIndex()
     {
         $model = new UserModel();
-        $data  = $model->findAll();
+        $list  = $model->findAll();
 
-        $this->response(10000, $data);
+        $this->response(10000, compact('list'));
     }
 
     public function actionDemo()
