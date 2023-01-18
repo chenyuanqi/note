@@ -43,6 +43,7 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 
 ### Go 入门
 [Go 中文文档](https://go-zh.org/doc/)  
+[Go 模块代理](https://goproxy.cn/)  
 
 [零基础通关 Go 语言](https://juejin.cn/book/7039174186522116131)  
 [Go 实战：web 入门](https://learnku.com/courses/go-basic/1.17)  
