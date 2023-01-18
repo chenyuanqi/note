@@ -67,3 +67,4 @@ Authorization: Bearer <token>
 2、secret 定时替换  
 3、使用 HTTPS 加密协议  
 4、对标准字段 iss、sub、aud、nbf、exp 进行校验  
+5、Token 被盗用？在防止冒充这个部分，需要其他的防护手段，比如 HTTPS 双向认证，双向加密之类的  
