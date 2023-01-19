@@ -3,6 +3,8 @@ package business
 import (
 	"fmt"
 	"mlj/pkg/database"
+
+	"github.com/asaskevich/govalidator"
 )
 
 type Business struct {
@@ -11,9 +13,9 @@ type Business struct {
 }
 
 type BusinessParams struct {
-	StartTime string `form:"start_time"`
-	EndTime   string `form:"end_time"`
-	Uid       string `form:"uid"`
+	StartTime string `valid:"required" form:"start_time"`
+	EndTime   string `valid:"required" form:"end_time"`
+	Uid       string `valid:"required,numeric" form:"uid"`
 }
 
 type BusinessResponse struct {
@@ -28,6 +30,10 @@ type BusinessResponse struct {
 }
 
 func (b *Business) Query() (err error) {
+	if _, err := govalidator.ValidateStruct(b.Request); err != nil {
+		return err
+	}
+
 	sql := fmt.Sprintf(`select
 		sum(computed) as 'computed',
 		sum(if(platform='ali', computed, 0)) as 'tb_computed',

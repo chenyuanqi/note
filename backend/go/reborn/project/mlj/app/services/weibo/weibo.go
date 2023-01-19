@@ -3,6 +3,8 @@ package weibo
 import (
 	"fmt"
 	"mlj/pkg/database"
+
+	"github.com/asaskevich/govalidator"
 )
 
 type Weibo struct {
@@ -11,9 +13,9 @@ type Weibo struct {
 }
 
 type WeiboParams struct {
-	StartTime string `form:"start_time"`
-	EndTime   string `form:"end_time"`
-	Uid       string `form:"uid"`
+	StartTime string `valid:"required" form:"start_time"`
+	EndTime   string `valid:"required" form:"end_time"`
+	Uid       string `valid:"required,numeric" form:"uid"`
 }
 
 type WeiboResponse struct {
@@ -24,6 +26,10 @@ type WeiboResponse struct {
 }
 
 func (w *Weibo) Query() (err error) {
+	if _, err := govalidator.ValidateStruct(w.Request); err != nil {
+		return err
+	}
+
 	sql := fmt.Sprintf(`select
 		count(distinct(item_id)) as weibo_count,
 		sum(if(platform in (1,2,3,5), 1, 0)) as 'tb_weibo_count',

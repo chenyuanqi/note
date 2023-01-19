@@ -4,6 +4,8 @@ import (
 	"mlj/app/services/business"
 	"mlj/app/services/weibo"
 	"sync"
+
+	"github.com/asaskevich/govalidator"
 )
 
 type Bi struct {
@@ -15,9 +17,9 @@ type Bi struct {
 }
 
 type BiParams struct {
-	StartTime string `form:"start_time"`
-	EndTime   string `form:"end_time"`
-	Uid       string `form:"uid"`
+	StartTime string `valid:"required" form:"start_time"`
+	EndTime   string `valid:"required" form:"end_time"`
+	Uid       string `valid:"required,numeric" form:"uid"`
 }
 
 type BiResponse struct {
@@ -26,6 +28,10 @@ type BiResponse struct {
 }
 
 func (b *Bi) Query() (err error) {
+	if _, err := govalidator.ValidateStruct(b.Request); err != nil {
+		return err
+	}
+
 	var wg sync.WaitGroup
 
 	wg.Add(1)
