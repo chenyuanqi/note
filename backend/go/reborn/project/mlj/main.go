@@ -31,8 +31,11 @@ func main() {
 	})
 	biGroup := r.Group("bi")
 	{
-		bussiness := new(bi.BussinessController)
-		biGroup.GET("bussiness", bussiness.Query)
+		bb := new(bi.BiController)
+		biGroup.GET("index", bb.Query)
+
+		business := new(bi.BusinessController)
+		biGroup.GET("business", business.Query)
 
 		weibo := new(bi.WeiboController)
 		biGroup.GET("weibo", weibo.Query)

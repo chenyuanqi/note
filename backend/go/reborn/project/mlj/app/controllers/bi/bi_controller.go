@@ -2,18 +2,18 @@ package bi
 
 import (
 	"mlj/app/controllers"
-	bs "mlj/app/services/business"
+	bb "mlj/app/services/bi"
 	"mlj/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )
 
-type BusinessController struct {
+type BiController struct {
 	controllers.Controller
 }
 
-func (ctrl *BusinessController) Query(c *gin.Context) {
-	b := &bs.Business{}
+func (ctrl *BiController) Query(c *gin.Context) {
+	b := &bb.Bi{}
 	if err := c.ShouldBind(&b.Request); err != nil {
 		response.Fail(c, err.Error())
 	}

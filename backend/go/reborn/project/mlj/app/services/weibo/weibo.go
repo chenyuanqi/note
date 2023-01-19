@@ -35,12 +35,10 @@ func (w *Weibo) Query() (err error) {
 	    created_time >= '%s 00:00:00'
 		and created_time <= '%s 23:59:59'
 		and uid = '%s'`, w.Request.StartTime, w.Request.EndTime, w.Request.Uid)
-	fmt.Printf("querysql = %s", sql)
+	// fmt.Printf("querysql = %s", sql)
 	if err := database.DBWeibo.Raw(sql).Scan(&w.Response).Error; err != nil {
 		return err
 	}
-
-	fmt.Println(w)
 
 	return nil
 }

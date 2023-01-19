@@ -1,4 +1,4 @@
-package Business
+package business
 
 import (
 	"fmt"
@@ -43,7 +43,7 @@ func (b *Business) Query() (err error) {
 		date >= '%s'
 		and date <= '%s'
 		and uid = '%s'`, b.Request.StartTime, b.Request.EndTime, b.Request.Uid)
-	fmt.Printf("querysql = %s", sql)
+	// fmt.Printf("querysql = %s", sql)
 	if err := database.DBItMain.Raw(sql).Scan(&b.Response).Error; err != nil {
 		return err
 	}
