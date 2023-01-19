@@ -33,6 +33,9 @@ func main() {
 	{
 		bussiness := new(bi.BussinessController)
 		biGroup.GET("bussiness", bussiness.Query)
+
+		weibo := new(bi.WeiboController)
+		biGroup.GET("weibo", weibo.Query)
 	}
 
 	r.NoRoute(func(c *gin.Context) {

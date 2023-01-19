@@ -13,7 +13,7 @@ type BussinessController struct {
 }
 
 func (ctrl *BussinessController) Query(c *gin.Context) {
-	b := &bs.Bussiness{}
+	b := &bs.Business{}
 	if err := c.ShouldBind(&b.Request); err != nil {
 		response.Fail(c, err.Error())
 	}
