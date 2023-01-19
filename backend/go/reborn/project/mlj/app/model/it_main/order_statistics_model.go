@@ -1,5 +1,5 @@
 //Package category 模型
-package category
+package it_main
 
 import (
 	"mlj/pkg/database"

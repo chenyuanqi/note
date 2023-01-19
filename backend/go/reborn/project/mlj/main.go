@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"mlj/app/controllers/bi"
+	"mlj/app/controllers/demo"
 	"mlj/app/middlewares"
 	"mlj/pkg/common/consts"
 
@@ -29,6 +30,7 @@ func main() {
 			"message": "ping success",
 		})
 	})
+
 	biGroup := r.Group("bi")
 	{
 		bb := new(bi.BiController)
@@ -39,6 +41,15 @@ func main() {
 
 		weibo := new(bi.WeiboController)
 		biGroup.GET("weibo", weibo.Query)
+	}
+
+	userGroup := r.Group("user")
+	{
+		u := new(demo.UserController)
+		userGroup.GET("detail", u.Detail)
+		userGroup.POST("create", u.Create)
+		userGroup.PUT("update", u.Update)
+		userGroup.DELETE("delete", u.Delete)
 	}
 
 	r.NoRoute(func(c *gin.Context) {
