@@ -20,6 +20,13 @@ type Users struct {
 	Password  string    `gorm:"column:password" json:"-"`
 }
 
+func (u *Users) Find() []Users {
+	result := []Users{}
+	database.DB.Find(&result)
+
+	return result
+}
+
 func (u *Users) FindByID(id int64) {
 	database.DB.First(&u, id)
 }
