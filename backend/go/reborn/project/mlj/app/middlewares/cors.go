@@ -18,9 +18,9 @@ func Cors(c *gin.Context) {
 	c.Header("Access-Control-Allow-Credentials", "true")
 	c.Header("x-container-pod", os.Getenv("HOSTNAME"))
 
-	if c.Request.Method == "OPTIONS" {
+	if c.Request.Method == http.MethodOptions {
 		c.AbortWithStatus(http.StatusNoContent)
-		return
 	}
+
 	c.Next()
 }

@@ -73,3 +73,21 @@ func FirstElement(args []string) string {
 	}
 	return ""
 }
+
+// 时间格式转化
+func TimeFormat(format string) string {
+	var transfer_format string
+	switch format {
+	case "Y/m/d":
+		transfer_format = "2006/01/02"
+	case "Y-m-d":
+		transfer_format = "2006-01-02"
+	case "Y/m/d H:i:s":
+		transfer_format = "2006/01/02 15:04:05"
+	case "Y-m-d H:i:s":
+	default:
+		transfer_format = "2006-01-02 15:04:05"
+	}
+
+	return transfer_format
+}
