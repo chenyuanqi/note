@@ -35,10 +35,5 @@ func runExport(cmd *cobra.Command, args []string) {
 	// fmt.Printf("%+v", data)
 
 	console.Success("export to excel")
-	excel.ExportXlsx("用户信息", map[string]string{
-		"id":         "ID",
-		"name":       "名称",
-		"email":      "邮件",
-		"created_at": "创建时间",
-	}, []string{"id", "name", "email", "created_at"}, data)
+	excel.ExportXlsx("用户信息", []string{"id", "name", "email", "created_at"}, []string{"ID", "名称", "邮件", "创建时间"}, data)
 }

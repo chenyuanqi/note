@@ -6,7 +6,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func ExportXlsx(name string, header map[string]string, fields []string, data []map[string]string) {
+func ExportXlsx(name string, fields []string, header []string, data []map[string]string) {
 	f := excelize.NewFile()
 	defer func() {
 		if err := f.Close(); err != nil {
@@ -23,8 +23,8 @@ func ExportXlsx(name string, header map[string]string, fields []string, data []m
 
 	// 设置头部
 	header_char := 'A'
-	for _, field := range fields {
-		f.SetCellValue("Sheet1", fmt.Sprintf("%c1", header_char), header[field])
+	for _, h := range header {
+		f.SetCellValue("Sheet1", fmt.Sprintf("%c1", header_char), h)
 		header_char++
 	}
 
