@@ -33,6 +33,6 @@ func PowerOf3(number int) bool {
 }
 
 func main() {
-	fmt.Printf("13 is power of 2: %v\n", PowerOf3(13))
-	fmt.Printf("81 is power of 2: %v\n", PowerOf3(81))
+	fmt.Printf("13 is power of 3: %v\n", PowerOf3(13))
+	fmt.Printf("81 is power of 3: %v\n", PowerOf3(81))
 }
