@@ -5,3 +5,5 @@
 # 缓存临时目录
 runtime
 tmp
+# 配置
+.env

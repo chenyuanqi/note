@@ -2,25 +2,34 @@ package main
 
 import (
 	"fmt"
-	"mlj/app/cmd/controllers"
-	"mlj/pkg/common/helpers"
-	"mlj/pkg/console"
 	"os"
+
+	"mlj/app/cmd/controllers"
+	btConfig "mlj/config"
+	"mlj/pkg/common/helpers"
+	"mlj/pkg/config"
+	"mlj/pkg/console"
 
 	"github.com/spf13/cobra"
 )
 
+var ROOT string
+
 func init() {
 	// 加载 config 目录下的配置信息
+	btConfig.Initialize()
 }
 
 func main() {
 	var rootCmd = &cobra.Command{
-		Use:   "-",
-		Short: "-",
+		Use:   config.Get("app.name"),
+		Short: "mlj project",
 		Long:  `Default will no command, you can use "-h" flag to see all subcommands`,
 		// rootCmd 的所有子命令都会执行以下代码
 		PersistentPreRun: func(command *cobra.Command, args []string) {
+			// 配置初始化，依赖命令行 --env 参数
+			config.InitConfig(Env)
+
 			// 初始化 Logger
 
 			// 初始化数据库

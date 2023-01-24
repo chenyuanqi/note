@@ -7,10 +7,18 @@ import (
 	"mlj/app/controllers/bi"
 	"mlj/app/controllers/demo"
 	"mlj/app/middlewares"
+	btConfig "mlj/config"
 	"mlj/pkg/common/consts"
+	"mlj/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )
+
+func init() {
+	// 初始化配置
+	btConfig.Initialize()
+	config.InitConfig(config.Get("app.env"))
+}
 
 func main() {
 	log.SetFlags(log.Ldate | log.Lmicroseconds | log.Lshortfile)
@@ -59,7 +67,7 @@ func main() {
 		})
 	})
 
-	if err := http.ListenAndServe(":9999", r); err != nil {
+	if err := http.ListenAndServe(":"+config.Get("app.port"), r); err != nil {
 		log.Fatalf("ListenAndServe err: %s", err)
 	}
 }

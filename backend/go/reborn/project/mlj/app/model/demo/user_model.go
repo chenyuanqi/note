@@ -22,13 +22,15 @@ type Users struct {
 
 func (u *Users) Find() []Users {
 	result := []Users{}
-	database.DB.Find(&result)
+	db, _ := database.GetDB()
+	db.Find(&result)
 
 	return result
 }
 
 func (u *Users) FindByID(id int64) {
-	database.DB.First(&u, id)
+	db, _ := database.GetDB()
+	db.First(&u, id)
 }
 
 func (u *Users) AfterFind(tx *gorm.DB) (err error) {
@@ -47,16 +49,19 @@ func (u *Users) BeforeCreate(scope *gorm.DB) (err error) {
 }
 
 func (u *Users) Create() {
-	database.DB.Create(&u)
+	db, _ := database.GetDB()
+	db.Create(&u)
 }
 
 func (u *Users) Save() (rowsAffected int64) {
-	result := database.DB.Save(&u)
+	db, _ := database.GetDB()
+	result := db.Save(&u)
 	return result.RowsAffected
 }
 
 func (u *Users) Delete() (rowsAffected int64) {
-	result := database.DB.Delete(&u)
+	db, _ := database.GetDB()
+	result := db.Delete(&u)
 	return result.RowsAffected
 }
 
