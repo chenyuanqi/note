@@ -10,6 +10,8 @@ import (
 	btConfig "mlj/config"
 	"mlj/pkg/common/consts"
 	"mlj/pkg/config"
+	"mlj/pkg/facade"
+	"mlj/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,6 +60,19 @@ func main() {
 		userGroup.POST("create", u.Create)
 		userGroup.PUT("update", u.Update)
 		userGroup.DELETE("delete", u.Delete)
+	}
+
+	requestGroup := r.Group("request")
+	{
+		requestGroup.GET("merchant-coupon-list", func(c *gin.Context) {
+			res, err := facade.GetMerchantCouponList(1, 10)
+			if err != nil {
+				response.Fail(c, err.Error())
+				return
+			}
+
+			response.Success(c, res, "")
+		})
 	}
 
 	r.NoRoute(func(c *gin.Context) {
