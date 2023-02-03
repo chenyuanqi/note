@@ -277,3 +277,28 @@ go run order.go -f etc/order.yaml
 # 访问 order api
 curl -i -X GET http://localhost:8888/api/order/get/1
 ```
+
+### Go Protobuf
+从 [Protobuf Release](https://github.com/protocolbuffers/protobuf/releases) 下载符合系统的安装包。
+```bash
+wget https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protoc-21.12-osx-x86_64.zip
+brew install p7zip
+sudo 7z x protoc-21.12-osx-x86_64.zip -o/usr/local
+sudo chmod 755 /usr/local/bin/protoc
+protoc --version
+```
+
+在 Golang 中使用 protobuf，还需要安装 protoc-gen-go，这个工具用来将 .proto 文件转换为 Golang 代码。
+```bash
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+```
+
+在 google.golang.org/protobuf 中，protoc-gen-go 纯粹用来生成 pb 序列化相关的文件，不再承载 gRPC 代码生成功能。  
+生成 gRPC 相关代码需要安装 grpc-go 相关的插件 protoc-gen-go-grpc。
+```bash
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+# 执行 code gen 命令
+protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    routeguide/route_guide.proto
+```
