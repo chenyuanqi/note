@@ -42,6 +42,7 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 > 不要（在生产环境）使用 panic()  
 
 ### Go 入门
+[Go awesome](https://github.com/avelino/awesome-go)  
 [Go 中文文档](https://go-zh.org/doc/)  
 [Go 模块代理](https://goproxy.cn/)  
 
@@ -65,3 +66,33 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 [Go 语言编程之旅](https://golang2.eddycjy.com/)  
 
 [Gopher 日报](https://github.com/bigwhite/gopherdaily)  
+
+### Go 工具
+[Aorm 数据库操作](https://github.com/tangpanqing/aorm)  
+[Gocache 缓存管理](https://github.com/eko/gocache)  
+[Goredis redis客户端](https://github.com/redis/go-redis)  
+
+[Viper 配置管理](http://github.com/spf13/viper)  
+[Zap 日志记录](https://github.com/uber-go/zap)  
+[Imaging 图片处理](https://github.com/disintegration/imaging)  
+
+[Cast 类型转换](https://github.com/spf13/cast)  
+[Carbon 日期处理](https://github.com/golang-module/carbon)  
+[Decimal 精度浮点数](https://github.com/shopspring/decimal)  
+
+[Govalidator 参数校验](https://github.com/asaskevich/govalidator)  
+[Grequest http请求](https://github.com/levigross/grequests)  
+[Fast http高性能服务](https://github.com/valyala/fasthttp)  
+
+[Cobra 命令行交互](https://github.com/spf13/cobra)  
+[Ansi 彩色字符](https://github.com/mgutz/ansi)  
+
+[Goconvey 测试工具](https://github.com/smartystreets/goconvey)  
+[Uuid uuid生成](https://github.com/pborman/uuid)  
+[Faker 数据生产](https://github.com/go-faker/faker)  
+
+[gzip gin中间件-gzip](https://github.com/gin-contrib/gzip)  
+[cors gin中间件-cors](https://github.com/gin-contrib/cors)  
+[jwt gin中间件-jwt](https://github.com/appleboy/gin-jwt)  
+[session gin中间件-session](https://github.com/gin-contrib/sessions)  
+[timeout gin中间件-timeout](https://github.com/gin-contrib/timeout)  
