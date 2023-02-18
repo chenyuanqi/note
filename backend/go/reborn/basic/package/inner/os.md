@@ -125,3 +125,25 @@ func main() {
 }
 // 因为使用 Stop 方法取消了 Notify 方法的监听，所以运行程序没有输出结果
 ```
+
+**获取进程ID**  
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	fmt.Printf("Process ID = %d\n", os.Getpid())
+	fmt.Printf("Parent process ID = %d\n", os.Getppid())
+}
+
+// $ go run main.go
+// 输出如下，你的输出可能和这里的不一样
+/**
+  Process ID = 13962
+  Parent process ID =  13860
+*/
+```

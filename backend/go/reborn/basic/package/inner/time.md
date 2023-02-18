@@ -62,11 +62,13 @@ import (
 )
 func main() {
     // 基于时间对象获取时间戳
-    now := time.Now()            //获取当前时间
-    timestamp1 := now.Unix()     //时间戳
-    timestamp2 := now.UnixNano() //纳秒时间戳
-    fmt.Printf("现在的时间戳：%v\n", timestamp1)
-    fmt.Printf("现在的纳秒时间戳：%v\n", timestamp2)
+    now := time.Now()
+	fmt.Println(now.Unix())      // 单位: 秒
+	fmt.Println(now.UnixNano())  // 单位: 纳秒
+
+	var timestamp int64 = 1676705548 // 解析时间戳
+	t := time.Unix(timestamp, 0)
+	fmt.Println(t.Format("2006-01-02 15:04:05"))
 
     // 使用 time.Unix() 函数可以将时间戳转为时间格式
     timeObj := time.Unix(timestamp, 0) //将时间戳转为时间格式
@@ -133,6 +135,33 @@ func (t Time) Before(u Time) bool
 func (t Time) After(u Time) bool
 ```
 
+**时间比较**  
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	now := time.Now()
+
+	afterHour := now.Add(time.Hour) // 当前时间加 1 个小时
+	fmt.Printf("afterHour after now = %t\n", afterHour.After(now))
+
+	beforeHour := now.Add(-time.Hour) // 当前时间减  1 个小时
+	fmt.Printf("beforeHour before now = %t\n", beforeHour.After(now))
+}
+
+// $ go run main.go
+// 输出如下
+/**
+  afterHour after now = true
+  beforeHour before now = false
+*/
+```
+
 **定时器**  
 使用 time.Tick(时间间隔) 可以设置定时器，定时器的本质上是一个通道（channel）。  
 ```go
@@ -196,3 +225,40 @@ func main() {
     fmt.Println(timeObj2)
 }
 ```
+
+**超时**  
+利用 `channel (通道)` 和 `time.After()` 方法实现超时控制。  
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	ch := make(chan bool)
+
+	go func() {
+		defer func() {
+			ch <- true
+		}()
+
+		time.Sleep(2 * time.Second) // 模拟超时操作
+	}()
+
+	select {
+	case <-ch:
+		fmt.Println("ok")
+	case <-time.After(time.Second):
+		fmt.Println("timeout!")
+	}
+}
+
+// $ go run main.go
+// 输出如下
+/**
+  timeout!
+*/
+```
+
