@@ -147,3 +147,85 @@ func main() {
   Parent process ID =  13860
 */
 ```
+
+**退出**  
+```go
+package main
+
+import "os"
+
+func main() {
+	os.Exit(3)
+
+	println("exiting ...") // 不会执行到这里
+}
+
+// $ go run main.go
+// 输出如下 
+/**
+  exit status 3
+*/
+```
+
+**执行系统命令**  
+```go
+package main
+
+import (
+	"fmt"
+	"os/exec"
+)
+
+func main() {
+	out, err := exec.Command("date").Output()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s\n", out)
+
+	out, err = exec.Command("git", "--version").Output()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s\n", out)
+}
+
+// $ go run main.go
+// 输出如下，你的输出可能和这里的不一样
+/**
+  Thu Nov  3 08:14:57 CST 2023
+
+  git version 2.30.1 (Apple Git-130)
+*/
+```
+
+**获取参数个数, 遍历参数**  
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	fmt.Printf("Number of args is %d\n\n", len(os.Args))
+
+	for _, arg := range os.Args {
+		fmt.Println(arg)
+	}
+}
+
+// $ go build main.go
+// $ ./main -a -b --c -d
+// 输出如下 
+/**
+  Number of args is 5
+
+  ./main
+  -a
+  -b
+  --c
+  -d
+*/
+```
