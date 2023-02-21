@@ -39,21 +39,102 @@ protoc --go_out=. --go_opt=paths=source_relative \
 3. 实现服务：使用生成的代码，实现服务的客户端和服务端，实现服务的功能。
 4. 部署服务：将服务端部署到服务器上，客户端可以通过网络访问服务端，实现服务的调用
 
-**定义消息类型**  
-student.proto 定义如下：
+要使用 Go 实现 Protocol Buffers (protobuf) 搭建客户端/服务器模型的通信，需要完成以下步骤：  
+1、安装 Go protobuf 库
+在命令行中使用以下命令安装 Go protobuf 库：  
+```bash
+go get -u google.golang.org/protobuf/cmd/protoc-gen-go
+```
+
+2、定义 protobuf 文件  
+定义 .proto 文件来描述消息的格式。例如，可以定义一个名为 message.proto 的文件，并在其中定义一个消息：  
 ```proto
 syntax = "proto3";
 
-package demo;
+package mypackage;
 
-// 输出路径
-option go_package=".";
-
-// this is a comment
-message Student {
-  string name = 1;
-  bool male = 2;
-  repeated int32 scores = 3;
+message MyMessage {
+    int32 id = 1;
+    string name = 2;
 }
 ```
 
+3、生成 Go 代码  
+在命令行中使用以下命令来生成 Go 代码：  
+```bash
+protoc --go_out=. message.proto
+```
+这将生成一个名为 message.pb.go 的文件，其中包含与消息格式匹配的 Go 结构体和方法。  
+
+4、编写服务器代码  
+在服务器端，可以使用 Go 的 net 和 grpc 库来编写代码。以下是一个简单的示例：  
+```go
+package main
+
+import (
+    "context"
+    "log"
+    "net"
+
+    "google.golang.org/grpc"
+    pb "path/to/your/proto/package"
+)
+
+type server struct {}
+
+func (s *server) GetMyMessage(ctx context.Context, req *pb.MyMessageRequest) (*pb.MyMessage, error) {
+    log.Printf("Received message ID: %d, Name: %s\n", req.Id, req.Name)
+    return &pb.MyMessage{Id: req.Id, Name: req.Name}, nil
+}
+
+func main() {
+    lis, err := net.Listen("tcp", ":50051")
+    if err != nil {
+        log.Fatalf("failed to listen: %v", err)
+    }
+
+    s := grpc.NewServer()
+    pb.RegisterMyServiceServer(s, &server{})
+
+    if err := s.Serve(lis); err != nil {
+        log.Fatalf("failed to serve: %v", err)
+    }
+}
+```
+在此示例中，我们定义了一个名为 MyService 的 gRPC 服务，并为其实现了一个名为 GetMyMessage 的方法。
+
+5、编写客户端代码  
+在客户端，可以使用 Go 的 grpc 库来编写代码。以下是一个简单的示例：  
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "google.golang.org/grpc"
+    pb "path/to/your/proto/package"
+)
+
+func main() {
+    conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+    if err != nil {
+        log.Fatalf("did not connect: %v", err)
+    }
+    defer conn.Close()
+
+    c := pb.NewMyServiceClient(conn)
+
+    message := &pb.MyMessageRequest{Id: 1, Name: "foo"}
+    res, err := c.GetMyMessage(context.Background(), message)
+    if err != nil {
+        log.Fatalf("could not get message: %v", err)
+    }
+
+    log.Printf("Received message ID: %d, Name: %s\n", res.Id, res.Name)
+}
+```
+在此示例中，我们创建了一个与服务器端通信的 gRPC 客户端，并调用了 GetMyMessage 方法。
+
+6、运行代码  
+在命令行中分别运行服务器  
