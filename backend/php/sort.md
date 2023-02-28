@@ -207,3 +207,11 @@ function merge(&$arr, $arr_p, $arr_q){
 }
 ```
 
+### 二维数组排序
+```php
+usort($data, function($a, $b) {
+    return $this->params['sort_type'] == 'desc' 
+    ? $b[$this->params['sort_field']] - $a[$this->params['sort_field']] 
+    : $a[$this->params['sort_field']] - $b[$this->params['sort_field']];
+});
+```
