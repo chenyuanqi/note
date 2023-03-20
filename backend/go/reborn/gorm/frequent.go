@@ -145,4 +145,17 @@ func Transaction() {
 	}
 }
 
+// 实现 MarshalJSON 方法
+func (u *User) MarshalJSON() ([]byte, error) {
+	type Alias User // 定义别名
+
+	return json.Marshal(&struct {
+		CreatedAt time.Time `json:"created_at"`
+		*Alias    // 使用别名
+	}{
+		CreatedAt: u.CreatedAt.Local(),
+		Alias:     (*Alias)(u),
+	})
+}
+
 func main() {}
