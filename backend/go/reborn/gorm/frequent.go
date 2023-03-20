@@ -103,6 +103,7 @@ func Upsert(data []map[string]interface{}) {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Clauses(clause.OnConflict{
 			Columns: []clause.Column{
+				// 重复的字段
 				{Name: "date"},
 				{Name: "category"},
 				{Name: "created_at"},
