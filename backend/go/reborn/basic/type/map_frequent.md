@@ -3,6 +3,7 @@
 Map 是 Golang 中一种关联数组（也称为哈希表或字典）的数据结构，可以存储键值对（key-value pairs）的无序集合。Map 的键可以是任何可比较的类型，而值可以是任意类型。
 
 ## 2. 创建和初始化 Map
+在 Golang 中，我们可以使用 make 函数来创建一个 Map，也可以使用字面量的方式直接创建。
 ### 2.1 使用 make 函数创建 Map
 ```go
 m := make(map[string]int) // 创建一个空的 Map，键类型为字符串，值类型为整数
@@ -124,6 +125,41 @@ func printSortedMap(m map[string]int) {
         fmt.Printf("键：%s, 值：%d\n", k, m[k])
     }
 }
+```
+
+### 4.6 统计单词出现次数
+```go
+func countWords(s string) map[string]int {
+    words := strings.Fields(s)
+    counts := make(map[string]int)
+    for _, w := range words {
+        counts[w]++
+    }
+    return counts
+}
+```
+
+### 4.7 按照键值对排序
+```go
+func sortMapByValue(m map[string]int) []string {
+    var ss []string
+    for k := range m {
+        ss = append(ss, k)
+    }
+    sort.Slice(ss, func(i, j int) bool {
+        return m[ss[i]] > m[ss[j]]
+    })
+    return ss
+}
+```
+
+### 4.8 Map 嵌套
+```go
+m := map[string]map[string]int{
+    "a": {"one": 1, "two": 2},
+    "b": {"three": 3, "four": 4},
+}
+fmt.Println(m["a"]["one"]) // 1
 ```
 
 ## 5. 总结
