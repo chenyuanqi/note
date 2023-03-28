@@ -192,3 +192,35 @@ for _, user := range users {
 }
 ```
 
+10. 事务
+```go
+func createUserWithOrders(db *gorm.DB) error {
+	tx := db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Create(&User{Name: "John"}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Create(&Order{Amount: 100}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+// 或
+if err := boot.DBXuanpinSystem.Transaction(func(tx *gorm.DB) error {
+    // ...
+}); err != nil {
+	return err
+}
+```
+
