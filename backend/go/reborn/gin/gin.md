@@ -3,16 +3,36 @@
 [Gin 中文文档](https://www.topgoer.cn/docs/ginkuangjia)  
 [Gin 示例代码](https://github.com/gin-gonic/examples)
 
+#### 获取参数
+```go
+// 路径中的
+router.GET("/user/:name", func(c *gin.Context) {
+	name := c.Param("name")
+	c.String(http.StatusOK, "Hello %s", name)
+})
+
+// url 参数
+firstname := c.DefaultQuery("firstname", "Guest")
+lastname := c.Query("lastname") // c.Request.URL.Query().Get("lastname") 的一种快捷方式
+
+// 表单参数
+name := c.PostForm("name")
+message := c.PostForm("message")
+
+// 获取 raw 参数
+raw, err := ioutil.ReadAll(c.Request.Body)
+```
+
 #### 使用结构体来传递参数
 ```go
 type User struct {
-    Name  string `json:"name" binding:"required"`
-    Email string `json:"email" binding:"required,email"`
+    Name  string `json:"name" form:"name" binding:"required"`
+    Email string `json:"email" form:"email" binding:"required,email"`
 }
 
 func CreateUser(c *gin.Context) {
     var user User
-    if err := c.ShouldBindJSON(&user); err != nil {
+    if err := c.ShouldBind(&user); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
