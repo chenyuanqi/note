@@ -1,6 +1,7 @@
 
 ### Gorm 框架简要使用
 golang orm 库旨在友好数据库开发。
+[Gorm 代码库-示例可参考测试用例](https://github.com/go-gorm/gorm)
 
 **特性**  
 - 全功能 ORM
