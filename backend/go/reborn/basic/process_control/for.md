@@ -150,3 +150,43 @@ for v := range c {
 }
 ```
 
+### for 的坑
+1、取地址符  
+在 Go 语言中，我们写 for 语句时有时会出现运行和猜想的结果不一致。例如以下第一个案例的代码：
+```go
+var all []*Item
+for _, item := range items {
+	all = append(all, &item)
+}
+```
+这段代码有问题吗？变量 all 内的 item 变量，存储进去的是什么？ 是每次循环的 item 值吗？实际上在 for 循环时，每次存入变量 all 的都是相同的 item，也就是最后一个循环的 item 值。由于 range 返回的是切片中元素的副本，因此在循环迭代期间，item 的值会发生变化，但是 all 切片中存储的指针仍然指向原始的 item 变量，因此最终 all 中所有的元素都将指向最后一次迭代中的 item 值。  
+这是 Go 面试里经常出现的题目，结合 goroutine 更风骚，毕竟还会存在乱序输出等问题。  
+如果你想解决这个问题，就需要把程序改写成如下：
+```go
+var all []*Item
+for _, item := range items {
+	item := item
+	all = append(all, &item)
+}
+```
+要重新声明一个 item 变量把 for 循环的 item 变量给存储下来再追加进去，确保每个指针都指向不同的局部变量，从而避免指针指向错误的问题。
+
+2、闭包函数  
+```go
+var prints []func()
+for _, v := range []int{1, 2, 3} {
+	prints = append(prints, func() { fmt.Println(v) })
+}
+for _, print := range prints {
+	print()
+}
+```
+这段程序的输出结果是什么？没有 & 取地址符，是输出 1，2，3 吗？输出结果是 3，3，3。这又是为什么？  
+问题的重点之一，关注到闭包函数，实际上所有闭包都打印的是相同的 v。输出 3，是因为在 for 循环结束后，最后 v 的值被设置为了 3，仅此而已（闭包中引用了循环变量 v，但是在调用闭包时，v 的值已经发生了改变。因此，每次调用闭包时都会打印最后一次迭代中的 v 值）。  
+如果想要达到预期的效果，依然是使用万能的再赋值。改写后的代码如下：
+```go
+for _, v := range []int{1, 2, 3} {
+    v := v // 使用一个局部变量来保存循环变量的值，然后将指向局部变量的指针添加到 prints 切片中
+    prints = append(prints, func() { fmt.Println(v) })
+}
+```
