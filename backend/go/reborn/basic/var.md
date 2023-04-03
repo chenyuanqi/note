@@ -36,6 +36,9 @@ b := 'A'
 c := "hello"
 // 或
 a, b, c := 12, 'A', "hello"
+
+// 查看变量的类型
+fmt.Printf("%T\n", a) // int
 ```
 
 **包级变量**  
