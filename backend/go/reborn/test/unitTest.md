@@ -306,3 +306,185 @@ func TestAdd(t *testing.T) {
 	assert.Equal(t, excepted, actual) // 使用 assert.Equal 函数简化 if 语句和日志打印，该函数期待 excepted 和 actual 变量相同，如果不相同会打印失败日志
 }
 ```
+
+### Gin + Gorm 单元测试
+1. 测试文件命名：
+Golang中的测试文件通常以`_test.go`结尾，与被测试的文件放在同一个目录下。例如，如果我们要测试`main.go`文件，测试文件应该命名为`main_test.go`。
+
+2. 编写测试函数：
+测试函数需要以`Test`开头，后接要测试的函数名。例如，要测试`main.go`中的`Add`函数，我们可以编写一个名为`TestAdd`的测试函数。
+
+```go
+func TestAdd(t *testing.T) {
+  // 测试逻辑
+}
+```
+
+3. 使用Gin和Gorm进行测试：
+在Gin框架中，我们通常使用`httptest`包来模拟HTTP请求。我们需要创建一个Gin引擎，然后为它添加路由，最后使用`httptest`发起请求，验证返回结果。  
+```go
+package main
+
+import (
+  "github.com/gin-gonic/gin"
+  "github.com/stretchr/testify/assert"
+  "net/http"
+  "net/http/httptest"
+  "testing"
+)
+
+func TestGetUser(t *testing.T) {
+  // 设置Gin
+  r := gin.Default()
+  r.GET("/user/:id", getUser)
+
+  // 发起请求
+  req, _ := http.NewRequest("GET", "/user/1", nil)
+  w := httptest.NewRecorder()
+  r.ServeHTTP(w, req)
+
+  // 检查结果
+  assert.Equal(t, http.StatusOK, w.Code)
+  assert.Equal(t, "User 1", w.Body.String())
+}
+```
+
+对于 Gorm，我们可以使用mock库，如`github.com/DATA-DOG/go-sqlmock`来模拟数据库操作。
+首先，让我们先定义一个简单的用户模型和数据库操作接口：
+```go
+package main
+
+import "database/sql"
+
+type User struct {
+  ID   int64
+  Name string
+}
+
+type UserRepository interface {
+  FindByID(id int64) (*User, error)
+}
+
+type userRepositoryImpl struct {
+  db *sql.DB
+}
+
+func (r *userRepositoryImpl) FindByID(id int64) (*User, error) {
+  var user User
+  err := r.db.QueryRow("SELECT id, name FROM users WHERE id = ?", id).Scan(&user.ID, &user.Name)
+  if err != nil {
+    return nil, err
+  }
+  return &user, nil
+}
+```
+接下来，我们将使用`go-sqlmock`库来模拟数据库操作并编写测试用例：
+```go
+package main
+
+import (
+  "database/sql"
+  "testing"
+  "github.com/DATA-DOG/go-sqlmock"
+  "github.com/stretchr/testify/assert"
+)
+
+func TestUserRepository_FindByID(t *testing.T) {
+  // 创建sqlmock
+  db, mock, err := sqlmock.New()
+  if err != nil {
+    t.Fatalf("failed to create sqlmock: %s", err)
+  }
+  defer db.Close()
+
+  // 创建userRepository
+  repo := &userRepositoryImpl{db: db}
+
+  // 设置期望的数据库操作
+  rows := sqlmock.NewRows([]string{"id", "name"}).
+    AddRow(1, "Alice")
+  mock.ExpectQuery("^SELECT (.+) FROM users WHERE").
+    WithArgs(1).
+    WillReturnRows(rows)
+
+  // 调用函数并检查结果
+  user, err := repo.FindByID(1)
+  assert.NoError(t, err)
+  assert.NotNil(t, user)
+  assert.Equal(t, int64(1), user.ID)
+  assert.Equal(t, "Alice", user.Name)
+
+  // 确认所有期望的数据库操作都已完成
+  err = mock.ExpectationsWereMet()
+  assert.NoError(t, err)
+}
+```
+在上述示例中，我们首先使用`sqlmock.New()`创建一个模拟的数据库连接对象`db`和一个与之关联的`sqlmock`对象。然后，我们创建一个`userRepositoryImpl`实例，将模拟的数据库连接对象`db`传递给它。  
+接下来，我们设置期望的数据库操作，这里我们期望执行一个查询操作，并返回包含一行数据（ID为1，名称为Alice）的结果。使用`mock.ExpectQuery`方法可以设置一个期望的查询操作，同时使用`WithArgs`和`WillReturnRows`方法分别设置查询参数和返回结果。  
+然后，我们调用`repo.FindByID(1)`，并使用`testify/assert`库检查返回的用户信息是否符合预期。  
+最后，我们使用`mock.ExpectationsWereMet()`方法检查所有期望的数据库操作是否都已完成。如果有未完成的操作，该方法将返回一个错误。  
+通过使用`go-sqlmock`库，我们可以轻松地模拟数据库操作并编写针对数据库相关功能的单元测试。  
+
+4. 运行测试：
+在命令行中，进入项目目录，运行`go test ./...`来运行所有测试。为了查看测试覆盖率，可以运行`go test -coverprofile=coverage.out ./...`，然后用`go tool cover -html=coverage.out -o coverage.html`生成覆盖率报告。
+
+5. 持续集成：
+为了确保团队的代码质量，我们可以将测试集成到持续集成（CI）系统中，确保每次提交代码时都会自动运行测试。
+通过以上方法，我们可以确保我们的Gin和Gorm应用具有高质量的代码。这有助于提高项目的稳定性和可维护性，为团队提供更好的开发体验。
+
+### 编写高质量单元测试的实践建议
+1. 编写简洁的测试函数：测试函数应当易于理解，每个测试函数尽量只测试一个功能点。在需要的情况下，可以将测试逻辑拆分到多个测试函数中，以提高可读性。
+
+2. 使用表格驱动测试：当需要为一个函数编写多个测试用例时，可以使用表格驱动测试。这种方法可以避免重复代码，并使得测试用例更易于理解和维护。
+
+```go
+func TestAdd(t *testing.T) {
+  testCases := []struct {
+    a        int
+    b        int
+    expected int
+  }{
+    {1, 2, 3},
+    {0, 0, 0},
+    {-1, 1, 0},
+  }
+
+  for _, tc := range testCases {
+    result := Add(tc.a, tc.b)
+    if result != tc.expected {
+      t.Errorf("Add(%d, %d) = %d; expected %d", tc.a, tc.b, result, tc.expected)
+    }
+  }
+}
+```
+
+3. 使用断言库：使用断言库（如`github.com/stretchr/testify/assert`）可以简化测试代码，并使错误信息更易于理解。
+
+```go
+import (
+  "testing"
+  "github.com/stretchr/testify/assert"
+)
+
+func TestAdd(t *testing.T) {
+  assert.Equal(t, 3, Add(1, 2))
+  assert.Equal(t, 0, Add(0, 0))
+  assert.Equal(t, 0, Add(-1, 1))
+}
+```
+
+4. 测试边界条件：在编写测试用例时，要考虑边界条件，如输入值为0、最大值、最小值等情况。
+
+5. Mock和Stub：在测试依赖外部服务或资源的代码时，可以使用Mock和Stub来隔离外部依赖，使测试更可控。例如，我们可以使用`github.com/DATA-DOG/go-sqlmock`库来模拟数据库操作。
+
+6. 优化测试速度：尽量减少测试运行时间，以提高开发效率。可以使用`testing.Short()`函数在快速模式下跳过耗时较长的测试。
+
+```go
+func TestSlow(t *testing.T) {
+  if testing.Short() {
+    t.Skip("skipping slow test in short mode")
+  }
+
+  // 这里是耗时较长的测试逻辑
+}
+```
