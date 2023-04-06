@@ -225,3 +225,59 @@ if err := boot.DBXuanpinSystem.Transaction(func(tx *gorm.DB) error {
 }
 ```
 
+11. 多条件查询  
+```go
+type Option func(*gorm.DB)
+
+func TableName(tableName string) Option {
+    return func(db *grom.DB) {
+        db.Table(tableName)
+    }
+}
+
+func UserID(ID int64) Option {    
+    return func(db *gorm.DB) {       
+        db.Where("`id` = ?", ID)    
+    } 
+}
+
+func Name(name int64) Option {    
+    return func(db *gorm.DB) {       
+        db.Where("`name` like %?%", name)    
+    } 
+}
+
+func Age(age int64) Option {    
+    return func(db *gorm.DB) {       
+        db.Where("`age` = ?", age)    
+    } 
+}
+
+func UserIDs(IDs int64) Option {    
+    return func(db *gorm.DB) {       
+        db.Where("`id` in (?)", IDs)    
+    } 
+}
+
+func AgeGT(age int64) Option {    
+    return func(db *gorm.DB) {       
+        db.Where("`age` > ?", age)    
+    } 
+}
+
+func GetRecords(ctx context.Context, in any, opts ...Option) {
+    db := GetDB(ctx)
+    for i:=range opts {
+        opts[i](db)
+    }
+    
+    return db.Find(in).Err
+}
+
+// 调用：根据user name 和age 查询users
+var users []User
+if err := GetRecords(ctx, &users, TableName("user"), Name("张三"), Age(18)); err != nil {
+    // TODO
+}
+```
+
