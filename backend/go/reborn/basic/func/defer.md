@@ -72,7 +72,13 @@ func fileSize(filename string) int64 {
 }
 ```
 
-### Defer 必掌握的 7 个知识点
+### Defer 必掌握的 7 个知识点  
+defer 是在函数返回之前执行，defer 的执行顺序是优先于 return。return 的执行是一个两步操作，先对 return 返回的值进行赋值，然后执行 defer 语句，最后将结果进行返回给函数的调用者。  
+
+即使函数内发生了 panic 异常，panic 之前定义的 defer 仍然会被执行。  
+
+defer 中存在子函数，子函数会按照 defer 的定义顺序执行。
+
 **知识点1：defer的执行顺序**  
 多个 defer 出现的时候，它是一个“栈”的关系，也就是先进后出。一个函数中，写在前面的 defer 会比写在后面的 defer 调用的晚。
 ```go
