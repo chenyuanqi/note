@@ -3,6 +3,14 @@
 [Gin 中文文档](https://www.topgoer.cn/docs/ginkuangjia)  
 [Gin 示例代码](https://github.com/gin-gonic/examples)
 
+#### 重定向
+```go
+ginServer.GET("/test", func(ctx *gin.Context) {
+	// 重定向 -> 301
+	ctx.Redirect(301, "https://xxx/")
+})
+```
+
 #### 获取参数
 ```go
 // 路径中的
@@ -44,8 +52,54 @@ func CreateUser(c *gin.Context) {
 }
 ```
 
-### 使用验证器来验证请求参数
+#### 使用验证器来验证请求参数
+在 gin 框架中，可以使用验证器来验证请求参数。常用的验证器有：  
+1. binding：将请求参数绑定到结构体上，并进行验证  
+2. validator：对结构体中的字段进行验证  
+```go
+import (
+	"net/http"
 
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+)
+
+type User struct {
+	Name  string `form:"name" binding:"required"`
+	Email string `form:"email" binding:"required,email"`
+	Age   int    `form:"age" binding:"gte=18,lte=100"`
+}
+
+func main() {
+	r := gin.Default()
+
+	// 注册验证器
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("checkName", checkName)
+	}
+
+	r.GET("/user", func(c *gin.Context) {
+		var user User
+		if err := c.ShouldBind(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"user": user})
+	})
+
+	r.Run(":8080")
+}
+
+// 自定义验证函数，用于验证 Name 字段
+func checkName(fl validator.FieldLevel) bool {
+	name := fl.Field().String()
+	return name != "admin"
+}
+```
+在上述代码中，我们定义了一个 User 结构体，并使用 binding 和 validator 对其进行验证。在路由处理函数中，我们使用 ShouldBind 方法将请求参数绑定到 User 结构体上，并进行验证。如果验证失败，我们返回一个包含错误信息的 JSON 响应；如果验证成功，我们返回一个包含 User 结构体的 JSON 响应。  
+在注册验证器时，我们还自定义了一个 checkName 函数，用于验证 Name 字段的值是否为 "admin"。这个函数会在验证 Name 字段时被调用。  
+需要注意的是，我们在注册验证器时使用了 binding.Validator.Engine() 方法，该方法返回的是一个 validator 的实例，我们可以通过类型断言将其转换为 *validator.Validate 类型，从而使用其 RegisterValidation 方法注册自定义验证函数。
 
 #### 使用中间件来实现公共逻辑
 跨域中间件
