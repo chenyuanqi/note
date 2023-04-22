@@ -128,6 +128,12 @@ go vet .
 - 30 * time.Second 比 time.Duration(30) * time.Second 更好
 - 按类型分组 const 声明，按逻辑和/或类型分组 var
 ```go
+// bad
+"github.com/dgrijalva/jwt-go/v4"
+
+//good
+jwt "github.com/dgrijalva/jwt-go/v4"
+
 // BAD
 const (
     foo = 1
@@ -205,6 +211,78 @@ if err := jsonpb.UnmarshalString(data, &message); err != nil {
 }
 
 fmt.Println(message.GetLabel(), message.GetType(), message.GetReps())
+```
+
+类型判断。
+```go
+// 空字符串判断
+// bad
+if s == "" {
+    // normal code
+}
+
+// good
+if len(s) == 0 {
+    // normal code
+}
+
+// []byte/string相等比较
+// bad
+var s1 []byte
+var s2 []byte
+...
+bytes.Equal(s1, s2) == 0
+bytes.Equal(s1, s2) != 0
+
+// good
+var s1 []byte
+var s2 []byte
+...
+bytes.Compare(s1, s2) == 0
+bytes.Compare(s1, s2) != 0
+
+// 空 slice 判断， map、channel 类似
+// bad
+if len(slice) = 0 {
+    // normal code
+}
+
+// good
+if slice != nil && len(slice) == 0 {
+    // normal code
+}
+
+// 声明 slice
+// bad
+s := []string{}
+s := make([]string, 0)
+
+// good
+var s []string
+
+// slice 复制
+// bad
+var b1, b2 []byte
+for i, v := range b1 {
+   b2[i] = v
+}
+for i := range b1 {
+   b2[i] = b1[i]
+}
+
+// good
+copy(b2, b1)
+
+// slice 新增
+// bad
+var a, b []int
+for _, v := range a {
+    b = append(b, v)
+}
+
+// good
+var a, b []int
+b = append(b, a...)
 ```
 
 ### 设计模式
