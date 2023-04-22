@@ -95,6 +95,9 @@ var users []User
 if err := db.Where("age > ?", 18).Find(&users).Error; err != nil {
     // 处理错误
 }
+
+// 分页查询
+db.Model(dataList).Count(&total).Limit(pageSize).Offset(offsetVal).Find(&dataList)
 ```
 
 3. 数据库修改操作：
@@ -114,6 +117,11 @@ if err := db.Model(&User{}).Where("age < ?", 18).Update("name", "Child").Error; 
 4. 数据库删除操作：
 
 ```go
+db.Where("id = ? ", id).Find(&data)
+if len(data) > 0 {
+    db.Delete(&data)
+}
+
 // 删除单个对象
 if err := db.Delete(&user).Error; err != nil {
     // 处理错误
