@@ -320,3 +320,105 @@ func log(i int, s []string) {
 ```
 前两种方式会创建一个 nil 的 slice，后两种会进行初始化，并且这些 slice 的大小都为 0 。
 
+### slice 的 copy
+slice 的 copy 是浅拷贝，也就是说当我们拷贝一个 slice 的时候，实际上只是拷贝了 slice 的指针，而不是 slice 的内容。  
+```go
+func main() {
+	s1 := []int{1, 2, 3, 4, 5}
+	s2 := s1
+	s2[0] = 100
+	fmt.Println(s1) // [100 2 3 4 5]
+	fmt.Println(s2) // [100 2 3 4 5]
+}
+```
+
+使用 copy 函数 copy slice 的时候需要注意，下面这种情况实际上会 copy 失败，因为对 slice 来说是由 length 来控制可用数据，copy 并没有复制这个字段。
+```go
+src := []int{0, 1, 2}
+var dst []int
+copy(dst, src)
+fmt.Println(dst) // []
+```
+要想 copy 我们可以这么做：
+```go
+src := []int{0, 1, 2}
+dst := make([]int, len(src))
+copy(dst, src)
+fmt.Println(dst) //[0 1 2]
+
+// 或者这样
+src := []int{0, 1, 2}
+dst := append([]int(nil), src...)
+```
+而且，copy 函数只会复制两个 slice 中较小的那个的元素个数。如果 dst 的长度小于 src 的长度，只会复制 dst 中的元素；如果 dst 的长度大于 src 的长度，则只会复制 src 中的元素，多余的 dst 中的元素不会被修改。
+
+### range 的 copy
+range 会返回两个值，第一个是 index，第二个是 value。  
+使用 range 的时候如果我们直接修改它返回的数据会不生效，因为返回的数据并不是原始数据：
+```go
+type account struct {
+  balance float32
+}
+
+accounts := []account{
+	{balance: 100.},
+	{balance: 200.},
+	{balance: 300.},
+}
+for _, a := range accounts {
+	a.balance += 1000  
+}
+fmt.Printf("%+v\n", accounts) // [{balance:100} {balance:200} {balance:300}]
+```
+我们想要改变 range 中的数据可以这么做：
+```go
+for i := range accounts {
+	accounts[i].balance += 1000
+}
+fmt.Printf("%+v\n", accounts) // [{balance:1100} {balance:1200} {balance:1300}]
+```
+
+range slice 的话也会 copy 一份：
+```go
+s := []int{0, 1, 2}
+// 在 range 的时候会 copy 一份，因此只会调用 3 次 append 后停止
+for range s {
+    s = append(s, 10) 
+	fmt.Printf("%+v", s) // [0 1 2 10] [0 1 2 10 10] [0 1 2 10 10 10]
+}
+```
+
+### 注意指针的问题
+比方我们想要 range slice 并将返回值存到 map 里面供后面业务使用，类似这样：
+```go
+type Customer struct {
+    ID string
+    Balance float64
+}
+
+test := []Customer{
+      {ID: "1", Balance: 10},
+      {ID: "2", Balance: -10},
+      {ID: "3", Balance: 0},
+} 
+
+var m map[string]*Customer
+for _, customer := range test {
+    m[customer.ID] = &customer
+}
+```
+这样做是不对的，因为 range 会 copy 一份，而我们存到 map 里面的是指针，这样的话 map 里面存的都是同一个指针，最后 map 里面的值都是最后一个元素的值。就是说当我们使用 range 遍历 slice 的时候，返回的 customer 变量实际上是一个固定的地址，而不是每次都是一个新的地址。  
+所以我们可以这样在 range 里面获取指针：  
+```go
+for i := range test {
+	m[test[i].ID] = &test[i]
+}
+
+// 或者
+for _, customer := range test {
+    current := customer // 使用局部变量
+    fmt.Printf("%p\n", &current) // 这里获取的指针是 range copy 出来元素的指针  
+}
+```
+
+
