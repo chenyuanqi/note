@@ -421,4 +421,43 @@ for _, customer := range test {
 }
 ```
 
+### 注意 break 作用域
+下面这个代码本来想 break 停止遍历，实际上只是 break 了 switch 作用域，print 依然会打印：0，1，2，3，4。
+```go
+for i := 0; i < 5; i++ {
+	fmt.Printf("%d ", i)
+
+	switch i {
+	default:
+	case 2:
+		break
+	}
+}
+// 0 1 2 3 4
+```
+正确做法应该是通过 label 的方式 break：
+```go
+loop:
+for i := 0; i < 5; i++ {
+	fmt.Printf("%d ", i)
+
+	switch i {
+	default:
+	case 2:
+		break loop
+	}
+}
+// 0 1 2
+```
+
+同样的，select 也是一样的，break 只会 break select 作用域，而不会 break for 作用域：
+```go
+loop:
+for {
+	select {
+	case <-ch:
+		break loop
+	}
+}
+```
 
