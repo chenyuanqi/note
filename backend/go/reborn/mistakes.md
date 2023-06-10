@@ -260,5 +260,36 @@ c := decimal.NewFromFloat(1.0002)
 fmt.Println(a.Mul(b.Add(c))) //200030.0020003
 ```
 
+### 区分 slice 的 length 和 capacity
+初始化一个带有 length 和 capacity 的 slice ：
+```go
+s := make([]int, 3, 6)
+```
+slice 的底层实际上指向了一个数组。当然，由于我们的 length 是 3，所以这样设置 s[4] = 0 会 panic 的。需要使用 append 才能添加新元素。  
+当 appned 超过 cap 大小的时候，slice 会自动帮我们扩容，`在元素数量小于 1024 的时候每次会扩大一倍，当超过了 1024 个元素每次扩大 25% `。  
+
+使用操作符从另一个 slice 上面创建一个新切片：
+```go
+s := []int{1, 2, 3, 4, 5}
+s1 := s[1:3]
+fmt.Println(s1) // [2 3]
+fmt.Println(len(s1), cap(s1)) // 2 4
+```
+实际上这两个 slice 还是指向了底层同样的数组，只不过 s1 的 length 和 capacity 分别是 2 和 4。  
+由于指向了同一个数组，那么当我们改变第一个槽位的时候，比如 s1[1]=100，实际上两个 slice 的数据都会发生改变。  
+```go	
+s1[1] = 100
+fmt.Println(s) // [1 100 3 4 5]
+fmt.Println(s1) // [2 100]
+fmt.Println(len(s1), cap(s1)) // 2 4
+```
+但是当我们使用 append 的时候情况会有所不同：  
+```go
+s1 = append(s1, 200)
+fmt.Println(s) // [1 100 3 4 5]
+fmt.Println(s1) // [2 100 200]
+fmt.Println(len(s1), cap(s1)) // 3 4
+```
+再继续 append s1 直到 s1 发生扩容，这个时候会发现 s1 实际上和 s 指向的不是同一个数组了。
 
 
