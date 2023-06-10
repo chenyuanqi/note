@@ -292,4 +292,31 @@ fmt.Println(len(s1), cap(s1)) // 3 4
 ```
 再继续 append s1 直到 s1 发生扩容，这个时候会发现 s1 实际上和 s 指向的不是同一个数组了。
 
+###  slice 初始化
+对于 slice 的初始化实际上有很多种方式：
+```go
+func main() {
+    // 好处就是不用做任何的内存分配
+	var s []string
+	log(1, s) // 1: empty=true	nil=true
+
+    // 较少使用，可能用它来进行 slice 的 copy：src := []int{0, 1, 2}; dst := append([]int(nil), src...)
+	s = []string(nil)
+	log(2, s)  // 2: empty=true	nil=true
+
+    // 适合初始化一个已知元素的 slice
+	s = []string{}
+	log(3, s) // 3: empty=true	nil=false
+
+    // 初始化 slice 的 length 和 capacity，如果我们能确定 slice 里面会存放多少元素，从性能的角度考虑最好使用 make 初始化好，因为对于一个空的 slice append 元素进去每次达到阈值都需要进行扩容
+	s = make([]string, 0)
+	log(4, s) // 4: empty=true	nil=false
+}
+
+func log(i int, s []string) {
+    // 最好是使用 len(xxx) == 0来判断 slice 是不是空的
+    fmt.Printf("%d: empty=%t\tnil=%t\n", i, len(s) == 0, s == nil)}
+}
+```
+前两种方式会创建一个 nil 的 slice，后两种会进行初始化，并且这些 slice 的大小都为 0 。
 
