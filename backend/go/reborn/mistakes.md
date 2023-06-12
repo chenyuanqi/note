@@ -461,3 +461,89 @@ for {
 }
 ```
 
+### 注意 defer 的调用时机
+有时候我们会像下面一样使用 defer 去关闭一些资源：
+```go
+func readFiles(ch <-chan string) error {
+	for path := range ch {
+		file, err := os.Open(path)
+		if err != nil {
+				return err
+		}
+
+		defer file.Close()
+
+		// Do something with file
+	}
+	return nil
+}
+```
+因为 defer 会在方法结束的时候调用，但是如果上面的 readFiles 函数永远没有 return，那么 defer 将永远不会被调用，从而造成内存泄露。并且 defer 写在 for 循环里面，编译器也无法做优化，会影响代码执行性能。  
+为了避免这种情况，我们可以 wrap 一层：
+```go
+func readFiles(ch <-chan string) error {
+	for path := range ch { 
+		if err := readFile(path); err != nil {
+				return err
+		} 
+	}
+	return nil
+} 
+
+func readFile(path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+			return err
+	}
+
+	defer file.Close()
+
+	// Do something with file
+	return nil
+}
+```
+
+### 注意 defer 的参数
+defer 声明时会先计算确定参数的值。
+```go
+func a() {
+	i := 0
+	defer notice(i) // 0
+	i++
+	return
+}
+
+func notice(i int) {
+	fmt.Println(i)
+}
+```
+在这个例子中，变量 i 在 defer 被调用的时候就已经确定了，而不是在 defer执行的时候，所以上面的语句输出的是 0。所以我们想要获取这个变量的真实值，应该用引用：
+```go
+func a() {
+  i := 0
+  defer notice(&i) // 1
+  i++
+  return
+}
+```
+
+### defer 下的闭包
+```go
+func a() int {
+  i := 0
+  defer func() {
+    fmt.Println(i + 1) //12
+  }()
+  i++
+  return i+10  
+}
+
+func TestA(t *testing.T) {
+  fmt.Println(a()) //11
+}
+```
+如果换成闭包的话，实际上闭包中对变量 i 是通过指针传递的，所以可以读到真实的值。但是上面的例子中 a 函数返回的是 11 是因为执行顺序是：  
+`先计算（i+10）-> (call defer) -> (return)`
+
+
+
