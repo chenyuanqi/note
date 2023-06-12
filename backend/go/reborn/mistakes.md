@@ -520,26 +520,26 @@ func notice(i int) {
 在这个例子中，变量 i 在 defer 被调用的时候就已经确定了，而不是在 defer执行的时候，所以上面的语句输出的是 0。所以我们想要获取这个变量的真实值，应该用引用：
 ```go
 func a() {
-  i := 0
-  defer notice(&i) // 1
-  i++
-  return
+	i := 0
+	defer notice(&i) // 1
+	i++
+	return
 }
 ```
 
 ### defer 下的闭包
 ```go
 func a() int {
-  i := 0
-  defer func() {
-    fmt.Println(i + 1) //12
-  }()
-  i++
-  return i+10  
+	i := 0
+	defer func() {
+		fmt.Println(i + 1) //12
+	}()
+	i++
+	return i+10  
 }
 
 func TestA(t *testing.T) {
-  fmt.Println(a()) //11
+	fmt.Println(a()) //11
 }
 ```
 如果换成闭包的话，实际上闭包中对变量 i 是通过指针传递的，所以可以读到真实的值。但是上面的例子中 a 函数返回的是 11 是因为执行顺序是：  
