@@ -545,5 +545,72 @@ func TestA(t *testing.T) {
 如果换成闭包的话，实际上闭包中对变量 i 是通过指针传递的，所以可以读到真实的值。但是上面的例子中 a 函数返回的是 11 是因为执行顺序是：  
 `先计算（i+10）-> (call defer) -> (return)`
 
+### string 迭代带来的问题
+在 Go 语言中，字符串是一种基本类型，**默认是通过 utf8 编码的字符序列**，当字符为 ASCII 码时则占用 1 个字节，其他字符根据需要占用 2-4 个字节，比如中文编码通常需要 3 个字节。  
+那么我们在做 string 迭代的时候可能会产生意想不到的问题：
+```go
+s := "hêllo"
+for i := range s {
+	fmt.Printf("position %d: %c\n", i, s[i])
+}
+fmt.Printf("len=%d\n", len(s))
+// position 0: h
+// position 1: Ã
+// position 3: l
+// position 4: l
+// position 5: o
+// len=6
+```
+上面的输出中发现第二个字符是 Ã，不是 ê，并且位置2的输出”消失“了，这其实就是因为 ê 在 utf8 里面实际上占用 2 个 byte，而我们在迭代的时候是按照 byte 来迭代的，所以导致了这个问题。  
+根据上面的分析，我们就可以知道在迭代获取字符的时候不能只获取单个 byte，应该使用 range 返回的 value 值：
+```go
+s := "hêllo"
+for i, v := range s {
+	fmt.Printf("position %d: %c\n", i, v)  
+}
+// position 0: h
+// position 1: ê
+// position 3: l
+// position 4: l
+// position 5: o
+```
+或者我们可以把 string 转成 rune 数组，在 go 中 rune 代表 Unicode码位，用它可以输出单个字符：
+```go
+s := "hêllo"
+runes := []rune(s)
+for i, _ := range runes {
+	fmt.Printf("position %d: %c\n", i, runes[i])  
+}
+// position 0: h
+// position 1: ê
+// position 2: l
+// position 3: l
+// position 4: o
+```
+
+### string 截断带来的问题
+**在对slice使用 ：操作符进行截断的时候，底层的数组实际上指向同一个**，在 string 里面也需要注意这个问题，比如下面：
+```go
+func (s store) handleLog(log string) error {
+	if len(log) < 36 {
+		return errors.New("log is not correctly formatted")
+	}
+	uuid := log[:36]
+	s.store(uuid)
+	// Do something    
+ }
+```
+这段代码用了 ：操作符进行截断，但是如果 log 这个对象很大，比如上面的 store 方法把 uuid 一直存在内存里，可能会造成底层的数组一直不释放，从而造成内存泄露。  
+为了解决这个问题，我们可以先复制一份再处理： 
+```go
+func (s store) handleLog(log string) error {
+	if len(log) < 36 {
+		return errors.New("log is not correctly formatted")
+	}
+	uuid := strings.Clone(log[:36]) // copy一份
+	s.store(uuid)
+	// Do something    
+}
+```
 
 
