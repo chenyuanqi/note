@@ -613,4 +613,194 @@ func (s store) handleLog(log string) error {
 }
 ```
 
+### interface 类型返回的非 nil 问题
+假如我们想要继承 error 接口实现一个自己的 MultiError：
+```go
+type MultiError struct {
+	errs []string
+}
+
+func (m *MultiError) Add(err error) {
+	m.errs = append(m.errs, err.Error())
+}
+
+func (m *MultiError) Error() string {
+	return strings.Join(m.errs, ";")
+}
+```
+然后在使用的时候返回 error，并且想通过 error 是否为 nil 判断是否有错误：
+```go
+func Validate(age int, name string) error {
+	var m *MultiError
+	if age < 0 {
+		m = &MultiError{}
+		m.Add(errors.New("age is negative"))
+	}
+	if name == "" {
+		if m == nil {
+			m = &MultiError{}
+		}
+		m.Add(errors.New("name is nil"))
+	}
+
+	return m
+}
+
+func Test(t *testing.T) {
+	if err := Validate(10, "a"); err != nil {
+		t.Errorf("invalid")
+	}
+}
+```
+实际上 Validate 返回的 err 会总是为非 nil 的，也就是上面代码只会输出 invalid。
+这是因为在 Go 语言中，interface 类型的变量在赋值的时候，如果没有赋值，那么它的值就是 nil，但是它的类型是有值的，所以在上面的代码中，m 的类型是 *MultiError，所以它的值就不是 nil。
+解决这个问题的方法是在返回的时候判断 errs 是否为空：
+```go
+if len(m.errs) == 0 {
+	return nil
+}
+```
+
+### error wrap
+对于 err 的 return 我们一般可以这么处理：
+```go
+err := xxx()
+if err != nil {
+	return err 
+}
+```
+但是这样处理只是简单地将原始的错误抛出去了，无法知道当前处理的这段程序的上下文信息，这个时候我们可能会自定义个 error 结构体，继承 error 接口：
+```go
+type MyError struct {
+	Err error
+	Msg string
+}
+
+func (e *MyError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Msg, e.Err.Error())
+}
+```
+然后在处理的时候：
+```go
+err := xxx()
+if err != nil {
+	return &MyError{Err: err, Msg: "xxx"}
+}
+```
+但是这样虽然可以添加一些上下文信息，但是每次都需要创建一个特定类型的 error 类会变得很麻烦，那么在 1.13 之后，我们可以使用 %w 进行 wrap。
+```go
+err := xxx()
+if err != nil {
+	return fmt.Errorf("xxx: %w", err)
+}
+```
+当然除了上面这种做法以外，我们还可以直接 %v 直接格式化我们的错误信息：
+```go
+err := xxx()
+if err != nil {
+	return fmt.Errorf("xxx: %v", err)
+}
+```
+这样做的缺点就是我们会丢失这个 err 的类型信息，如果不需要这个类型信息，只是想往上抛打印一些日志当然也无所谓。
+
+### error Is & As
+因为我们的 error 可以会被 wrap 好几层，那么使用 == 是可能无法判断我们的 error 究竟是不是我们想要的特定的 error，那么可以用 errors.Is：
+```go
+var BaseErr = errors.New("base error")
+
+func main() {
+	err1 := fmt.Errorf("wrap base: %w", BaseErr)
+	err2 := fmt.Errorf("wrap err1: %w", err1)
+	println(err2 == BaseErr)
+
+	if !errors.Is(err2, BaseErr) {
+		panic("err2 is not BaseErr")
+	}
+	println("err2 is BaseErr")
+}
+// false
+// err2 is BaseErr
+```
+在上面，我们通过 errors.Is 就可以判断出 err2 里面包含了 BaseErr 错误。errors.Is 里面会递归调用 Unwrap 方法拆包装，然后挨个使用 == 判断是否和指定类型的 error 相等。  
+errors.As 主要用来做类型判断，原因也是和上面一样，error 被 wrap 之后我们通过 err.(type) 无法直接判断，errors.As 会用 Unwrap 方法拆包装，然后挨个判断类型。使用如下：
+```go
+type TypicalErr struct {
+	e string
+}
+
+func (t TypicalErr) Error() string {
+	return t.e
+}
+
+func main() {
+	err := TypicalErr{"typical error"}
+	err1 := fmt.Errorf("wrap err: %w", err)
+	err2 := fmt.Errorf("wrap err1: %w", err1)
+	var e TypicalErr
+	if !errors.As(err2, &e) {
+		panic("TypicalErr is not on the chain of err2")
+	}
+	println("TypicalErr is on the chain of err2")
+	println(err == e)
+}
+// TypicalErr is on the chain of err2
+// true
+```
+上面的代码中，我们通过 errors.As 将 err2 里面的 TypicalErr 取出来了，然后和 e 进行了比较，发现是相等的。
+
+### 处理 defer 中的 error
+我们如果在调用 Close 的时候报错是没有处理的：
+```go
+func getBalance(db *sql.DB, clientID string) (float32, error) {
+	rows, err := db.Query(query, clientID)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	// Use rows    
+}
+```
+那么也许我们可以在 defer 中打印一些 log，但是无法 return，defer 不接受一个 err 类型的返回值：
+```go
+defer func() {
+	err := rows.Close()
+	if err != nil {
+		log.Printf("failed to close rows: %v", err)
+	}
+	return err //无法通过编译    
+}()
+```
+那么我们可能想通过默认 err 返回值的方式将 defer 的 error 也返回了：
+```go
+func getBalance(db *sql.DB, clientID string) (balance float32, err error) {
+	rows, err = db.Query(query, clientID)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		err = rows.Close()
+	}()
+
+	// Use rows    
+}
+```
+上面代码看起来没问题，那么假如 Query 的时候和 Close 的时候同时发生异常呢？其中有一个 error 会被覆盖，那么我们可以根据自己的需求选择一个打印日志，另一个 error 返回：
+```go
+defer func() {
+	closeErr := rows.Close()
+	if err != nil {
+		if closeErr != nil {
+			log.Printf("failed to close rows: %v", err)
+		}
+		return
+	}
+	err = closeErr    
+}()
+```
+
+
+
+
+
 
