@@ -799,7 +799,323 @@ defer func() {
 }()
 ```
 
+### 错误使用 sync.WaitGroup
+sync.WaitGroup 通常用在并发中等待 goroutines 任务完成，用 Add 方法添加计数器，当任务完成后需要调用 Done 方法让计数器减一。等待的线程会调用 Wait 方法等待，直到 sync.WaitGroup 内计数器为零。
+需要注意的是 Add 方法是怎么使用的，如下：
+```go
+wg := sync.WaitGroup{}
+var v uint64
 
+for i := 0; i < 3; i++ {
+	go func() {
+		wg.Add(1)
+		atomic.AddUint64(&v, 1)
+		wg.Done()
+	}()
+}
+
+wg.Wait()    
+fmt.Println(v)
+```
+这样使用可能会导致 v 不一定等于3，因为在 for 循环里面创建的 3 个 goroutines 不一定比外面的主线程先执行，从而导致在调用 Add 方法之前可能 Wait 方法就执行了，并且恰好 sync.WaitGroup 里面计数器是零，然后就通过了。
+正确的做法应该是在创建 goroutines 之前就将要创建多少个 goroutines 通过 Add 方法添加进去。
+```go
+wg := sync.WaitGroup{}
+var v uint64
+
+wg.Add(3)
+for i := 0; i < 3; i++ {
+	go func() {
+		atomic.AddUint64(&v, 1)
+		wg.Done()
+	}()
+}
+
+wg.Wait()
+fmt.Println(v)
+```
+
+### 不要拷贝 sync 类型
+sync 包里面提供一些并发操作的类型，如 mutex、condition、wait gorup 等等，这些类型都不应该被拷贝之后使用。  
+有时候我们在使用的时候拷贝是很隐秘的，比如下面：
+```go
+type Counter struct {
+	mu sync.Mutex
+	counters map[string]int
+}
+
+func (c Counter) Increment(name string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.counters[name]++
+}
+
+func NewCounter() Counter {
+  	return Counter{counters: map[string]int{}}
+}
+
+func main() {
+	counter := NewCounter()
+	go counter.Increment("aa")
+	go counter.Increment("bb")
+}
+```
+receiver 是一个值类型，所以调用 Increment 方法的时候实际上拷贝了一份 Counter 里面的变量。这里我们可以将 receiver 改成一个指针，或者将 sync.Mutex 变量改成指针类型。
+所以如果：
+`receiver 是值类型； 函数参数是 sync 包类型； 函数参数的结构体里面包含了 sync 包类型；`  
+遇到这种情况需要注意检查一下，我们可以借用 go vet 来检测。
+
+### time.After 内存泄露
+我们用一个简单的例子模拟一下：
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+//define a channel
+var chs chan int
+
+func Get() {
+	for {
+		select {
+		case v := <-chs:
+			fmt.Printf("print:%v\n", v)
+		case <-time.After(3 * time.Minute):
+			fmt.Printf("time.After:%v", time.Now().Unix())
+		}
+	}
+}
+
+func Put() {
+	var i = 0
+	for {
+		i++
+		chs <- i
+	}
+}
+
+func main() {
+	chs = make(chan int, 100)
+	go Put()
+	Get()
+}
+```
+逻辑很简单就是先往 channel 里面存数据，然后不停地使用 for select case 语法从 channel 里面取数据，为了防止长时间取不到数据，所以在上面加了 time.After 定时器，这里只是简单打印一下。  
+发现不一会儿 Timer 的内存占用很高了。这是因为在计时器触发之前，垃圾收集器不会回收 Timer，但是在循环里面每次都调用 time.After都会实例化一个一个新的定时器，并且这个定时器会在激活之后才会被清除。  
+为了避免这种情况我们可以使用下面代码：  
+```go
+func Get() {
+	delay := time.NewTimer(3 * time.Minute)
+
+	defer delay.Stop()
+
+	for {
+		delay.Reset(3 * time.Minute)
+
+		select {
+		case v := <-chs:
+			fmt.Printf("print:%v\n", v)
+		case <-delay.C:
+			fmt.Printf("time.After:%v", time.Now().Unix())
+		}
+	}
+}
+```
+
+### HTTP body 忘记 Close 导致的泄露
+```go
+type handler struct {
+	client http.Client
+	url    string
+}
+
+func (h handler) getBody() (string, error) {
+	resp, err := h.client.Get(h.url)
+	if err != nil {
+		return "", err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
+```
+上面这段代码看起来没什么问题，但是 resp 是 *http.Response 类型，里面包含了 Body io.ReadCloser 对象，它是一个 io 类，必须要正确关闭，否则是会产生资源泄露的。一般我们可以这么做：
+```go
+defer func() {
+	err := resp.Body.Close()
+	if err != nil {
+		log.Printf("failed to close response: %v\n", err)
+	}
+}()
+```
+
+### byte slice 和 string 的转换优化
+直接通过强转 string(bytes) 或者 []byte(str) 会带来数据的复制，性能不佳，所以在追求极致性能场景使用 unsafe 包的方式直接进行转换来提升性能：
+```go
+// toBytes performs unholy acts to avoid allocations
+func toBytes(s string) []byte {
+	return *(*[]byte)(unsafe.Pointer(&s))
+}
+
+// toString performs unholy acts to avoid allocations
+func toString(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
+}
+```
+在 Go 1.12 中，增加了几个方法 String、StringData、Slice 和 SliceData ,用来做这种性能转换。
+```go
+// String returns the string representation of the underlying data.
+func (b *Builder) String() string {
+	return *(*string)(unsafe.Pointer(&b.buf))
+}
+
+// StringData returns a string that shares the underlying data buffer with the builder.
+// If the builder is not empty, the result is undefined.
+func (b *Builder) StringData() string {
+	return *(*string)(unsafe.Pointer(&reflect.StringHeader{
+		Data: b.buf.Data,
+		Len:  b.buf.Len,
+	}))
+}
+
+// Slice returns the contents of the builder's buffer.
+func (b *Builder) Slice() []byte {
+	return b.buf.Bytes()
+}
+
+// SliceData returns a byte slice that shares the underlying data buffer with the builder.
+// If the builder is not empty, the result is undefined.
+func (b *Builder) SliceData() []byte {
+	return *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
+		Data: b.buf.Data,
+		Len:  b.buf.Len,
+		Cap:  b.buf.Cap,
+	}))
+}
+```
+
+### 容器中的 GOMAXPROCS
+自 Go 1.5 开始， Go 的 GOMAXPROCS 默认值已经设置为 CPU 的核数，但是在 Docker 或 k8s 容器中 runtime.GOMAXPROCS() 获取的是宿主机的 CPU 核数 。这样会导致 P 值设置过大，导致生成线程过多，会增加上下文切换的负担，导致严重的上下文切换，浪费 CPU。  
+所以可以使用 uber 的 automaxprocs 库，大致原理是读取 CGroup 值识别容器的 CPU quota，计算得到实际核心数，并自动设置 GOMAXPROCS 线程数量。
+```go
+package main
+
+import _ "go.uber.org/automaxprocs"
+
+func main() {
+  // Your application logic here
+}
+```
+
+### 逃逸分析
+逃逸分析是指编译器分析程序的代码，确定程序中的对象是否在函数栈上分配还是在堆上分配。如果对象被分配到函数栈上，它就不需要进行垃圾回收，因为当函数返回时，栈上的内存自动被释放。而如果对象被分配到堆上，它需要进行垃圾回收，这会对程序的性能产生影响。
+
+逃逸分析可以帮助编译器优化程序的性能，例如将一些对象从堆上移动到栈上，从而减少垃圾回收的开销。同时，逃逸分析还可以帮助开发者更好地理解程序的内存使用情况，从而提高程序的可维护性。  
+
+在 Go 中，编译器会自动进行逃逸分析，以优化程序的性能。  
+Go 是通过在编译器里做逃逸分析（escape analysis）来决定一个对象放栈上还是放堆上，不逃逸的对象放栈上，可能逃逸的放堆上。对于 Go 来说，我们可以通过下面指令来看变量是否逃逸：
+```go
+go build -gcflags "-m -l" main.go
+```
+`-m 会打印出逃逸分析的优化策略，实际上最多总共可以用 4 个 -m，但是信息量较大，一般用 1 个就可以了。 -l 会禁用函数内联，在这里禁用掉内联能更好的观察逃逸情况，减少干扰。`
+
+Go 语言的编译器会对代码进行逃逸分析，如果发现变量在函数内部定义，但是在函数外部被引用，那么这个变量就会被分配在堆上，而不是栈上。  
+比如下面这段代码：
+```go
+func main() {
+	var s string
+	s = "hello world"
+	fmt.Println(s)
+}
+```
+这里的 s 变量是在 main 函数内部定义的，但是在函数外部被引用，所以会被分配在堆上。
+
+**指针逃逸**  
+指针逃逸是指指针指向的变量逃逸到堆上。  
+在函数中创建了一个对象，返回了这个对象的指针。这种情况下，函数虽然退出了，但是因为指针的存在，对象的内存不能随着函数结束而回收，因此只能分配在堆上。
+```go
+type Demo struct {
+	name string
+}
+
+func createDemo(name string) *Demo {
+	d := new(Demo) // 局部变量 d 逃逸到堆
+	d.name = name
+	return d
+}
+
+func main() {
+	demo := createDemo("demo")
+	fmt.Println(demo)
+}
+
+// go run -gcflags '-m -l'  .\main\main.go
+// # command-line-arguments
+// main\main.go:12:17: leaking param: name
+// main\main.go:13:10: new(Demo) escapes to heap
+// main\main.go:20:13: ... argument does not escape&{demo}
+```
+
+**interface{}/any 动态类型逃逸**  
+因为编译期间很难确定其参数的具体类型，也会发生逃逸，例如这样：
+```go
+func createDemo(name string) any {
+	d := new(Demo) // 局部变量 d 逃逸到堆
+	d.name = name
+	return d
+}
+```
+
+**切片长度或容量没指定逃逸**  
+如果使用局部切片时，已知切片的长度或容量，请使用常量或数值字面量来定义，否则也会逃逸：
+```go
+func main() {
+	number := 10
+	s1 := make([]int, 0, number)
+	for i := 0; i < number; i++ {
+		s1 = append(s1, i)
+	}
+
+	s2 := make([]int, 0, 10)
+	for i := 0; i < 10; i++ {
+		s2 = append(s2, i)
+	}
+}
+
+// go run -gcflags '-m -l'  .\main\main.go
+// ./main.go:65:12: make([]int, 0, number) escapes to heap
+// ./main.go:69:12: make([]int, 0, 10) does not escape
+```
+
+**闭包引用逃逸**  
+Increase() 返回值是一个闭包函数，该闭包函数访问了外部变量 n，那变量 n 将会一直存在，直到 in 被销毁。很显然，变量 n 占用的内存不能随着函数 Increase() 的退出而回收，因此将会逃逸到堆上。
+```go
+func Increase() func() int {
+	n := 0
+	return func() int {
+		n++
+		return n
+	}
+}
+
+func main() {
+	in := Increase()
+	fmt.Println(in()) // 1
+	fmt.Println(in()) // 2
+}
+
+// go run -gcflags '-m -l'  main.go  
+//  
+// ./main.go:64:5: moved to heap: n
+// ./main.go:65:12: func literal escapes to heap
+```
 
 
 
