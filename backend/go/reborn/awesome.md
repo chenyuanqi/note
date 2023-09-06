@@ -60,6 +60,7 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 [Go 编码规范](https://learnku.com/go/wikis/38426)  
 [Go 最佳实践](https://learnku.com/go/wikis/38430)  
 [Go 语言圣经](https://yar999.gitbook.io/gopl-zh/)  
+[Go 标准库](http://books.studygolang.com/The-Golang-Standard-Library-by-Example/)  
 [地鼠文档](https://www.topgoer.cn/)  
 
 ### Go 进阶
