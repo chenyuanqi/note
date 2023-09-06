@@ -30,9 +30,9 @@ func solveNQueens(queens []int, row int, n int) {
     }
 
     // 依次尝试当前行的每一列
-    for i := 0; i < n; i++ {
-        if isValid(queens, row, i) { // 判断当前位置是否可以放置皇后
-            queens[row] = i // 放置皇后
+    for col := 0; col < n; col++ {
+        if isValid(queens, row, col) { // 判断当前位置是否可以放置皇后
+            queens[row] = col // 放置皇后
             solveNQueens(queens, row+1, n) // 递归调用下一行
         }
     }
@@ -44,9 +44,9 @@ func solveNQueens(queens []int, row int, n int) {
 // col：当前列号
 func isValid(queens []int, row int, col int) bool {
     // 遍历前面已经放置的皇后
-    for i := 0; i < row; i++ {
-        // 判断当前位置是否和前面已经放置的皇后在同一列或同一对角线上
-        if queens[i] == col || math.Abs(float64(queens[i]-col)) == float64(row-i) {
+    for r := 0; r < row; r++ {
+        // 判断当前位置是否和前面已经放置的皇后在同一列或同一对角线上(对于任意两个点，如果它们的行索引和列索引的差值或和值相等，那么这两个点就在同一对角线上)
+        if queens[r] == col || math.Abs(float64(queens[r]-col)) == float64(row-r) {
             return false // 如果是，则返回 false，表示这个位置不能放置皇后
         }
     }
