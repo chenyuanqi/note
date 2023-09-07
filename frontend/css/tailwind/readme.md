@@ -93,6 +93,18 @@ npx tailwindcss build src/styles.css -o dist/styles.css
 
 ### 10. 查看结果
 
+tailwind.config.js 需要配置如下内容，再重新打包样式：
+```css
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["*.{html,js}", "./src/**/*.{html,js}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
 你可以使用一个简单的 HTTP 服务器来查看你的结果。例如，你可以使用 `live-server`：
 
 ```sh
