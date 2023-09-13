@@ -1,6 +1,8 @@
 
 要快速上手使用 Tailwind CSS，你需要按照以下步骤进行：
 
+[Tailwind CSS 中文](https://www.tailwindcss.cn/)  
+
 ### 1. 准备环境
 
 确保你的开发环境已经安装了 Node.js 和 npm。你可以通过访问 [Node.js 官网](https://nodejs.org/) 来下载和安装它们。
