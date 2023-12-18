@@ -72,8 +72,12 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 [Aorm 数据库操作](https://github.com/tangpanqing/aorm)  
 [Gocache 缓存管理](https://github.com/eko/gocache)  
 [Goredis redis客户端](https://github.com/redis/go-redis)  
+[Goelasticsearch elasticsearch客户端](https://github.com/elastic/go-elasticsearch)  
 
 [Viper 配置管理](http://github.com/spf13/viper)  
+[godotenv 读取 .env 文件](https://github.com/joho/godotenv)  
+[Task 自动化构建](https://taskfile.dev/)  
+[air 动态编译](https://github.com/cosmtrek/air)  
 [Zap 日志记录](https://github.com/uber-go/zap)  
 [Imaging 图片处理](https://github.com/disintegration/imaging)  
 
@@ -89,6 +93,7 @@ Go 语言每半年发布一个主要版本，一般在每年的 2 月和 8 月�
 
 [Cobra 命令行交互](https://github.com/spf13/cobra)  
 [Ansi 彩色字符](https://github.com/mgutz/ansi)  
+[cron 定时任务](https://github.com/robfig/cron)  
 
 [Goconvey 测试工具](https://github.com/smartystreets/goconvey)  
 [Uuid uuid生成](https://github.com/pborman/uuid)  
