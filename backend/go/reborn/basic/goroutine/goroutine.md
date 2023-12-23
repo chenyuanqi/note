@@ -14,6 +14,16 @@ Goroutine 是 Go 语言中的协程，其它语言称为的协程字面上叫 Co
 - goroutine 和 coroutine 的概念和运行机制都是脱胎于早期的操作系统；goroutine 间使用 channel 通信，coroutine 使用 yield 和 resume 操作
 - goroutines 意味着并行（或者可以以并行的方式部署），coroutines 一般来说不是这样的，goroutines 通过通道来通信；coroutines 通过让出和恢复操作来通信，goroutines 比 coroutines 更强大，也很容易从 coroutines 的逻辑复用到 goroutines  
 
+goroutine是Go语言实现的用户态线程，主要用来解决操作系统线程太“重”的问题，所谓的太重，主要表现在以下两个方面：
+- 创建和切换太重：操作系统线程的创建和切换都需要进入内核，而进入内核所消耗的性能代价比较高，开销较大；
+- 内存使用太重：一方面，为了尽量避免极端情况下操作系统线程栈的溢出，内核在创建操作系统线程时默认会为其分配一个较大的栈内存（虚拟地址空间，内核并不会一开始就分配这么多的物理内存），然而在绝大多数情况下，系统线程远远用不了这么多内存，这导致了浪费；另一方面，栈内存空间一旦创建和初始化完成之后其大小就不能再有变化，这决定了在某些特殊场景下系统线程栈还是有溢出的风险。
+
+而相对的，用户态的goroutine则轻量得多：
+- goroutine是用户态线程，其创建和切换都在用户代码中完成而无需进入操作系统内核，所以其开销要远远小于系统线程的创建和切换；
+- goroutine启动时默认栈大小只有2k，这在多数情况下已经够用了，即使不够用，goroutine的栈也会自动扩大，同时，如果栈太大了过于浪费它还能自动收缩，这样既没有栈溢出的风险，也不会造成栈内存空间的大量浪费。
+
+正是因为Go语言中实现了如此轻量级的线程，才使得我们在Go程序中，可以轻易的创建成千上万甚至上百万的goroutine出来并发的执行任务而不用太担心性能和内存等问题。
+
 当启动 main 入口函数时，后台就自动跑了一个 main Goroutine，  
 `所以，一个 goroutine 内也可以使用 goroutine。`
 ```go
@@ -393,3 +403,36 @@ func main() {
 }
 // 没有可读写通道
 ```
+
+### 线程模型与调度器
+goroutine建立在操作系统线程基础之上，它与操作系统线程之间实现了一个多对多(M:N)的两级线程模型。  
+这里的 M:N 是指M个goroutine运行在N个操作系统线程之上，内核负责对这N个操作系统线程进行调度，而这N个系统线程又负责对这M个goroutine进行调度和运行。
+
+所谓的对goroutine的调度，是指程序代码按照一定的算法在适当的时候挑选出合适的goroutine并放到CPU上去运行的过程，这些负责对goroutine进行调度的程序代码我们称之为goroutine调度器。用极度简化了的伪代码来描述goroutine调度器的工作流程大概是下面这个样子：
+```go
+// 程序启动时的初始化代码
+......
+for i := 0; i < N; i++ { // 创建N个操作系统线程执行schedule函数
+    create_os_thread(schedule) // 创建一个操作系统线程执行schedule函数
+}
+
+//schedule函数实现调度逻辑
+func schedule() {
+   for { //调度循环
+         // 根据某种算法从M个goroutine中找出一个需要运行的goroutine
+         g := find_a_runnable_goroutine_from_M_goroutines()
+         run_g(g) // CPU运行该goroutine，直到需要调度其它goroutine才返回
+         save_status_of_g(g) // 保存goroutine的状态，主要是寄存器的值
+    }
+}
+```
+这段伪代码表达的意思是，程序运行起来之后创建了N个由内核调度的操作系统线程去执行shedule函数，而schedule函数在一个调度循环中反复从M个goroutine中挑选出一个需要运行的goroutine并跳转到该goroutine去运行，直到需要调度其它goroutine时才返回到schedule函数中通过save_status_of_g保存刚刚正在运行的goroutine的状态然后再次去寻找下一个goroutine。
+
+内核对系统线程的调度简单的归纳为：在执行操作系统代码时，内核调度器按照一定的算法挑选出一个线程并把该线程保存在内存之中的寄存器的值放入CPU对应的寄存器从而恢复该线程的运行。  
+万变不离其宗，系统线程对goroutine的调度与内核对系统线程的调度原理是一样的，实质都是通过保存和修改CPU寄存器的值来达到切换线程/goroutine的目的。
+
+所谓的goroutine调度，是指程序代码按照一定的算法在适当的时候挑选出合适的goroutine并放到CPU上去运行的过程。这句话揭示了调度系统需要解决的三大核心问题：  
+- 调度时机：什么时候会发生调度？  
+- 调度策略：使用什么策略来挑选下一个进入运行的goroutine？  
+- 切换机制：如何把挑选出来的goroutine放到CPU上运行？  
+
